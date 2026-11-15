@@ -3,9 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>이모티콘 사진관</title>
-<meta name="description" content="카카오톡 이모티콘 PNG를 맡기면 규격·여백·다크모드·실제 크기를 한 번에 검수해 주는 무료 도구. 파일은 기기 밖으로 나가지 않아요.">
+<title>이모티콘 사진관 · 카톡 이모티콘 제안 전 검수</title>
+<meta name="description" content="PNG를 맡기면 규격, 여백, 다크모드, 실제 크기를 한 번에 확인해요. 파일은 기기 밖으로 나가지 않아요. 무료 공개 중.">
 <meta name="theme-color" content="#d9ebf8">
+<link rel="canonical" href="https://librumlego.github.io/emoticon-photostudio/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="이모티콘 사진관">
+<meta property="og:title" content="이모티콘 사진관 · 카톡 이모티콘 제안 전 검수">
+<meta property="og:description" content="PNG를 맡기면 규격, 여백, 다크모드, 실제 크기를 한 번에 확인해요. 파일은 기기 밖으로 나가지 않아요. 무료 공개 중.">
+<meta property="og:url" content="https://librumlego.github.io/emoticon-photostudio/">
+<meta property="og:image" content="https://librumlego.github.io/emoticon-photostudio/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="이모티콘 사진관 · 카톡 이모티콘 제안 전 검수">
+<meta name="twitter:description" content="PNG를 맡기면 규격, 여백, 다크모드, 실제 크기를 한 번에 확인해요. 파일은 기기 밖으로 나가지 않아요. 무료 공개 중.">
+<meta name="twitter:image" content="https://librumlego.github.io/emoticon-photostudio/og.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 :root{
@@ -114,15 +130,17 @@ body.dragging #veil{display:grid}
 .toggle{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer}
 .toggle input{accent-color:var(--navy);width:16px;height:16px}
 .prints{display:grid;grid-template-columns:repeat(var(--cols,6),minmax(0,1fr));gap:12px;background:var(--sky);padding:14px;border-radius:12px}
-.print{position:relative;background:var(--paper);padding:6px;border-radius:6px;border:0;cursor:pointer;box-shadow:0 1px 2px rgba(29,43,58,.12);transition:transform .2s var(--ease),box-shadow .2s}
+.print{position:relative;background:var(--paper);padding:6px 6px 22px;border-radius:6px;border:0;cursor:pointer;box-shadow:0 1px 2px rgba(29,43,58,.12);transition:transform .2s var(--ease),box-shadow .2s}
 .print:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(29,43,58,.14)}
 .print .face{aspect-ratio:1;display:grid;place-items:center;border-radius:3px;overflow:hidden}
 .prints.night .print .face{background:#1c1c1e}
 .print img{max-width:100%;max-height:100%}
 .print .no{position:absolute;top:9px;left:9px;font-size:11px;font-weight:700;color:var(--ink-2);background:rgba(255,255,255,.85);border-radius:6px;padding:0 5px;font-variant-numeric:tabular-nums}
-.print .mark{position:absolute;left:9px;bottom:9px;right:9px;display:flex;gap:3px;flex-wrap:wrap}
-.print .mark span{font-size:10px;font-weight:700;border-radius:5px;padding:1px 5px;background:var(--retake);color:#fff}
+/* 표시는 칸 아래 띠(padding-bottom)에만 놓여 그림 얼굴을 가리지 않아요. 최대 2개 + 「+N」 */
+.print .mark{position:absolute;left:6px;bottom:4px;right:6px;display:flex;gap:2px;overflow:hidden}
+.print .mark span{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;line-height:1.5;font-weight:700;border-radius:5px;padding:0 4px;background:var(--retake);color:#fff}
 .print .mark span.chg{background:var(--changed)}
+.print .mark span.more{flex:none;background:var(--navy)}
 .print.bad{box-shadow:0 0 0 2px var(--retake)}
 .print[aria-pressed="true"]{box-shadow:0 0 0 3px var(--navy),0 6px 14px rgba(29,43,58,.18)}
 .print.dev .face{animation:develop .9s var(--ease) both;animation-delay:calc(var(--n) * 14ms)}
@@ -573,7 +591,8 @@ function drawReceipt() {
 
 function drawPrints(develop) {
   const k = K(), box = $('#prints');
-  box.style.setProperty('--cols', Array.isArray(k.grid) ? k.grid[0] : 8);
+  // 데스크톱은 네 종류 모두 한 줄 6칸이에요 (760px 이하는 CSS에서 3칸)
+  box.style.setProperty('--cols', 6);
   box.classList.toggle('night', $('#night').checked);
   const only = $('#onlyBad').checked;
   const bad = items.filter(it => it.bad.length).length;
@@ -582,10 +601,14 @@ function drawPrints(develop) {
   $('#retakeCount').className = 'chip ' + (bad ? 'retake' : 'pass');
   box.innerHTML = items.map((it, i) => {
     const hide = only && !it.bad.length && !it.changed;
+    // 칸 표시는 최대 2개: 「바뀜」을 가장 먼저, 나머지는 「+N」으로 줄여요. 전체 목록은 aria-label과 출력 시트에 있어요
+    const tags = [...(it.changed ? [['바뀜', 'chg']] : []), ...it.bad.map(b => [SHORT[b], ''])];
+    const marks = tags.slice(0, 2).map(([t, c]) => `<span${c ? ` class="${c}"` : ''}>${t}</span>`).join('')
+      + (tags.length > 2 ? `<span class="more">+${tags.length - 2}</span>` : '');
     return `<button class="print${it.bad.length ? ' bad' : ''}${develop ? ' dev' : ''}" style="--n:${i}${hide ? ';visibility:hidden' : ''}" data-i="${i}" aria-pressed="${i === selected}" aria-label="${it.no}번 칸${it.bad.length ? ', 손볼 것: ' + it.bad.map(b => SHORT[b]).join(', ') : ', 통과'}">
       <div class="face">${it.src ? `<img src="${it.src}" alt="">` : ''}</div>
       <span class="no">${it.no}</span>
-      <span class="mark">${it.changed ? '<span class="chg">바뀜</span>' : ''}${it.bad.map(b => `<span>${SHORT[b]}</span>`).join('')}</span></button>`;
+      <span class="mark">${marks}</span></button>`;
   }).join('');
 }
 $('#prints').onclick = e => {
