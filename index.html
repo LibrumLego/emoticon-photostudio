@@ -3,188 +3,307 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>이모티콘 검수실</title>
-<meta name="description" content="카카오톡 이모티콘 제안 전에 규격·비슷한 표정·실제 크기·리액션 구성·제출 정보를 한 번에 점검하는 무료 검수 도구">
+<title>이모티콘 사진관</title>
+<meta name="description" content="카카오톡 이모티콘 PNG를 맡기면 규격·여백·다크모드·실제 크기를 한 번에 검수해 주는 무료 도구. 파일은 기기 밖으로 나가지 않아요.">
+<meta name="theme-color" content="#d9ebf8">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 :root{
-  --bg:#f4f7f6; --panel:#ffffff; --line:#d9e3e0; --text:#16302b; --muted:#4f655f;
-  --accent:#0f766e; --accent-ink:#ffffff; --accent-soft:#e0f2ef;
-  --bad:#b4370a; --bad-bg:#fff1e8; --bad-ink:#ffffff; --good:#15803d; --good-bg:#e8f7ee;
-  --checker-a:#eef2f1; --checker-b:#ffffff;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#0f1716; --panel:#172221; --line:#2a3a37; --text:#e3efec; --muted:#93aba5;
-    --accent:#2dd4bf; --accent-ink:#06201d; --accent-soft:#16322e;
-    --bad:#fb923c; --bad-bg:#3a2214; --bad-ink:#1f1208; --good:#4ade80; --good-bg:#13301f;
-    --checker-a:#22302e; --checker-b:#2b3b38;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0f1716; --panel:#172221; --line:#2a3a37; --text:#e3efec; --muted:#93aba5;
-  --accent:#2dd4bf; --accent-ink:#06201d; --accent-soft:#16322e;
-  --bad:#fb923c; --bad-bg:#3a2214; --bad-ink:#1f1208; --good:#4ade80; --good-bg:#13301f;
-  --checker-a:#22302e; --checker-b:#2b3b38;
+  --sky:#d9ebf8; --sky-deep:#b9d6ee; --sky-ink:#3f6687;
+  --paper:#ffffff; --ink:#1d2b3a; --ink-2:#44576a; --line:#d5e3ef;
+  --navy:#1f3a5c; --navy-ink:#ffffff;
+  --retake:#d93b2f; --retake-bg:#fde9e6; --pass:#1d7f53; --pass-bg:#e3f4ea; --changed:#2f6fd6; --changed-bg:#e4eefc;
+  --radius:16px; --radius-s:10px;
+  --shadow:0 1px 2px rgba(29,43,58,.06),0 6px 18px rgba(29,43,58,.08);
+  --ease:cubic-bezier(.16,1,.3,1);
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;font-size:15px;line-height:1.55}
-header{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-.bar{max-width:1180px;margin:0 auto;padding:12px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
-h1{font-size:24px;margin:0;letter-spacing:-.02em;line-height:1.2}
-h1 small{font-weight:500;color:var(--muted);font-size:13px;margin-left:6px;letter-spacing:0}
-h2{font-size:18px;margin:0 0 10px;letter-spacing:-.01em}
-h3{font-size:14px;margin:14px 0 6px}
-nav{display:flex;gap:2px;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;padding:3px}
-nav button{border:0;background:transparent;color:var(--text);padding:6px 12px;border-radius:7px;cursor:pointer;font:inherit;font-size:14px}
-nav button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
-main{max-width:1180px;margin:0 auto;padding:16px}
-section.tab{display:none}
-section.tab.on{display:block}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit;font-weight:600;font-size:14px}
-.btn.line{background:transparent;color:var(--text);border-color:var(--line);font-weight:500}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chips button{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:5px 11px;border-radius:8px;cursor:pointer;font:inherit;font-size:13px}
-.chips button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);font-weight:600}
-.muted{color:var(--muted);font-size:13px}
-.intake{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;border:1.5px solid var(--line);border-radius:12px;padding:18px;margin-top:12px;cursor:pointer;background:var(--bg)}
-.intake.over{border-color:var(--accent);background:var(--accent-soft)}
-.err{color:var(--bad);font-weight:600;margin:8px 0 0;white-space:pre-line}
-/* 체크리스트 */
-.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
-.check{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start}
-.check b{display:block;font-size:14px}
-.check .v{font-size:12px;color:var(--muted)}
-.mark{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700}
-.mark.ok{background:var(--good-bg);color:var(--good)}
-.mark.no{background:var(--bad-bg);color:var(--bad)}
-/* 그리드 */
-.grid{display:grid;grid-template-columns:repeat(var(--cols,6),minmax(0,1fr));gap:6px}
-@media (max-width:640px){.grid{--cols:4 !important}}
-.cell{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-  background-color:var(--checker-b);background-image:linear-gradient(45deg,var(--checker-a) 25%,transparent 25%,transparent 75%,var(--checker-a) 75%),linear-gradient(45deg,var(--checker-a) 25%,transparent 25%,transparent 75%,var(--checker-a) 75%);background-size:14px 14px;background-position:0 0,7px 7px}
-.cell.onDark{background:#141414}
-.cell img{max-width:100%;max-height:100%;display:block}
-.cell .no{position:absolute;right:4px;top:4px;font-size:10px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:5px;padding:0 4px}
-.cell .tags{position:absolute;left:3px;right:3px;bottom:3px;display:flex;gap:2px;flex-wrap:wrap}
-.cell .tags span{font-size:10px;background:var(--bad);color:var(--bad-ink);border-radius:4px;padding:0 4px}
-/* 작게 보기 */
-.strip{display:flex;flex-wrap:wrap;align-items:center;gap:3px;padding:10px;border-radius:10px;margin-top:6px}
-.strip img{display:block}
-/* 비슷한 표정 */
-.pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
-.pair{border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;gap:10px;align-items:center}
-.pair .imgs{display:flex;gap:4px}
-.pair .imgs div{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--muted)}
-.pair .imgs img{width:56px;height:56px;object-fit:contain;background:#fff;border-radius:6px;border:1px solid var(--line)}
-.pair .tiny{display:flex;gap:2px;padding:4px 6px;background:#fee500;border-radius:8px}
-.meter{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:4px}
-.meter i{display:block;height:100%;background:var(--bad)}
-/* 테마 */
-.phones{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
-.phone{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel)}
-.phone header{position:static;font-size:12px;padding:6px 10px;color:var(--muted);border-bottom:1px solid var(--line);background:var(--panel)}
-.room{padding:10px;display:flex;flex-direction:column;gap:7px;min-height:330px}
+[hidden]{display:none !important}
+html{background:var(--sky)}
+body{margin:0;background:var(--sky);color:var(--ink);font-family:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;word-break:keep-all}
+::selection{background:var(--navy);color:#fff}
+:focus-visible{outline:3px solid var(--changed);outline-offset:2px;border-radius:6px}
+button{font:inherit;color:inherit}
+img{display:block}
+svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* 위쪽 바 */
+.top{position:sticky;top:0;z-index:10;background:rgba(217,235,248,.92);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--sky-deep)}
+.top-in{max-width:1320px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;letter-spacing:-.03em;color:var(--navy);text-decoration:none}
+.brand svg{width:34px;height:34px}
+.tabs{display:flex;gap:4px;background:rgba(255,255,255,.6);padding:4px;border-radius:999px}
+.tabs button{border:0;background:transparent;padding:7px 16px;border-radius:999px;cursor:pointer;font-weight:600;color:var(--ink-2)}
+.tabs button[aria-selected="true"]{background:var(--paper);color:var(--navy);box-shadow:var(--shadow)}
+.tabs button:disabled{opacity:.45;cursor:default}
+.free{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--sky-ink)}
+.free b{background:var(--navy);color:#fff;border-radius:999px;padding:3px 10px;font-size:12px}
+
+main{max-width:1320px;margin:0 auto;padding:22px 20px 40px}
+.view{display:none}.view.on{display:block}
+
+/* 공통 */
+.card{background:var(--paper);border-radius:var(--radius);box-shadow:var(--shadow)}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;cursor:pointer;border-radius:12px;padding:12px 20px;font-weight:700;font-size:15px;transition:transform .15s var(--ease),background .15s}
+.btn:active{transform:scale(.97)}
+.btn-main{background:var(--navy);color:var(--navy-ink)}
+.btn-main:hover{background:#17304f}
+.btn-soft{background:var(--sky);color:var(--navy)}
+.btn-soft:hover{background:var(--sky-deep)}
+.btn-line{background:transparent;color:var(--navy);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn-line:hover{box-shadow:inset 0 0 0 1.5px var(--sky-deep);background:#f6fafd}
+.btn-s{padding:8px 14px;font-size:14px;border-radius:10px}
+.kinds{display:flex;gap:6px;flex-wrap:wrap}
+.kinds button{border:0;cursor:pointer;padding:8px 14px;border-radius:999px;background:var(--sky);color:var(--ink-2);font-weight:600;font-size:14px}
+.kinds button[aria-pressed="true"]{background:var(--navy);color:#fff}
+.muted{color:var(--ink-2);font-size:13px}
+h1,h2,h3{letter-spacing:-.03em;margin:0}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px}
+.chip.retake{background:var(--retake-bg);color:var(--retake)}
+.chip.pass{background:var(--pass-bg);color:var(--pass)}
+.chip.changed{background:var(--changed-bg);color:var(--changed)}
+
+/* 접수(빈 화면) */
+.intake{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:28px;padding:44px;align-items:center}
+.intake h1{font-size:clamp(28px,3.4vw,42px);line-height:1.25;color:var(--navy);margin:14px 0 14px}
+.intake p.lead{font-size:16px;color:var(--ink-2);margin:0 0 26px;max-width:34em}
+.intake .acts{display:flex;gap:10px;flex-wrap:wrap}
+.intake .hint{margin-top:14px}
+.dropzone{border-radius:var(--radius);transition:box-shadow .2s,background .2s}
+.dropzone.over{box-shadow:0 0 0 3px var(--changed),var(--shadow);background:#f4f9ff}
+.demo{background:var(--sky);border-radius:var(--radius);padding:22px}
+.demo .sheet-row{background:var(--paper)}
+.err{margin:14px 0 0;color:var(--retake);font-weight:600;white-space:pre-line}
+
+/* 출력 시트 (선택한 칸) */
+.sheet-row{border:1.5px dashed var(--sky-deep);border-radius:12px;padding:16px;display:flex;align-items:flex-end;gap:22px;position:relative}
+.sheet-row .sz{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.sheet-row.dark{background:#1c1c1e;border-color:#3a3a3d}
+.sheet-row.dark .sz{color:#b9c2cc}
+.sheet-row .bubble{background:#fee500;color:#191919;border-radius:14px 4px 14px 14px;padding:8px 12px;display:inline-flex;align-items:center;gap:4px;font-size:14px;align-self:center;margin-left:auto}
+.ph{object-fit:contain}
+
+/* 결과 화면 */
+.desk{display:grid;grid-template-columns:270px minmax(0,1fr) 380px;gap:18px;align-items:start}
+.rail,.inspector{position:sticky;top:78px}
+.rail{padding:20px}
+.rail h2,.board h2,.inspector h2{font-size:16px;color:var(--navy)}
+.rail .kinds{margin:12px 0 14px}
+.rail .reload{width:100%;justify-content:center}
+.receipt{margin-top:18px;border-top:1.5px dashed var(--line);padding-top:12px}
+.receipt .row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:14px;border-bottom:1px solid #eef3f8;font-variant-numeric:tabular-nums}
+.receipt .row:last-child{border-bottom:0}
+.receipt .v{display:flex;align-items:center;gap:6px;font-weight:700}
+.receipt .v.ok{color:var(--pass)}.receipt .v.no{color:var(--retake)}
+.receipt .sub{font-size:12px;color:var(--ink-2);font-weight:500}
+.rail .print{margin-top:16px;width:100%;justify-content:center}
+.sample-note{margin-top:12px;background:var(--sky);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--sky-ink)}
+
+.board{padding:20px}
+.board-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.board-head .sp{flex:1}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.toggle input{accent-color:var(--navy);width:16px;height:16px}
+.prints{display:grid;grid-template-columns:repeat(var(--cols,6),minmax(0,1fr));gap:12px;background:var(--sky);padding:14px;border-radius:12px}
+.print{position:relative;background:var(--paper);padding:6px;border-radius:6px;border:0;cursor:pointer;box-shadow:0 1px 2px rgba(29,43,58,.12);transition:transform .2s var(--ease),box-shadow .2s}
+.print:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(29,43,58,.14)}
+.print .face{aspect-ratio:1;display:grid;place-items:center;border-radius:3px;overflow:hidden}
+.prints.night .print .face{background:#1c1c1e}
+.print img{max-width:100%;max-height:100%}
+.print .no{position:absolute;top:9px;left:9px;font-size:11px;font-weight:700;color:var(--ink-2);background:rgba(255,255,255,.85);border-radius:6px;padding:0 5px;font-variant-numeric:tabular-nums}
+.print .mark{position:absolute;left:9px;bottom:9px;right:9px;display:flex;gap:3px;flex-wrap:wrap}
+.print .mark span{font-size:10px;font-weight:700;border-radius:5px;padding:1px 5px;background:var(--retake);color:#fff}
+.print .mark span.chg{background:var(--changed)}
+.print.bad{box-shadow:0 0 0 2px var(--retake)}
+.print[aria-pressed="true"]{box-shadow:0 0 0 3px var(--navy),0 6px 14px rgba(29,43,58,.18)}
+.print.dev .face{animation:develop .9s var(--ease) both;animation-delay:calc(var(--n) * 14ms)}
+@keyframes develop{from{filter:blur(4px) saturate(0) brightness(1.35)}to{filter:none}}
+@media (prefers-reduced-motion:reduce){.print.dev .face{animation:none}.print,.btn{transition:none}}
+
+.inspector{padding:20px}
+.inspector .title{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}
+.inspector .title h2{font-size:22px}
+.now{border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;font-weight:700}
+.now.retake{background:var(--retake-bg);color:var(--retake)}
+.now.pass{background:var(--pass-bg);color:var(--pass)}
+.now small{display:block;font-weight:500;color:var(--ink-2);margin-top:2px;font-size:13px}
+.inspector .sheet-row{margin-bottom:10px;flex-wrap:wrap}
+.inspector .sheet-row .bubble{margin-left:0}
+.facts{margin-top:12px;font-size:14px}
+.facts .row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #eef3f8;font-variant-numeric:tabular-nums}
+.facts .row:last-child{border-bottom:0}
+.facts .bad{color:var(--retake);font-weight:700}.facts .ok{color:var(--pass);font-weight:700}
+
+/* 닮은꼴·실제 크기 */
+.panel{padding:24px;margin-bottom:18px}
+.panel > h2{font-size:20px;color:var(--navy);margin-bottom:4px}
+.panel > .muted{margin:0 0 16px}
+.pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.pair{background:var(--sky);border-radius:12px;padding:12px;display:flex;gap:12px;align-items:center}
+.pair .two{display:flex;gap:6px}
+.pair .two figure{margin:0;background:var(--paper);padding:4px;border-radius:5px;text-align:center;font-size:11px;color:var(--ink-2)}
+.pair .two img{width:60px;height:60px;object-fit:contain}
+.pair .rank{font-weight:800;color:var(--navy)}
+.pair .tiny{display:inline-flex;gap:2px;background:#fee500;border-radius:8px;padding:4px 6px;margin-top:6px}
+.strip-wrap h3{font-size:14px;margin:16px 0 6px;color:var(--ink-2)}
+.strip{display:flex;flex-wrap:wrap;gap:3px;align-items:center;padding:12px;border-radius:12px}
+
+/* 테마 갤러리 */
+.scene{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 20px;margin-bottom:16px}
+.phones{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.phone{background:var(--paper);border-radius:22px;padding:8px;box-shadow:var(--shadow)}
+.phone .name{font-size:13px;font-weight:700;color:var(--ink-2);padding:4px 8px 8px}
+.room{border-radius:16px;padding:12px 10px;display:flex;flex-direction:column;gap:7px;min-height:340px}
 .msg{display:flex;flex-direction:column;gap:3px;max-width:86%}
 .msg.me{align-self:flex-end;align-items:flex-end}
 .msg.you{align-self:flex-start;align-items:flex-start}
 .bub{padding:6px 10px;border-radius:12px;font-size:13px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
-.me .bub{border-top-right-radius:3px}
-.you .bub{border-top-left-radius:3px}
-.bub .seq{display:inline-flex;vertical-align:-0.3em;line-height:0}
-.bub .seq img{display:block}
+.me .bub{border-top-right-radius:3px}.you .bub{border-top-left-radius:3px}
+.bub .seq{display:inline-flex;vertical-align:-.3em;line-height:0}
 .solo{display:flex}
-.solo img{display:block}
-a{color:var(--accent)}
-footer{max-width:1180px;margin:0 auto;padding:4px 16px 28px}
+
+.empty-tab{padding:48px 24px;text-align:center;color:var(--ink-2)}
+.empty-tab .btn{margin-top:14px}
+
+footer{max-width:1320px;margin:0 auto;padding:6px 20px 36px;display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--sky-ink)}
+footer a{color:var(--navy);text-underline-offset:3px}
+
+@media (max-width:1180px){
+  .desk{grid-template-columns:240px minmax(0,1fr)}
+  .inspector{grid-column:1/-1;position:static}
+}
+@media (max-width:760px){
+  .top-in{gap:10px}
+  .tabs{order:3;width:100%;overflow-x:auto}
+  .tabs button{flex:none}
+  .intake{grid-template-columns:1fr;padding:26px 20px}
+  .desk{grid-template-columns:1fr}
+  .rail{position:static}
+  .prints{--cols:3 !important;gap:8px;padding:10px}
+  .sheet-row{gap:14px;flex-wrap:wrap}
+}
 @media print{
-  header nav,#printBtn,.intake,.noprint{display:none !important}
-  section.tab{display:block !important;break-inside:avoid}
-  :root,:root:not([data-theme="light"]){
-    --bg:#ffffff; --panel:#ffffff; --line:#d9e3e0; --text:#16302b; --muted:#4f655f;
-    --accent:#0f766e; --accent-ink:#ffffff; --accent-soft:#e0f2ef;
-    --bad:#b4370a; --bad-bg:#fff1e8; --bad-ink:#ffffff; --good:#15803d; --good-bg:#e8f7ee;
-  }
+  .top,.rail .print,.reload,.tabs,.kinds,footer,.scene .kinds{display:none !important}
+  body,html{background:#fff}
+  .view{display:block !important}
+  .desk{grid-template-columns:1fr}
+  .rail,.inspector{position:static}
+  .card{box-shadow:none;border:1px solid var(--line)}
 }
 </style>
 </head>
 <body>
-<header>
-  <div class="bar">
-    <h1>이모티콘 검수실</h1>
-    <nav role="tablist">
-      <button role="tab" data-tab="review" aria-selected="true">규격 검수</button>
-      <button role="tab" data-tab="look" aria-selected="false">닮은꼴·실제 크기</button>
-      <button role="tab" data-tab="themes" aria-selected="false">테마 갤러리</button>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 3v18M3 9h5M3 15h5"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></symbol>
+  <symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.7 2.7L16.5 9"/></symbol>
+  <symbol id="i-no" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="./" aria-label="이모티콘 사진관 처음으로">
+      <svg viewBox="0 0 40 40" aria-hidden="true">
+        <rect x="2" y="2" width="36" height="36" rx="10" fill="#1f3a5c"/>
+        <rect x="9" y="9" width="22" height="24" rx="3" fill="#d9ebf8"/>
+        <circle cx="20" cy="19" r="6.5" fill="#fff" stroke="#1f3a5c" stroke-width="1.6"/>
+        <path d="M13.5 17.5c1-4.5 4-6 6.5-6s5.5 1.5 6.5 6c-2.2-1.4-4.2-2-6.5-2s-4.3.6-6.5 2z" fill="#6b4a33"/>
+        <circle cx="17.6" cy="20" r="1" fill="#1f3a5c"/><circle cx="22.4" cy="20" r="1" fill="#1f3a5c"/>
+        <path d="M18 22.6c1.2 1 2.8 1 4 0" stroke="#1f3a5c" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+        <path d="M12 29.5h16" stroke="#1f3a5c" stroke-width="1.4" stroke-dasharray="2 2"/>
+      </svg>
+      이모티콘 사진관
+    </a>
+    <nav class="tabs" role="tablist" aria-label="화면">
+      <button role="tab" data-view="check" aria-selected="true">규격 검수</button>
+      <button role="tab" data-view="look" aria-selected="false">닮은꼴·실제 크기</button>
+      <button role="tab" data-view="themes" aria-selected="false">테마 갤러리</button>
     </nav>
-    <button class="btn line" id="printBtn" style="margin-left:auto">검수 리포트 인쇄·PDF</button>
+    <span class="free"><svg class="i"><use href="#i-lock"/></svg>파일은 기기 밖으로 안 나가요 <b>무료 공개 중</b></span>
   </div>
 </header>
 
 <main>
-<!-- 규격 검수 -->
-<section class="tab on" id="tab-review">
-  <div class="card">
-    <h2>불러오기</h2>
-    <div class="row">
-      <span class="muted">종류</span>
-      <div class="chips" id="kindChips"></div>
-    </div>
-    <p class="muted" id="kindSpec" style="margin:8px 0 0"></p>
-    <input type="file" id="picker" multiple hidden>
-    <div class="intake" id="intake">
+  <input type="file" id="picker" multiple hidden>
+
+  <!-- 규격 검수 -->
+  <section class="view on" id="v-check">
+    <!-- 접수: 아무것도 안 올렸을 때 -->
+    <div class="card intake dropzone" id="intake">
       <div>
-        <strong>시트 한 장 또는 낱장 파일 여러 개</strong>
-        <div class="muted" id="intakeHint"></div>
+        <div class="kinds" id="kinds0" role="group" aria-label="이모티콘 종류"></div>
+        <h1>PNG를 맡기면<br>고칠 칸부터 찾아 드려요</h1>
+        <p class="lead">규격, 여백, 다크모드, 작게 봤을 때까지 한 번에 확인해요. 시트 한 장이든 낱장 여러 개든 그대로 끌어다 놓으세요.</p>
+        <div class="acts">
+          <button class="btn btn-main" data-act="pick"><svg class="i"><use href="#i-up"/></svg>PNG 맡기기</button>
+          <button class="btn btn-soft" data-act="sample"><svg class="i"><use href="#i-play"/></svg>예시로 둘러보기</button>
+        </div>
+        <p class="muted hint" id="hint0"></p>
+        <p class="err" id="err" hidden></p>
       </div>
-      <span class="btn">파일 고르기</span>
+      <div class="demo" aria-hidden="true">
+        <div class="sheet-row" id="demoSheet"></div>
+        <div class="sheet-row dark" id="demoDark" style="margin-top:10px"></div>
+      </div>
     </div>
-    <p class="err" id="loadErr" hidden></p>
-  </div>
 
-  <div class="card" id="reviewCard" hidden>
-    <h2>규격</h2>
-    <div class="checks" id="checks"></div>
-  </div>
+    <!-- 결과 -->
+    <div class="desk" id="desk" hidden>
+      <aside class="card rail dropzone" id="rail">
+        <h2>접수증</h2>
+        <div class="kinds" id="kinds1" role="group" aria-label="이모티콘 종류"></div>
+        <button class="btn btn-line btn-s reload" data-act="pick"><svg class="i"><use href="#i-up"/></svg>다른 PNG 맡기기</button>
+        <div class="sample-note" id="sampleNote" hidden>예시 시트를 보고 있어요. 내 PNG를 맡기면 바로 바뀌어요.</div>
+        <div class="receipt" id="receipt"></div>
+        <button class="btn btn-soft btn-s print" id="printBtn"><svg class="i"><use href="#i-print"/></svg>검수 결과 인쇄·PDF</button>
+      </aside>
 
-  <div class="card" id="cellsCard" hidden>
-    <div class="row" style="justify-content:space-between">
-      <h2 style="margin:0">칸별 결과</h2>
-      <label class="muted noprint"><input type="checkbox" id="onDark"> 검정 배경에 놓고 보기</label>
+      <section class="card board" aria-label="칸 목록">
+        <div class="board-head">
+          <h2 id="boardTitle">칸</h2>
+          <span class="chip retake" id="retakeCount"></span>
+          <span class="sp"></span>
+          <label class="toggle"><input type="checkbox" id="night"> 검정 배경</label>
+          <label class="toggle"><input type="checkbox" id="onlyBad"> 손볼 칸만</label>
+        </div>
+        <div class="prints" id="prints"></div>
+      </section>
+
+      <aside class="card inspector" id="inspector" aria-live="polite"></aside>
     </div>
-    <div class="grid" id="cells"></div>
-  </div>
-</section>
+  </section>
 
-<!-- 닮은꼴·실제 크기 -->
-<section class="tab" id="tab-look">
-  <div class="card">
-    <h2>닮은꼴 TOP 8 <span class="muted">(24px 기준)</span></h2>
-    <div class="pairs" id="pairs"><div class="muted">먼저 「규격 검수」에서 이모티콘을 불러와 주세요.</div></div>
-  </div>
-  <div class="card">
-    <h2>실제 크기</h2>
-    <h3>20px · 노란 말풍선</h3><div class="strip" id="stripS1" style="background:#fee500"></div>
-    <h3>20px · 검정 배경</h3><div class="strip" id="stripS2" style="background:#1c1c1e"></div>
-    <h3>40px · 기본 배경</h3><div class="strip" id="stripM" style="background:#bacee0"></div>
-  </div>
-</section>
-
-<!-- 테마 갤러리 -->
-<section class="tab" id="tab-themes">
-  <div class="card noprint">
-    <div class="row">
-      <span class="muted">대화 상황</span>
-      <div class="chips" id="sceneChips"></div>
+  <!-- 닮은꼴·실제 크기 -->
+  <section class="view" id="v-look">
+    <div class="card panel">
+      <h2>헷갈리는 짝 TOP 8</h2>
+      <p class="muted">채팅창 크기(24px)로 줄였을 때 서로 가장 비슷한 짝이에요.</p>
+      <div class="pairs" id="pairs"></div>
     </div>
-  </div>
-  <div class="phones" id="phones"></div>
-</section>
+    <div class="card panel strip-wrap">
+      <h2>실제 크기</h2>
+      <h3>20px · 노란 말풍선 옆</h3><div class="strip" id="s1" style="background:#fee500"></div>
+      <h3>20px · 다크모드</h3><div class="strip" id="s2" style="background:#1c1c1e"></div>
+      <h3>40px · 기본 배경</h3><div class="strip" id="s3" style="background:#bacee0"></div>
+    </div>
+  </section>
+
+  <!-- 테마 갤러리 -->
+  <section class="view" id="v-themes">
+    <div class="card scene">
+      <strong>대화 상황</strong>
+      <div class="kinds" id="scenes" role="group" aria-label="대화 상황"></div>
+    </div>
+    <div class="phones" id="phones"></div>
+  </section>
 </main>
 
-<footer class="muted">
-  카카오와 무관한 개인 도구 · 이미지는 서버로 전송되지 않아요
+<footer>
+  <span>이모티콘 사진관 · 카카오와 관련 없는 개인 도구예요</span>
+  <span>테마 색과 표시 크기는 실제 카톡을 비슷하게 맞춘 값이에요</span>
+  <a href="https://github.com/LibrumLego/emoticon-checkroom" rel="noopener">소스 코드</a>
 </footer>
 
 <script>
@@ -197,87 +316,86 @@ const KINDS = {
 };
 let kind = 'mini';
 const K = () => KINDS[kind];
-let items = [];            // {no, label, w, h, type, kb, src(url), canvas, problems:{...}}
-const tagOf = new Map();   // item index -> 리액션
-const q = s => document.querySelector(s);
-const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let items = [], selected = 0, isSample = false, lastHashes = null;
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const kbText = kb => kb >= 1024 ? (kb / 1024).toFixed(2) + 'MB' : kb.toFixed(1) + 'KB';
+const limitText = () => K().maxKB >= 1024 ? (K().maxKB / 1024) + 'MB' : K().maxKB + 'KB';
 
-/* ===== 탭 ===== */
-document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
-  document.querySelectorAll('nav button').forEach(x => x.setAttribute('aria-selected', x === b));
-  document.querySelectorAll('section.tab').forEach(s => s.classList.toggle('on', s.id === 'tab-' + b.dataset.tab));
-  ({ look: drawLook, themes: drawThemes })[b.dataset.tab]?.();
-});
-q('#printBtn').onclick = () => { drawLook(); drawThemes(); window.print(); };
+/* ===== 화면 전환 ===== */
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => go(b.dataset.view));
+function go(v) {
+  document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x.dataset.view === v));
+  document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
+  if (v === 'look') drawLook();
+  if (v === 'themes') drawThemes();
+  scrollTo({ top: 0 });
+}
 
 /* ===== 종류 ===== */
-q('#kindChips').innerHTML = Object.entries(KINDS).map(([k, v]) => `<button data-k="${k}" aria-pressed="${k === kind}">${v.name}</button>`).join('');
-q('#kindChips').onclick = e => {
-  const b = e.target.closest('button'); if (!b || b.dataset.k === kind) return;
-  kind = b.dataset.k;
-  q('#kindChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
-  reset(); describeKind();
-};
-function describeKind() {
-  const k = K();
-  const kb = k.maxKB >= 1024 ? (k.maxKB / 1024) + 'MB' : k.maxKB + 'KB';
-  q('#kindSpec').innerHTML = `${k.need}개 · ${k.dims.map(d => d.join('×')).join(' / ')}px · 파일당 ${kb} 이하 · ${k.types.join(', ').toUpperCase()} · `
-    + (k.official ? '<b>공식 안내서 기준</b>' : '공개 정리 자료 기준(스튜디오에서 재확인 필요)');
-  const [cw, ch] = k.dims[0];
-  q('#intakeHint').textContent = Array.isArray(k.grid)
-    ? `시트는 ${cw * k.grid[0]}×${ch * k.grid[1]}px (${k.grid[0]}열 ${k.grid[1]}행) · 낱장은 ${cw}×${ch}px`
-    : k.grid === 'free' ? `시트는 가로·세로가 ${cw}px의 배수 · 낱장은 ${cw}×${ch}px`
-    : `낱장 파일만 · 움직이는 파일은 첫 장면으로 검사해요`;
-  q('#picker').accept = k.types.map(t => '.' + t).join(',');
+function drawKinds() {
+  const html = Object.entries(KINDS).map(([k, v]) => `<button data-k="${k}" aria-pressed="${k === kind}">${v.name}</button>`).join('');
+  $('#kinds0').innerHTML = html; $('#kinds1').innerHTML = html;
+  const k = K(), [cw, ch] = k.dims[0];
+  const sheet = Array.isArray(k.grid) ? `시트 ${cw * k.grid[0]}×${ch * k.grid[1]}px 또는 ` : k.grid === 'free' ? `시트(${cw}px 배수) 또는 ` : '';
+  $('#hint0').textContent = `${k.name} ${k.need}개 · ${sheet}낱장 ${k.dims.map(d => d.join('×')).join(' / ')}px · ${limitText()} 이하` + (k.official ? '' : ' · 공개 자료 기준이라 스튜디오에서 한 번 더 확인해 주세요');
+  $('#picker').accept = k.types.map(t => '.' + t).join(',');
 }
-describeKind();
+document.addEventListener('click', e => {
+  const kb = e.target.closest('[data-k]');
+  if (kb && kb.dataset.k !== kind) { kind = kb.dataset.k; lastHashes = null; drawKinds(); showIntake(); return; }
+  const act = e.target.closest('[data-act]');
+  if (act?.dataset.act === 'pick') { $('#picker').value = ''; $('#picker').click(); }
+  if (act?.dataset.act === 'sample') loadSample();
+});
+$('#picker').onchange = () => $('#picker').files.length && ingest([...$('#picker').files]);
+document.querySelectorAll('.dropzone').forEach(z => {
+  z.ondragover = e => { e.preventDefault(); z.classList.add('over'); };
+  z.ondragleave = () => z.classList.remove('over');
+  z.ondrop = e => { e.preventDefault(); z.classList.remove('over'); e.dataTransfer.files.length && ingest([...e.dataTransfer.files]); };
+});
+$('#printBtn').onclick = () => { drawLook(); drawThemes(); print(); };
 
-function reset() {
-  items.forEach(it => it.src.startsWith('blob:') && URL.revokeObjectURL(it.src));
-  items = []; tagOf.clear();
-  ['#reviewCard', '#cellsCard'].forEach(s => q(s).hidden = true);
-  showErr('');
+function showIntake() {
+  items.forEach(it => it.src?.startsWith('blob:') && URL.revokeObjectURL(it.src));
+  items = []; isSample = false;
+  $('#intake').hidden = false; $('#desk').hidden = true; showErr('');
 }
+function showErr(m) { const p = $('#err'); p.textContent = m || ''; p.hidden = !m; if (m) { $('#intake').hidden = false; $('#desk').hidden = true; } }
 
 /* ===== 불러오기 ===== */
-const intake = q('#intake'), picker = q('#picker');
-intake.onclick = () => { picker.value = ''; picker.click(); };
-picker.onchange = () => picker.files.length && ingest([...picker.files]);
-intake.ondragover = e => { e.preventDefault(); intake.classList.add('over'); };
-intake.ondragleave = () => intake.classList.remove('over');
-intake.ondrop = e => { e.preventDefault(); intake.classList.remove('over'); e.dataTransfer.files.length && ingest([...e.dataTransfer.files]); };
-function showErr(m) { const p = q('#loadErr'); p.textContent = m || ''; p.hidden = !m; }
 const typeOf = f => (f.name.split('.').pop() || '').toLowerCase();
 const dimOk = (w, h) => K().dims.some(([a, b]) => a === w && b === h);
 
-async function ingest(files) {
-  reset();
+async function ingest(files, sample = false) {
+  const prev = items; items = []; isSample = sample; showErr('');
   const k = K();
   files.sort((a, b) => a.name.localeCompare(b.name, 'ko', { numeric: true }));
   if (files.length === 1 && k.grid && typeOf(files[0]) === 'png') {
-    let bmp; try { bmp = await createImageBitmap(files[0]); } catch { return showErr('이미지를 열 수 없어요.'); }
+    let bmp; try { bmp = await createImageBitmap(files[0]); } catch { return showErr('이 파일은 열 수 없어요. PNG가 맞는지 확인해 주세요.'); }
     const [cw, ch] = k.dims[0];
     const cols = Array.isArray(k.grid) ? k.grid[0] : bmp.width / cw, rows = Array.isArray(k.grid) ? k.grid[1] : bmp.height / ch;
     const sheet = bmp.width === cw * cols && bmp.height === ch * rows && Number.isInteger(cols) && Number.isInteger(rows) && cols * rows > 1;
-    if (sheet) { await fromSheet(bmp, cw, ch, cols, rows); return done(); }
-    if (!dimOk(bmp.width, bmp.height)) { const m = `${bmp.width}×${bmp.height}px 이에요. 시트나 낱장 규격과 맞지 않아요.`; bmp.close(); return showErr(m); }
+    if (sheet) { await fromSheet(bmp, cw, ch, cols, rows); return done(prev); }
+    if (!dimOk(bmp.width, bmp.height)) {
+      const m = `${bmp.width}×${bmp.height}px 이미지예요.\n${k.name}는 ` + (Array.isArray(k.grid) ? `시트 ${cw * k.grid[0]}×${ch * k.grid[1]}px 또는 ` : '') + `낱장 ${k.dims.map(d => d.join('×')).join(' / ')}px이어야 해요.`;
+      bmp.close(); return showErr(m);
+    }
     bmp.close();
   }
   for (const f of files) await fromFile(f);
-  done();
+  done(prev);
 }
 
 async function fromSheet(bmp, cw, ch, cols, rows) {
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
     const cv = Object.assign(document.createElement('canvas'), { width: cw, height: ch });
-    const x = cv.getContext('2d', { willReadFrequently: true });
-    x.drawImage(bmp, c * cw, r * ch, cw, ch, 0, 0, cw, ch);
+    cv.getContext('2d', { willReadFrequently: true }).drawImage(bmp, c * cw, r * ch, cw, ch, 0, 0, cw, ch);
     const blob = await new Promise(ok => cv.toBlob(ok, 'image/png'));
-    items.push({ label: `${r + 1}행 ${c + 1}열`, w: cw, h: ch, type: 'png', kb: blob.size / 1024, src: URL.createObjectURL(blob), canvas: cv, fromSheet: true });
+    items.push({ label: `${r + 1}행 ${c + 1}열`, w: cw, h: ch, type: 'png', kb: blob.size / 1024, src: URL.createObjectURL(blob), canvas: cv });
   }
   bmp.close();
 }
-
 async function fromFile(f) {
   const type = typeOf(f);
   let bmp; try { bmp = await createImageBitmap(f); } catch { items.push({ label: f.name, w: 0, h: 0, type, kb: f.size / 1024, src: '', canvas: null, broken: true }); return; }
@@ -287,6 +405,7 @@ async function fromFile(f) {
   bmp.close();
 }
 
+/* ===== 검사 ===== */
 function inspect(it) {
   const k = K(), p = {};
   p.type = !k.types.includes(it.type);
@@ -295,14 +414,14 @@ function inspect(it) {
   if (!it.canvas) { p.blank = true; return p; }
   const { width: w, height: h } = it.canvas;
   const d = it.canvas.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, w, h).data;
-  const alpha = (x, y) => (x < 0 || y < 0 || x >= w || y >= h) ? 0 : d[(y * w + x) * 4 + 3];
+  const a = (x, y) => (x < 0 || y < 0 || x >= w || y >= h) ? 0 : d[(y * w + x) * 4 + 3];
   const band = Math.max(2, Math.round(w / 90));
   let ink = 0, touch = 0, rim = 0, darkRim = 0;
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const i = (y * w + x) * 4; if (d[i + 3] <= 8) continue;
     ink++;
     if (x < band || y < band || x >= w - band || y >= h - band) touch++;
-    if (alpha(x - 1, y) <= 8 || alpha(x + 1, y) <= 8 || alpha(x, y - 1) <= 8 || alpha(x, y + 1) <= 8) {
+    if (a(x - 1, y) <= 8 || a(x + 1, y) <= 8 || a(x, y - 1) <= 8 || a(x, y + 1) <= 8) {
       rim++; if (0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2] < 70) darkRim++;
     }
   }
@@ -312,60 +431,180 @@ function inspect(it) {
   p.dark = !p.square && rim > 0 && darkRim / rim > 0.6;
   return p;
 }
-
-const LABEL = { type: '형식', size: '크기', weight: '용량', blank: '빈칸', margin: '여백', square: '네모', dark: '다크' };
-
-function done() {
-  items.forEach((it, i) => { it.no = i + 1; it.problems = inspect(it); it.thumb = null; });
-  q('#reviewCard').hidden = q('#cellsCard').hidden = false;
-  drawChecks(); drawCells();
-}
-
-function drawChecks() {
+// 가장 먼저 손볼 문제 순서
+const ORDER = ['type', 'size', 'weight', 'blank', 'square', 'dark', 'margin'];
+const SHORT = { type: '형식', size: '크기', weight: '용량', blank: '빈칸', square: '네모', dark: '다크', margin: '여백' };
+function sayProblem(key, it) {
   const k = K();
-  const count = key => items.filter(it => it.problems[key]).length;
-  const maxKb = Math.max(0, ...items.map(it => it.kb));
-  const list = [
-    ['개수', items.length === k.need, `${items.length} / ${k.need}개`],
-    ['파일 형식', !count('type'), count('type') ? `${count('type')}개가 ${k.types.join('/').toUpperCase()}가 아님` : '모두 통과'],
-    ['이미지 크기', !count('size'), count('size') ? `${count('size')}개가 규격과 다름` : '모두 통과'],
-    ['파일 용량', !count('weight'), `가장 큰 파일 ${maxKb.toFixed(1)}KB / ${k.maxKB}KB`],
-    ['빈칸 없음', !count('blank'), count('blank') ? `${count('blank')}칸이 비어 있음` : '모두 그림 있음'],
-    ['가장자리 여백', !count('margin'), count('margin') ? `${count('margin')}칸이 끝에 닿음 (연결 칸이면 괜찮아요)` : '모두 여유 있음'],
-    ['투명 배경', !count('square'), count('square') ? `${count('square')}칸이 배경까지 칠해짐` : '모두 투명'],
-    ['다크모드', !count('dark'), count('dark') ? `${count('dark')}칸이 검정 배경에 묻힘 → 흰 테두리 권장` : '잘 보임'],
-  ];
-  q('#checks').innerHTML = list.map(([t, ok, v]) => `<div class="check"><span class="mark ${ok ? 'ok' : 'no'}">${ok ? '✓' : '!'}</span><div><b>${t}</b><span class="v">${v}</span></div></div>`).join('');
+  return ({
+    type: [`${it.type.toUpperCase() || '이 형식'} 파일은 받지 않아요`, `${k.types.join('/').toUpperCase()}로 저장해 주세요.`],
+    size: [`크기가 ${it.w}×${it.h}px이에요`, `${k.dims.map(d => d.join('×')).join(' / ')}px로 맞춰 주세요.`],
+    weight: [`용량이 ${kbText(it.kb)}예요`, `${limitText()} 이하로 줄여 주세요.`],
+    blank: ['그림이 없는 빈칸이에요', '그림을 넣거나 칸을 빼 주세요.'],
+    square: ['배경까지 칠해져 있어요', '글자 옆에서 네모 타일처럼 보여요.'],
+    dark: ['다크모드에서 외곽이 묻혀요', '흰 테두리 2~3px이면 또렷해져요.'],
+    margin: ['그림이 칸 끝에 닿아요', '이어지는 연결 칸이 아니라면 여백을 주세요.'],
+  })[key];
 }
 
-function drawCells() {
-  const k = K(), g = q('#cells');
-  g.style.setProperty('--cols', Array.isArray(k.grid) ? k.grid[0] : 8);
-  const dark = q('#onDark').checked;
-  g.innerHTML = items.map(it => {
-    const bad = Object.entries(it.problems).filter(([, v]) => v).map(([key]) => LABEL[key]);
-    return `<div class="cell${dark ? ' onDark' : ''}" title="${esc(it.label)} · ${it.w}×${it.h}px · ${it.kb.toFixed(1)}KB">${it.src ? `<img src="${it.src}" alt="">` : ''}<span class="no">${it.no}</span><div class="tags">${bad.map(b => `<span>${b}</span>`).join('')}</div></div>`;
-  }).join('');
-}
-q('#onDark').onchange = drawCells;
-
-/* ===== 닮은꼴 ===== */
-const TS = 24;
 function thumbOf(it) {
   if (it.thumb) return it.thumb;
-  const cv = Object.assign(document.createElement('canvas'), { width: TS, height: TS });
+  const S = 24, cv = Object.assign(document.createElement('canvas'), { width: S, height: S });
   const x = cv.getContext('2d', { willReadFrequently: true });
-  x.fillStyle = '#fff'; x.fillRect(0, 0, TS, TS);
-  x.imageSmoothingQuality = 'high';
-  const s = TS / Math.max(it.w, it.h);
-  x.drawImage(it.canvas, (TS - it.w * s) / 2, (TS - it.h * s) / 2, it.w * s, it.h * s);
-  const d = x.getImageData(0, 0, TS, TS).data, v = new Float32Array(TS * TS);
+  x.fillStyle = '#fff'; x.fillRect(0, 0, S, S);
+  if (it.canvas) { const s = S / Math.max(it.w, it.h); x.drawImage(it.canvas, (S - it.w * s) / 2, (S - it.h * s) / 2, it.w * s, it.h * s); }
+  const d = x.getImageData(0, 0, S, S).data, v = new Float32Array(S * S);
   for (let i = 0; i < v.length; i++) v[i] = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
   return it.thumb = v;
 }
+const hashOf = it => { const v = thumbOf(it); let h = 0; for (let i = 0; i < v.length; i += 3) h = (h * 31 + (v[i] >> 3)) | 0; return h; };
+
+function done(prev) {
+  items.forEach((it, i) => { it.no = i + 1; it.problems = inspect(it); it.bad = ORDER.filter(k => it.problems[k]); });
+  // 같은 종류·같은 개수를 다시 맡기면, 바뀐 칸에 표시를 남겨요
+  const hashes = items.map(hashOf);
+  if (lastHashes && lastHashes.length === items.length && !isSample) items.forEach((it, i) => it.changed = hashes[i] !== lastHashes[i]);
+  lastHashes = isSample ? null : hashes;
+  const firstBad = items.findIndex(it => it.bad.length);
+  selected = firstBad < 0 ? 0 : firstBad;
+  $('#intake').hidden = true; $('#desk').hidden = false;
+  $('#sampleNote').hidden = !isSample;
+  drawReceipt(); drawPrints(true); drawInspector();
+  if (prev) prev.forEach(it => it.src?.startsWith('blob:') && URL.revokeObjectURL(it.src));
+}
+
+function drawReceipt() {
+  const k = K(), n = key => items.filter(it => it.problems[key]).length;
+  const maxKb = Math.max(0, ...items.map(it => it.kb));
+  const rows = [
+    ['개수', items.length === k.need, `${items.length} / ${k.need}`],
+    ['파일 형식', !n('type'), n('type') ? `${n('type')}개` : '통과'],
+    ['크기', !n('size'), n('size') ? `${n('size')}개` : '통과'],
+    ['용량', !n('weight'), kbText(maxKb), `최대 ${limitText()}`],
+    ['빈칸', !n('blank'), n('blank') ? `${n('blank')}칸` : '없음'],
+    ['투명 배경', !n('square'), n('square') ? `${n('square')}칸` : '통과'],
+    ['다크모드', !n('dark'), n('dark') ? `${n('dark')}칸` : '통과'],
+    ['여백', !n('margin'), n('margin') ? `${n('margin')}칸` : '통과', n('margin') ? '연결 칸이면 괜찮아요' : ''],
+  ];
+  $('#receipt').innerHTML = rows.map(([t, ok, v, sub]) => `<div class="row"><span>${t}${sub ? `<br><span class="sub">${sub}</span>` : ''}</span><span class="v ${ok ? 'ok' : 'no'}"><svg class="i"><use href="#i-${ok ? 'ok' : 'no'}"/></svg>${v}</span></div>`).join('');
+}
+
+function drawPrints(develop) {
+  const k = K(), box = $('#prints');
+  box.style.setProperty('--cols', Array.isArray(k.grid) ? k.grid[0] : 8);
+  box.classList.toggle('night', $('#night').checked);
+  const only = $('#onlyBad').checked;
+  const bad = items.filter(it => it.bad.length).length;
+  $('#boardTitle').textContent = `칸 ${items.length}개`;
+  $('#retakeCount').textContent = bad ? `손볼 칸 ${bad}` : '모두 통과';
+  $('#retakeCount').className = 'chip ' + (bad ? 'retake' : 'pass');
+  box.innerHTML = items.map((it, i) => {
+    const hide = only && !it.bad.length && !it.changed;
+    return `<button class="print${it.bad.length ? ' bad' : ''}${develop ? ' dev' : ''}" style="--n:${i}${hide ? ';visibility:hidden' : ''}" data-i="${i}" aria-pressed="${i === selected}" aria-label="${it.no}번 칸${it.bad.length ? ', 손볼 것: ' + it.bad.map(b => SHORT[b]).join(', ') : ', 통과'}">
+      <div class="face">${it.src ? `<img src="${it.src}" alt="">` : ''}</div>
+      <span class="no">${it.no}</span>
+      <span class="mark">${it.changed ? '<span class="chg">바뀜</span>' : ''}${it.bad.map(b => `<span>${SHORT[b]}</span>`).join('')}</span></button>`;
+  }).join('');
+}
+$('#prints').onclick = e => {
+  const b = e.target.closest('.print'); if (!b) return;
+  selected = +b.dataset.i; items[selected].changed = false;
+  drawPrints(false); drawInspector();
+  if (matchMedia('(max-width:1180px)').matches) $('#inspector').scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+$('#night').onchange = () => drawPrints(false);
+$('#onlyBad').onchange = () => drawPrints(false);
+
+function sizes(it) {
+  const big = Math.min(180, Math.max(it.w, it.h));
+  return [big, 40, 20].map(s => { const r = s / Math.max(it.w, it.h); return [Math.round(it.w * r), Math.round(it.h * r), s]; });
+}
+function sheetRow(it, dark) {
+  const cells = sizes(it).map(([w, h, s]) => `<div class="sz"><img class="ph" src="${it.src}" width="${w}" height="${h}" alt="">${s}px</div>`).join('');
+  const bubble = !dark && K().inline ? `<span class="bubble">알겠어 <img src="${it.src}" width="18" height="18" alt=""></span>` : '';
+  return cells + bubble;
+}
+function drawInspector() {
+  const it = items[selected]; if (!it) return;
+  const first = it.bad[0];
+  const [head, sub] = first ? sayProblem(first, it) : ['손볼 곳이 없어요', '규격과 표시 모두 통과했어요.'];
+  const rest = it.bad.slice(1).map(b => sayProblem(b, it)[0]);
+  $('#inspector').innerHTML = `
+    <div class="title"><h2>${it.no}번</h2><span class="muted">${esc(it.label)}</span></div>
+    <div class="now ${first ? 'retake' : 'pass'}"><svg class="i"><use href="#i-${first ? 'no' : 'ok'}"/></svg><div>${head}<small>${sub}</small></div></div>
+    ${it.src ? `<div class="sheet-row">${sheetRow(it, false)}</div><div class="sheet-row dark">${sheetRow(it, true)}</div>` : ''}
+    <div class="facts">
+      <div class="row"><span>크기</span><span class="${it.problems.size ? 'bad' : ''}">${it.w}×${it.h}px</span></div>
+      <div class="row"><span>용량</span><span class="${it.problems.weight ? 'bad' : ''}">${kbText(it.kb)}</span></div>
+      <div class="row"><span>형식</span><span class="${it.problems.type ? 'bad' : ''}">${esc(it.type.toUpperCase())}</span></div>
+      ${rest.map(r => `<div class="row"><span>그리고</span><span class="bad">${r}</span></div>`).join('')}
+    </div>`;
+}
+
+/* ===== 예시 시트 (직접 그린 가상 캐릭터, 일부러 문제를 섞어 둠) ===== */
+function drawFace(x, n, opts = {}) {
+  const S = 180, cx = 90, cy = 98;
+  x.save();
+  if (opts.fill) { x.fillStyle = '#ffe8a3'; x.fillRect(0, 0, S, S); }
+  const r = opts.big ? 96 : 62;
+  const ox = opts.big ? 40 : 0;
+  x.lineWidth = 5; x.strokeStyle = opts.soft ? '#7a5b45' : '#1a1a1a';
+  if (opts.outline) { x.beginPath(); x.arc(cx + ox, cy, r + 6, 0, 7); x.fillStyle = '#fff'; x.fill(); }
+  x.beginPath(); x.arc(cx + ox, cy, r, 0, 7); x.fillStyle = '#fff1ea'; x.fill(); x.stroke();
+  x.beginPath(); x.moveTo(cx + ox - r - 2, cy - 4); x.quadraticCurveTo(cx + ox - r + 6, cy - r - 18, cx + ox, cy - r - 4);
+  x.quadraticCurveTo(cx + ox + r - 6, cy - r - 18, cx + ox + r + 2, cy - 4); x.quadraticCurveTo(cx + ox, cy - r * .55, cx + ox - r - 2, cy - 4);
+  x.fillStyle = '#5b3a24'; x.fill(); x.stroke();
+  x.fillStyle = '#ffb9b0'; x.beginPath(); x.ellipse(cx + ox - 34, cy + 20, 12, 8, 0, 0, 7); x.ellipse(cx + ox + 34, cy + 20, 12, 8, 0, 0, 7); x.fill();
+  x.strokeStyle = '#1a1a1a'; x.fillStyle = '#1a1a1a'; x.lineWidth = 4.5; x.lineCap = 'round';
+  const e = n % 6, m = Math.floor(n / 6) % 7, ex = 22, ey = cy + 6;
+  [-1, 1].forEach(sd => {
+    const X = cx + ox + sd * ex;
+    x.beginPath();
+    if (e === 0) { x.arc(X, ey, 5, 0, 7); x.fill(); }
+    else if (e === 1) { x.moveTo(X - 7, ey + 3); x.quadraticCurveTo(X, ey - 6, X + 7, ey + 3); x.stroke(); }
+    else if (e === 2) { x.moveTo(X - 6 * sd, ey - 6); x.lineTo(X + 6 * sd, ey); x.lineTo(X - 6 * sd, ey + 6); x.stroke(); }
+    else if (e === 3) { x.moveTo(X - 7, ey); x.lineTo(X + 7, ey); x.stroke(); }
+    else if (e === 4) { x.fillStyle = '#e8453c'; x.moveTo(X, ey + 7); x.bezierCurveTo(X - 12, ey - 2, X - 5, ey - 10, X, ey - 3); x.bezierCurveTo(X + 5, ey - 10, X + 12, ey - 2, X, ey + 7); x.fill(); x.fillStyle = '#1a1a1a'; }
+    else { x.arc(X, ey, 7, 0, 7); x.stroke(); x.beginPath(); x.arc(X, ey, 2.5, 0, 7); x.fill(); }
+  });
+  x.beginPath(); const my = cy + 30;
+  if (m === 0) { x.arc(cx + ox, my - 6, 9, .2, Math.PI - .2); x.stroke(); }
+  else if (m === 1) { x.ellipse(cx + ox, my, 9, 11, 0, 0, 7); x.fillStyle = '#e86a6a'; x.fill(); x.stroke(); }
+  else if (m === 2) { x.moveTo(cx + ox - 8, my + 2); x.quadraticCurveTo(cx + ox, my - 6, cx + ox + 8, my + 2); x.stroke(); }
+  else if (m === 3) { x.moveTo(cx + ox - 7, my); x.lineTo(cx + ox + 7, my); x.stroke(); }
+  else if (m === 4) { x.arc(cx + ox, my - 4, 12, 0, Math.PI); x.fillStyle = '#e86a6a'; x.fill(); x.stroke(); }
+  else if (m === 5) { x.moveTo(cx + ox - 6, my - 4); x.quadraticCurveTo(cx + ox + 8, my, cx + ox - 6, my + 5); x.stroke(); }
+  else { x.arc(cx + ox, my - 2, 5, 0, 7); x.stroke(); }
+  x.restore();
+}
+async function loadSample() {
+  kind = 'mini'; drawKinds();
+  const cv = Object.assign(document.createElement('canvas'), { width: 1080, height: 1260 });
+  const x = cv.getContext('2d');
+  for (let i = 0; i < 42; i++) {
+    const c = document.createElement('canvas'); c.width = c.height = 180;
+    // 일부 칸은 일부러 문제를 넣어 둔 예시예요
+    drawFace(c.getContext('2d'), i, { fill: i === 15 || i === 28, big: i === 9, outline: i % 3 === 1, soft: i % 5 === 2 });
+    x.drawImage(c, (i % 6) * 180, Math.floor(i / 6) * 180);
+  }
+  const blob = await new Promise(ok => cv.toBlob(ok, 'image/png'));
+  await ingest([new File([blob], '예시시트.png', { type: 'image/png' })], true);
+}
+// 접수 화면의 미리 보기도 같은 가상 캐릭터로 그려요
+(function demo() {
+  const c = document.createElement('canvas'); c.width = c.height = 180;
+  drawFace(c.getContext('2d'), 13, {});
+  const url = c.toDataURL();
+  const row = dark => [180, 40, 20].map(s => `<div class="sz"><img src="${url}" width="${Math.min(s, 132)}" height="${Math.min(s, 132)}" alt="">${s}px</div>`).join('')
+    + (dark ? '' : `<span class="bubble">알겠어 <img src="${url}" width="18" height="18" alt=""></span>`);
+  $('#demoSheet').innerHTML = row(false); $('#demoDark').innerHTML = row(true);
+})();
+
+/* ===== 닮은꼴·실제 크기 ===== */
+function noFile(box) { box.innerHTML = `<div class="empty-tab">먼저 PNG를 맡기거나 예시로 둘러보세요.<br><button class="btn btn-soft btn-s" data-act="sample">예시로 둘러보기</button></div>`; }
 function drawLook() {
   const usable = items.filter(it => it.canvas && !it.problems.blank);
-  if (!usable.length) return;
+  if (!usable.length) { noFile($('#pairs')); ['#s1', '#s2', '#s3'].forEach(s => $(s).innerHTML = ''); return; }
   const pairs = [];
   for (let a = 0; a < usable.length; a++) for (let b = a + 1; b < usable.length; b++) {
     const A = thumbOf(usable[a]), B = thumbOf(usable[b]); let s = 0;
@@ -373,20 +612,15 @@ function drawLook() {
     pairs.push([s / A.length, usable[a], usable[b]]);
   }
   pairs.sort((x, y) => x[0] - y[0]);
-  const top = pairs.slice(0, 8), worst = pairs[pairs.length - 1][0] || 1;
-  q('#pairs').innerHTML = top.map(([dist, a, b], i) => {
-    const sim = Math.round(100 - dist / worst * 100);
-    return `<div class="pair"><div class="imgs">
-      <div><img src="${a.src}" alt="">${a.no}번</div><div><img src="${b.src}" alt="">${b.no}번</div></div>
-      <div style="flex:1"><b>${i + 1}위</b> <span class="muted">닮음 ${sim}%</span><div class="meter"><i style="width:${sim}%"></i></div>
-      <div class="tiny" style="margin-top:6px;width:max-content"><img src="${a.src}" width="22" height="22" alt=""><img src="${b.src}" width="22" height="22" alt=""></div></div></div>`;
-  }).join('');
-  const strip = (sel, size) => q(sel).innerHTML = usable.map(it => `<img src="${it.src}" width="${size}" height="${size}" title="${it.no}번" alt="" style="object-fit:contain">`).join('');
-  strip('#stripS1', 20); strip('#stripS2', 20); strip('#stripM', 40);
+  $('#pairs').innerHTML = pairs.slice(0, 8).map(([, a, b], i) => `<div class="pair">
+      <div class="two"><figure><img src="${a.src}" alt="">${a.no}번</figure><figure><img src="${b.src}" alt="">${b.no}번</figure></div>
+      <div><div class="rank">${i + 1}위</div><span class="tiny"><img src="${a.src}" width="22" height="22" alt=""><img src="${b.src}" width="22" height="22" alt=""></span></div></div>`).join('');
+  const strip = (sel, s) => $(sel).innerHTML = usable.map(it => `<img src="${it.src}" width="${s}" height="${s}" title="${it.no}번" alt="" style="object-fit:contain">`).join('');
+  strip('#s1', 20); strip('#s2', 20); strip('#s3', 40);
 }
 
 /* ===== 테마 갤러리 ===== */
-// 실제 카톡 테마를 비슷하게 흉내 낸 색 (공식 색상 코드는 공개되어 있지 않음)
+// 실제 카톡 테마를 비슷하게 흉내 낸 색이에요 (공식 색상 코드는 공개되어 있지 않음)
 const SKINS = [
   { name: '기본',   bg: '#bacee0', mine: '#fee500', mineInk: '#191919', other: '#ffffff', otherInk: '#191919' },
   { name: '다크',   bg: '#1c1c1e', mine: '#fee500', mineInk: '#191919', other: '#2c2c2e', otherInk: '#f2f2f2' },
@@ -396,42 +630,24 @@ const SKINS = [
   { name: '핑크',   bg: '#fde4ec', mine: '#ff9fbb', mineInk: '#191919', other: '#ffffff', otherInk: '#191919' },
   { name: '민트',   bg: '#d6f1ea', mine: '#76d4bd', mineInk: '#191919', other: '#ffffff', otherInk: '#191919' },
 ];
-// 대사마다 어울리는 리액션을 지정 → 「리액션 구성」에서 고른 칸이 우선 들어감
 const SCENES = {
-  '연인': [
-    ['other', '오늘 회사 너무 힘들었어', '슬픔·눈물'], ['mine', '헐 고생했어', '사랑·하트'], ['other', '맛있는 거 사줘', '장난·메롱'],
-    ['mine', '', '연결 칸'], ['other', '고마워!!', '감사'], ['mine', '잘 자 내일 봐', '잘자'],
-  ],
-  '친구 단톡': [
-    ['other', '이번 주 토요일 다들 시간 돼?', '질문'], ['mine', '나 완전 콜', 'OK·알겠어'], ['other', '아 나 그날 알바', '미안'],
-    ['mine', '', '화남'], ['other', '대신 다음엔 내가 쏠게', '웃음·기쁨'], ['mine', '오 진짜?', '놀람'],
-  ],
-  '회사': [
-    ['other', '자료 공유드렸습니다', '인사'], ['mine', '확인했습니다 감사합니다', '감사'], ['other', '수정 사항 있으면 말씀 주세요', 'OK·알겠어'],
-    ['mine', '', '칭찬·엄지'], ['other', '내일 회의 10시입니다', '인사'], ['mine', '넵 알겠습니다', 'OK·알겠어'],
-  ],
+  '연인': [['other', '오늘 회사 너무 힘들었어'], ['mine', '헐 고생했어'], ['other', '맛있는 거 사줘'], ['mine', ''], ['other', '고마워!!'], ['mine', '잘 자 내일 봐']],
+  '친구 단톡': [['other', '이번 주 토요일 다들 시간 돼?'], ['mine', '나 완전 콜'], ['other', '아 나 그날 알바'], ['mine', ''], ['other', '대신 다음엔 내가 쏠게'], ['mine', '오 진짜?']],
+  '회사': [['other', '자료 공유드렸습니다'], ['mine', '확인했습니다 감사합니다'], ['other', '수정 사항 있으면 말씀 주세요'], ['mine', ''], ['other', '내일 회의 10시입니다'], ['mine', '넵 알겠습니다']],
 };
 let scene = '연인';
-q('#sceneChips').innerHTML = Object.keys(SCENES).map(s => `<button data-s="${s}" aria-pressed="${s === scene}">${s}</button>`).join('');
-q('#sceneChips').onclick = e => { const b = e.target.closest('button'); if (!b) return; scene = b.dataset.s; q('#sceneChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); drawThemes(); };
-
-function pickFor(tag, i, usable) {
-  const tagged = usable.filter(it => tagOf.get(items.indexOf(it)) === tag);
-  if (tag === '연결 칸' && tagged.length) return tagged;           // 연결 칸은 묶음 전체를 이어서
-  if (tagged.length) return [tagged[i % tagged.length]];
-  if (tag === '연결 칸') return K().inline ? usable.slice(Math.max(0, usable.length - 4), usable.length - 1) : [usable[i % usable.length]];
-  return [usable[(i * 7) % usable.length]];
-}
+$('#scenes').innerHTML = Object.keys(SCENES).map(s => `<button data-s="${s}" aria-pressed="${s === scene}">${s}</button>`).join('');
+$('#scenes').onclick = e => { const b = e.target.closest('[data-s]'); if (!b) return; scene = b.dataset.s; $('#scenes').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); drawThemes(); };
 function drawThemes() {
-  const box = q('#phones');
+  const box = $('#phones');
   const usable = items.filter(it => it.src && !it.problems.blank);
-  if (!usable.length) { box.innerHTML = '<div class="card muted">먼저 「규격 검수」에서 이모티콘을 불러와 주세요.</div>'; return; }
-  const lines = SCENES[scene].map(([who, text, tag], i) => ({ who, text, emos: pickFor(tag, i, usable) }));
-  box.innerHTML = SKINS.map(sk => `<div class="phone"><header>${sk.name}</header><div class="room" style="background:${sk.bg}">${lines.map(l => line(l, sk)).join('')}</div></div>`).join('');
+  if (!usable.length) { noFile(box); return; }
+  const pick = i => usable[(i * 7 + 3) % usable.length];
+  const lines = SCENES[scene].map(([who, text], i) => ({ who, text, emos: text ? [pick(i)] : (K().inline ? usable.slice(-4, -1) : [pick(i)]) }));
+  box.innerHTML = SKINS.map(sk => `<div class="phone"><div class="name">${sk.name}</div><div class="room" style="background:${sk.bg}">${lines.map(l => line(l, sk)).join('')}</div></div>`).join('');
 }
 function line({ who, text, emos }, sk) {
-  const bg = who === 'mine' ? sk.mine : sk.other, ink = who === 'mine' ? sk.mineInk : sk.otherInk;
-  const side = who === 'mine' ? 'me' : 'you';
+  const bg = who === 'mine' ? sk.mine : sk.other, ink = who === 'mine' ? sk.mineInk : sk.otherInk, side = who === 'mine' ? 'me' : 'you';
   if (K().inline) {
     if (!text) { const s = emos.length === 1 ? 64 : 34; return `<div class="msg ${side}"><div class="solo">${emos.map(e => `<img src="${e.src}" width="${s}" height="${s}" alt="">`).join('')}</div></div>`; }
     return `<div class="msg ${side}"><div class="bub" style="background:${bg};color:${ink}">${esc(text)} <span class="seq">${emos.map(e => `<img src="${e.src}" width="18" height="18" alt="">`).join('')}</span></div></div>`;
@@ -440,6 +656,9 @@ function line({ who, text, emos }, sk) {
   return `<div class="msg ${side}"><img src="${e.src}" width="${Math.round(e.w * s)}" height="${Math.round(e.h * s)}" alt="">${text ? `<div class="bub" style="background:${bg};color:${ink}">${esc(text)}</div>` : ''}</div>`;
 }
 
+drawKinds();
+// ?demo 로 열면 예시 시트를 바로 보여 줘요 (공유·소개용 링크)
+if (new URLSearchParams(location.search).has('demo')) loadSample();
 </script>
 </body>
 </html>

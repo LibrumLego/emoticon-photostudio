@@ -1,0 +1,5 @@
+.impeccable/tmp/
+.impeccable/serve.log
+.impeccable/answer.log
+.impeccable/mocks/
+.impeccable/review/*.png

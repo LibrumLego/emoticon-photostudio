@@ -1,8 +1,8 @@
-# 이모티콘 검수실
+# 이모티콘 사진관
 
 카카오톡 이모티콘 PNG를 제안하기 전에 점검하는 무료 웹 도구예요. 이미지는 서버로 전송되지 않고 브라우저 안에서만 처리돼요.
 
-**사이트:** https://librumlego.github.io/emoticon-checkroom/
+**사이트:** https://librumlego.github.io/emoticon-checkroom/ · 예시 바로 보기: https://librumlego.github.io/emoticon-checkroom/?demo
 
 ## 기능
 - **규격 검수:** 개수, 크기, 용량, 형식, 빈칸, 가장자리 여백, 투명 배경, 다크모드 대비를 확인해요.
