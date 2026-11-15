@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이모티콘 검수실</title>
+<meta name="description" content="카카오톡 이모티콘 제안 전에 규격·비슷한 표정·실제 크기·리액션 구성·제출 정보를 한 번에 점검하는 무료 검수 도구">
+<style>
+:root{
+  --bg:#f4f7f6; --panel:#ffffff; --line:#d9e3e0; --text:#16302b; --muted:#4f655f;
+  --accent:#0f766e; --accent-ink:#ffffff; --accent-soft:#e0f2ef;
+  --bad:#b4370a; --bad-bg:#fff1e8; --bad-ink:#ffffff; --good:#15803d; --good-bg:#e8f7ee;
+  --checker-a:#eef2f1; --checker-b:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1716; --panel:#172221; --line:#2a3a37; --text:#e3efec; --muted:#93aba5;
+    --accent:#2dd4bf; --accent-ink:#06201d; --accent-soft:#16322e;
+    --bad:#fb923c; --bad-bg:#3a2214; --bad-ink:#1f1208; --good:#4ade80; --good-bg:#13301f;
+    --checker-a:#22302e; --checker-b:#2b3b38;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1716; --panel:#172221; --line:#2a3a37; --text:#e3efec; --muted:#93aba5;
+  --accent:#2dd4bf; --accent-ink:#06201d; --accent-soft:#16322e;
+  --bad:#fb923c; --bad-bg:#3a2214; --bad-ink:#1f1208; --good:#4ade80; --good-bg:#13301f;
+  --checker-a:#22302e; --checker-b:#2b3b38;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;font-size:15px;line-height:1.55}
+header{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.bar{max-width:1180px;margin:0 auto;padding:12px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+h1{font-size:24px;margin:0;letter-spacing:-.02em;line-height:1.2}
+h1 small{font-weight:500;color:var(--muted);font-size:13px;margin-left:6px;letter-spacing:0}
+h2{font-size:18px;margin:0 0 10px;letter-spacing:-.01em}
+h3{font-size:14px;margin:14px 0 6px}
+nav{display:flex;gap:2px;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;padding:3px}
+nav button{border:0;background:transparent;color:var(--text);padding:6px 12px;border-radius:7px;cursor:pointer;font:inherit;font-size:14px}
+nav button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+main{max-width:1180px;margin:0 auto;padding:16px}
+section.tab{display:none}
+section.tab.on{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit;font-weight:600;font-size:14px}
+.btn.line{background:transparent;color:var(--text);border-color:var(--line);font-weight:500}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:5px 11px;border-radius:8px;cursor:pointer;font:inherit;font-size:13px}
+.chips button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.muted{color:var(--muted);font-size:13px}
+.intake{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;border:1.5px solid var(--line);border-radius:12px;padding:18px;margin-top:12px;cursor:pointer;background:var(--bg)}
+.intake.over{border-color:var(--accent);background:var(--accent-soft)}
+.err{color:var(--bad);font-weight:600;margin:8px 0 0;white-space:pre-line}
+/* 체크리스트 */
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.check{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start}
+.check b{display:block;font-size:14px}
+.check .v{font-size:12px;color:var(--muted)}
+.mark{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700}
+.mark.ok{background:var(--good-bg);color:var(--good)}
+.mark.no{background:var(--bad-bg);color:var(--bad)}
+/* 그리드 */
+.grid{display:grid;grid-template-columns:repeat(var(--cols,6),minmax(0,1fr));gap:6px}
+@media (max-width:640px){.grid{--cols:4 !important}}
+.cell{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  background-color:var(--checker-b);background-image:linear-gradient(45deg,var(--checker-a) 25%,transparent 25%,transparent 75%,var(--checker-a) 75%),linear-gradient(45deg,var(--checker-a) 25%,transparent 25%,transparent 75%,var(--checker-a) 75%);background-size:14px 14px;background-position:0 0,7px 7px}
+.cell.onDark{background:#141414}
+.cell img{max-width:100%;max-height:100%;display:block}
+.cell .no{position:absolute;right:4px;top:4px;font-size:10px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:5px;padding:0 4px}
+.cell .tags{position:absolute;left:3px;right:3px;bottom:3px;display:flex;gap:2px;flex-wrap:wrap}
+.cell .tags span{font-size:10px;background:var(--bad);color:var(--bad-ink);border-radius:4px;padding:0 4px}
+/* 작게 보기 */
+.strip{display:flex;flex-wrap:wrap;align-items:center;gap:3px;padding:10px;border-radius:10px;margin-top:6px}
+.strip img{display:block}
+/* 비슷한 표정 */
+.pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.pair{border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;gap:10px;align-items:center}
+.pair .imgs{display:flex;gap:4px}
+.pair .imgs div{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--muted)}
+.pair .imgs img{width:56px;height:56px;object-fit:contain;background:#fff;border-radius:6px;border:1px solid var(--line)}
+.pair .tiny{display:flex;gap:2px;padding:4px 6px;background:#fee500;border-radius:8px}
+.meter{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:4px}
+.meter i{display:block;height:100%;background:var(--bad)}
+/* 구성 */
+.tagGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.tagItem{border:1px solid var(--line);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:5px}
+.tagItem .cell{border:0}
+.tagItem select{font:inherit;font-size:12px;padding:3px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--text)}
+.cover{display:flex;flex-wrap:wrap;gap:6px}
+.cover span{font-size:13px;padding:4px 10px;border-radius:999px;border:1px solid var(--line)}
+.cover span.has{background:var(--good-bg);color:var(--good);border-color:transparent;font-weight:600}
+.cover span.miss{background:var(--bad-bg);color:var(--bad);border-color:transparent;font-weight:600}
+/* 테마 */
+.phones{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.phone{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel)}
+.phone header{position:static;font-size:12px;padding:6px 10px;color:var(--muted);border-bottom:1px solid var(--line);background:var(--panel)}
+.room{padding:10px;display:flex;flex-direction:column;gap:7px;min-height:330px}
+.msg{display:flex;flex-direction:column;gap:3px;max-width:86%}
+.msg.me{align-self:flex-end;align-items:flex-end}
+.msg.you{align-self:flex-start;align-items:flex-start}
+.bub{padding:6px 10px;border-radius:12px;font-size:13px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+.me .bub{border-top-right-radius:3px}
+.you .bub{border-top-left-radius:3px}
+.bub .seq{display:inline-flex;vertical-align:-0.3em;line-height:0}
+.bub .seq img{display:block}
+.solo{display:flex}
+.solo img{display:block}
+/* 제출 정보 */
+.fields{display:grid;gap:12px;max-width:640px}
+.field label{display:block;font-weight:600;font-size:14px;margin-bottom:4px}
+.field input,.field textarea{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text)}
+.field textarea{min-height:90px;resize:vertical}
+.field .meta{display:flex;justify-content:space-between;gap:8px;font-size:12px;margin-top:4px}
+.field .meta .bad{color:var(--bad);font-weight:600}
+.field .meta .ok{color:var(--good);font-weight:600}
+a{color:var(--accent)}
+footer{max-width:1180px;margin:0 auto;padding:4px 16px 28px}
+@media print{
+  header nav,#printBtn,.intake,.noprint{display:none !important}
+  section.tab{display:block !important;break-inside:avoid}
+  :root,:root:not([data-theme="light"]){
+    --bg:#ffffff; --panel:#ffffff; --line:#d9e3e0; --text:#16302b; --muted:#4f655f;
+    --accent:#0f766e; --accent-ink:#ffffff; --accent-soft:#e0f2ef;
+    --bad:#b4370a; --bad-bg:#fff1e8; --bad-ink:#ffffff; --good:#15803d; --good-bg:#e8f7ee;
+  }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <h1>이모티콘 검수실 <small>제안 버튼 누르기 전 마지막 점검</small></h1>
+    <nav role="tablist">
+      <button role="tab" data-tab="review" aria-selected="true">규격 검수</button>
+      <button role="tab" data-tab="look" aria-selected="false">닮은꼴·실제 크기</button>
+      <button role="tab" data-tab="lineup" aria-selected="false">리액션 구성</button>
+      <button role="tab" data-tab="themes" aria-selected="false">테마 갤러리</button>
+      <button role="tab" data-tab="info" aria-selected="false">제출 정보</button>
+    </nav>
+    <button class="btn line" id="printBtn" style="margin-left:auto">검수 리포트 인쇄·PDF</button>
+  </div>
+</header>
+
+<main>
+<!-- 규격 검수 -->
+<section class="tab on" id="tab-review">
+  <div class="card">
+    <h2>1. 이모티콘 불러오기</h2>
+    <div class="row">
+      <span class="muted">종류</span>
+      <div class="chips" id="kindChips"></div>
+    </div>
+    <p class="muted" id="kindSpec" style="margin:8px 0 0"></p>
+    <input type="file" id="picker" multiple hidden>
+    <div class="intake" id="intake">
+      <div>
+        <strong>시트 한 장 또는 낱장 파일 여러 개</strong>
+        <div class="muted" id="intakeHint"></div>
+      </div>
+      <span class="btn">파일 고르기</span>
+    </div>
+    <p class="err" id="loadErr" hidden></p>
+  </div>
+
+  <div class="card" id="reviewCard" hidden>
+    <h2>2. 규격 체크리스트</h2>
+    <div class="checks" id="checks"></div>
+  </div>
+
+  <div class="card" id="cellsCard" hidden>
+    <div class="row" style="justify-content:space-between">
+      <h2 style="margin:0">3. 칸별 결과</h2>
+      <label class="muted noprint"><input type="checkbox" id="onDark"> 검정 배경에 놓고 보기</label>
+    </div>
+    <p class="muted">주황 표시: <b>여백</b> 그림이 끝에 닿음 · <b>네모</b> 배경까지 칠해져 글자 옆에서 사각형으로 보임 · <b>다크</b> 외곽이 어두워 다크모드에서 묻힘 · <b>빈칸</b> · <b>크기</b> · <b>용량</b> · <b>형식</b></p>
+    <div class="grid" id="cells"></div>
+  </div>
+</section>
+
+<!-- 닮은꼴·실제 크기 -->
+<section class="tab" id="tab-look">
+  <div class="card">
+    <h2>가장 헷갈리는 짝 TOP 8</h2>
+    <p class="muted">채팅창에 실제로 보이는 크기(약 24px)로 줄였을 때 서로 가장 비슷하게 보이는 짝이에요. 위에 있을수록 구분이 어려워요. 같은 캐릭터라 얼굴형은 원래 비슷하니, <b>표정·소품으로 확실히 구분되는지</b>를 보세요.</p>
+    <div class="pairs" id="pairs"><div class="muted">먼저 「규격 검수」에서 이모티콘을 불러와 주세요.</div></div>
+  </div>
+  <div class="card">
+    <h2>실제 크기로 한눈에</h2>
+    <p class="muted">글자 옆(약 20px)과 단독 전송(약 40px) 크기예요. 이 크기에서 안 보이는 디테일은 심사에서도 안 보여요.</p>
+    <h3>글자 크기 · 밝은 말풍선</h3><div class="strip" id="stripS1" style="background:#fee500"></div>
+    <h3>글자 크기 · 다크 배경</h3><div class="strip" id="stripS2" style="background:#1c1c1e"></div>
+    <h3>단독 크기 · 기본 배경</h3><div class="strip" id="stripM" style="background:#bacee0"></div>
+  </div>
+</section>
+
+<!-- 리액션 구성 -->
+<section class="tab" id="tab-lineup">
+  <div class="card">
+    <h2>자주 쓰는 리액션이 다 있나요?</h2>
+    <p class="muted">각 칸에 어떤 감정·용도인지 골라 주세요. 채팅에서 자주 쓰이는 리액션 중 빠진 게 무엇인지 알려 드려요. 고른 값은 「테마 갤러리」 예시 대화에도 쓰여요.</p>
+    <h3>필수 리액션</h3><div class="cover" id="coverMust"></div>
+    <h3>있으면 좋은 리액션</h3><div class="cover" id="coverNice"></div>
+    <p class="muted" id="dupNote"></p>
+  </div>
+  <div class="card"><div class="tagGrid" id="tagGrid"><div class="muted">먼저 「규격 검수」에서 이모티콘을 불러와 주세요.</div></div></div>
+</section>
+
+<!-- 테마 갤러리 -->
+<section class="tab" id="tab-themes">
+  <div class="card noprint">
+    <div class="row">
+      <span class="muted">대화 상황</span>
+      <div class="chips" id="sceneChips"></div>
+    </div>
+    <p class="muted" style="margin:8px 0 0">같은 대화를 여러 카톡 테마에 동시에 띄워요. 「리액션 구성」에서 감정을 골라 두면 대사에 맞는 이모티콘이 자동으로 들어가요. 테마 색은 실제 카톡을 비슷하게 흉내 낸 값이에요.</p>
+  </div>
+  <div class="phones" id="phones"></div>
+</section>
+
+<!-- 제출 정보 -->
+<section class="tab" id="tab-info">
+  <div class="card">
+    <h2>제출 정보 글자 수 검사</h2>
+    <p class="muted">카카오 이모티콘 스튜디오 공식 안내서의 글자 수·특수기호 규칙으로 검사해요. 사용 가능한 특수기호: <code>! ? ~ ( ) “ ” ‘ ’ : &amp; , . #</code></p>
+    <div class="fields" id="fields"></div>
+  </div>
+</section>
+</main>
+
+<footer class="muted">
+  개인이 만든 무료 도구이며 카카오와 관련이 없어요. 규격은 바뀔 수 있으니 제안 전 카카오 이모티콘 스튜디오에서 꼭 다시 확인해 주세요. 불러온 이미지는 서버로 전송되지 않고 이 브라우저 안에서만 처리돼요.
+</footer>
+
+<script>
+/* ===== 규격 (미니: 공식 안내서 확인 / 나머지: 공개 정리 자료) ===== */
+const KINDS = {
+  mini:  { name: '미니',        need: 42, dims: [[180, 180]], maxKB: 100,  types: ['png'],               grid: [6, 7], official: true,  inline: true },
+  still: { name: '멈춰있는',    need: 32, dims: [[360, 360]], maxKB: 150,  types: ['png'],               grid: 'free', official: false, inline: false },
+  anim:  { name: '움직이는',    need: 24, dims: [[360, 360]], maxKB: 650,  types: ['png', 'webp', 'gif'], grid: null,   official: false, inline: false },
+  large: { name: '큰 이모티콘', need: 16, dims: [[540, 540], [540, 300], [300, 540]], maxKB: 1024, types: ['png', 'webp', 'gif'], grid: null, official: false, inline: false },
+};
+let kind = 'mini';
+const K = () => KINDS[kind];
+let items = [];            // {no, label, w, h, type, kb, src(url), canvas, problems:{...}}
+const tagOf = new Map();   // item index -> 리액션
+const q = s => document.querySelector(s);
+const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* ===== 탭 ===== */
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(x => x.setAttribute('aria-selected', x === b));
+  document.querySelectorAll('section.tab').forEach(s => s.classList.toggle('on', s.id === 'tab-' + b.dataset.tab));
+  ({ look: drawLook, lineup: drawLineup, themes: drawThemes })[b.dataset.tab]?.();
+});
+q('#printBtn').onclick = () => { drawLook(); drawLineup(); drawThemes(); window.print(); };
+
+/* ===== 종류 ===== */
+q('#kindChips').innerHTML = Object.entries(KINDS).map(([k, v]) => `<button data-k="${k}" aria-pressed="${k === kind}">${v.name}</button>`).join('');
+q('#kindChips').onclick = e => {
+  const b = e.target.closest('button'); if (!b || b.dataset.k === kind) return;
+  kind = b.dataset.k;
+  q('#kindChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  reset(); describeKind();
+};
+function describeKind() {
+  const k = K();
+  const kb = k.maxKB >= 1024 ? (k.maxKB / 1024) + 'MB' : k.maxKB + 'KB';
+  q('#kindSpec').innerHTML = `${k.need}개 · ${k.dims.map(d => d.join('×')).join(' / ')}px · 파일당 ${kb} 이하 · ${k.types.join(', ').toUpperCase()} · `
+    + (k.official ? '<b>공식 안내서 기준</b>' : '공개 정리 자료 기준(스튜디오에서 재확인 필요)');
+  const [cw, ch] = k.dims[0];
+  q('#intakeHint').textContent = Array.isArray(k.grid)
+    ? `시트는 ${cw * k.grid[0]}×${ch * k.grid[1]}px (${k.grid[0]}열 ${k.grid[1]}행) · 낱장은 ${cw}×${ch}px`
+    : k.grid === 'free' ? `시트는 가로·세로가 ${cw}px의 배수 · 낱장은 ${cw}×${ch}px`
+    : `낱장 파일만 · 움직이는 파일은 첫 장면으로 검사해요`;
+  q('#picker').accept = k.types.map(t => '.' + t).join(',');
+}
+describeKind();
+
+function reset() {
+  items.forEach(it => it.src.startsWith('blob:') && URL.revokeObjectURL(it.src));
+  items = []; tagOf.clear();
+  ['#reviewCard', '#cellsCard'].forEach(s => q(s).hidden = true);
+  showErr('');
+}
+
+/* ===== 불러오기 ===== */
+const intake = q('#intake'), picker = q('#picker');
+intake.onclick = () => { picker.value = ''; picker.click(); };
+picker.onchange = () => picker.files.length && ingest([...picker.files]);
+intake.ondragover = e => { e.preventDefault(); intake.classList.add('over'); };
+intake.ondragleave = () => intake.classList.remove('over');
+intake.ondrop = e => { e.preventDefault(); intake.classList.remove('over'); e.dataTransfer.files.length && ingest([...e.dataTransfer.files]); };
+function showErr(m) { const p = q('#loadErr'); p.textContent = m || ''; p.hidden = !m; }
+const typeOf = f => (f.name.split('.').pop() || '').toLowerCase();
+const dimOk = (w, h) => K().dims.some(([a, b]) => a === w && b === h);
+
+async function ingest(files) {
+  reset();
+  const k = K();
+  files.sort((a, b) => a.name.localeCompare(b.name, 'ko', { numeric: true }));
+  if (files.length === 1 && k.grid && typeOf(files[0]) === 'png') {
+    let bmp; try { bmp = await createImageBitmap(files[0]); } catch { return showErr('이미지를 열 수 없어요.'); }
+    const [cw, ch] = k.dims[0];
+    const cols = Array.isArray(k.grid) ? k.grid[0] : bmp.width / cw, rows = Array.isArray(k.grid) ? k.grid[1] : bmp.height / ch;
+    const sheet = bmp.width === cw * cols && bmp.height === ch * rows && Number.isInteger(cols) && Number.isInteger(rows) && cols * rows > 1;
+    if (sheet) { await fromSheet(bmp, cw, ch, cols, rows); return done(); }
+    if (!dimOk(bmp.width, bmp.height)) { const m = `${bmp.width}×${bmp.height}px 이에요. 시트나 낱장 규격과 맞지 않아요.`; bmp.close(); return showErr(m); }
+    bmp.close();
+  }
+  for (const f of files) await fromFile(f);
+  done();
+}
+
+async function fromSheet(bmp, cw, ch, cols, rows) {
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const cv = Object.assign(document.createElement('canvas'), { width: cw, height: ch });
+    const x = cv.getContext('2d', { willReadFrequently: true });
+    x.drawImage(bmp, c * cw, r * ch, cw, ch, 0, 0, cw, ch);
+    const blob = await new Promise(ok => cv.toBlob(ok, 'image/png'));
+    items.push({ label: `${r + 1}행 ${c + 1}열`, w: cw, h: ch, type: 'png', kb: blob.size / 1024, src: URL.createObjectURL(blob), canvas: cv, fromSheet: true });
+  }
+  bmp.close();
+}
+
+async function fromFile(f) {
+  const type = typeOf(f);
+  let bmp; try { bmp = await createImageBitmap(f); } catch { items.push({ label: f.name, w: 0, h: 0, type, kb: f.size / 1024, src: '', canvas: null, broken: true }); return; }
+  const cv = Object.assign(document.createElement('canvas'), { width: bmp.width, height: bmp.height });
+  cv.getContext('2d', { willReadFrequently: true }).drawImage(bmp, 0, 0);
+  items.push({ label: f.name, w: bmp.width, h: bmp.height, type, kb: f.size / 1024, src: URL.createObjectURL(f), canvas: cv });
+  bmp.close();
+}
+
+function inspect(it) {
+  const k = K(), p = {};
+  p.type = !k.types.includes(it.type);
+  p.size = it.broken || !dimOk(it.w, it.h);
+  p.weight = it.kb > k.maxKB;
+  if (!it.canvas) { p.blank = true; return p; }
+  const { width: w, height: h } = it.canvas;
+  const d = it.canvas.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, w, h).data;
+  const alpha = (x, y) => (x < 0 || y < 0 || x >= w || y >= h) ? 0 : d[(y * w + x) * 4 + 3];
+  const band = Math.max(2, Math.round(w / 90));
+  let ink = 0, touch = 0, rim = 0, darkRim = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const i = (y * w + x) * 4; if (d[i + 3] <= 8) continue;
+    ink++;
+    if (x < band || y < band || x >= w - band || y >= h - band) touch++;
+    if (alpha(x - 1, y) <= 8 || alpha(x + 1, y) <= 8 || alpha(x, y - 1) <= 8 || alpha(x, y + 1) <= 8) {
+      rim++; if (0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2] < 70) darkRim++;
+    }
+  }
+  p.blank = ink === 0;
+  p.square = ink / (w * h) > 0.95;
+  p.margin = !p.square && touch > (w + h) / 18;
+  p.dark = !p.square && rim > 0 && darkRim / rim > 0.6;
+  return p;
+}
+
+const LABEL = { type: '형식', size: '크기', weight: '용량', blank: '빈칸', margin: '여백', square: '네모', dark: '다크' };
+
+function done() {
+  items.forEach((it, i) => { it.no = i + 1; it.problems = inspect(it); it.thumb = null; });
+  q('#reviewCard').hidden = q('#cellsCard').hidden = false;
+  drawChecks(); drawCells();
+}
+
+function drawChecks() {
+  const k = K();
+  const count = key => items.filter(it => it.problems[key]).length;
+  const maxKb = Math.max(0, ...items.map(it => it.kb));
+  const list = [
+    ['개수', items.length === k.need, `${items.length} / ${k.need}개`],
+    ['파일 형식', !count('type'), count('type') ? `${count('type')}개가 ${k.types.join('/').toUpperCase()}가 아님` : '모두 통과'],
+    ['이미지 크기', !count('size'), count('size') ? `${count('size')}개가 규격과 다름` : '모두 통과'],
+    ['파일 용량', !count('weight'), `가장 큰 파일 ${maxKb.toFixed(1)}KB / ${k.maxKB}KB`],
+    ['빈칸 없음', !count('blank'), count('blank') ? `${count('blank')}칸이 비어 있음` : '모두 그림 있음'],
+    ['가장자리 여백', !count('margin'), count('margin') ? `${count('margin')}칸이 끝에 닿음 (연결 칸이면 괜찮아요)` : '모두 여유 있음'],
+    ['투명 배경', !count('square'), count('square') ? `${count('square')}칸이 배경까지 칠해짐` : '모두 투명'],
+    ['다크모드', !count('dark'), count('dark') ? `${count('dark')}칸이 검정 배경에 묻힘 → 흰 테두리 권장` : '잘 보임'],
+  ];
+  q('#checks').innerHTML = list.map(([t, ok, v]) => `<div class="check"><span class="mark ${ok ? 'ok' : 'no'}">${ok ? '✓' : '!'}</span><div><b>${t}</b><span class="v">${v}</span></div></div>`).join('');
+}
+
+function drawCells() {
+  const k = K(), g = q('#cells');
+  g.style.setProperty('--cols', Array.isArray(k.grid) ? k.grid[0] : 8);
+  const dark = q('#onDark').checked;
+  g.innerHTML = items.map(it => {
+    const bad = Object.entries(it.problems).filter(([, v]) => v).map(([key]) => LABEL[key]);
+    return `<div class="cell${dark ? ' onDark' : ''}" title="${esc(it.label)} · ${it.w}×${it.h}px · ${it.kb.toFixed(1)}KB">${it.src ? `<img src="${it.src}" alt="">` : ''}<span class="no">${it.no}</span><div class="tags">${bad.map(b => `<span>${b}</span>`).join('')}</div></div>`;
+  }).join('');
+}
+q('#onDark').onchange = drawCells;
+
+/* ===== 닮은꼴 ===== */
+const TS = 24;
+function thumbOf(it) {
+  if (it.thumb) return it.thumb;
+  const cv = Object.assign(document.createElement('canvas'), { width: TS, height: TS });
+  const x = cv.getContext('2d', { willReadFrequently: true });
+  x.fillStyle = '#fff'; x.fillRect(0, 0, TS, TS);
+  x.imageSmoothingQuality = 'high';
+  const s = TS / Math.max(it.w, it.h);
+  x.drawImage(it.canvas, (TS - it.w * s) / 2, (TS - it.h * s) / 2, it.w * s, it.h * s);
+  const d = x.getImageData(0, 0, TS, TS).data, v = new Float32Array(TS * TS);
+  for (let i = 0; i < v.length; i++) v[i] = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
+  return it.thumb = v;
+}
+function drawLook() {
+  const usable = items.filter(it => it.canvas && !it.problems.blank);
+  if (!usable.length) return;
+  const pairs = [];
+  for (let a = 0; a < usable.length; a++) for (let b = a + 1; b < usable.length; b++) {
+    const A = thumbOf(usable[a]), B = thumbOf(usable[b]); let s = 0;
+    for (let i = 0; i < A.length; i++) s += Math.abs(A[i] - B[i]);
+    pairs.push([s / A.length, usable[a], usable[b]]);
+  }
+  pairs.sort((x, y) => x[0] - y[0]);
+  const top = pairs.slice(0, 8), worst = pairs[pairs.length - 1][0] || 1;
+  q('#pairs').innerHTML = top.map(([dist, a, b], i) => {
+    const sim = Math.round(100 - dist / worst * 100);
+    return `<div class="pair"><div class="imgs">
+      <div><img src="${a.src}" alt="">${a.no}번</div><div><img src="${b.src}" alt="">${b.no}번</div></div>
+      <div style="flex:1"><b>${i + 1}위</b> <span class="muted">닮음 ${sim}%</span><div class="meter"><i style="width:${sim}%"></i></div>
+      <div class="tiny" style="margin-top:6px;width:max-content"><img src="${a.src}" width="22" height="22" alt=""><img src="${b.src}" width="22" height="22" alt=""></div></div></div>`;
+  }).join('');
+  const strip = (sel, size) => q(sel).innerHTML = usable.map(it => `<img src="${it.src}" width="${size}" height="${size}" title="${it.no}번" alt="" style="object-fit:contain">`).join('');
+  strip('#stripS1', 20); strip('#stripS2', 20); strip('#stripM', 40);
+}
+
+/* ===== 리액션 구성 ===== */
+const MUST = ['인사', '감사', '미안', 'OK·알겠어', '사랑·하트', '웃음·기쁨', '슬픔·눈물', '화남', '놀람', '잘자'];
+const NICE = ['축하', '응원·화이팅', '질문', '거절·싫어', '당황·땀', '배고픔', '부끄러움', '장난·메롱', '피곤', '칭찬·엄지'];
+const ALL_TAGS = [...MUST, ...NICE, '연결 칸', '기타'];
+function drawLineup() {
+  const g = q('#tagGrid');
+  if (!items.length) return;
+  g.innerHTML = items.map((it, i) => `<div class="tagItem"><div class="cell">${it.src ? `<img src="${it.src}" alt="">` : ''}<span class="no">${it.no}</span></div>
+    <select data-i="${i}" aria-label="${it.no}번 감정"><option value="">— 고르기 —</option>${ALL_TAGS.map(t => `<option${tagOf.get(i) === t ? ' selected' : ''}>${t}</option>`).join('')}</select></div>`).join('');
+  g.onchange = e => { const s = e.target.closest('select'); if (!s) return; s.value ? tagOf.set(+s.dataset.i, s.value) : tagOf.delete(+s.dataset.i); drawCover(); };
+  drawCover();
+}
+function drawCover() {
+  const used = [...tagOf.values()];
+  const chip = list => list.map(t => `<span class="${used.includes(t) ? 'has' : 'miss'}">${used.includes(t) ? '✓' : '✗'} ${t}</span>`).join('');
+  q('#coverMust').innerHTML = chip(MUST); q('#coverNice').innerHTML = chip(NICE);
+  const counts = {}; used.forEach(t => counts[t] = (counts[t] || 0) + 1);
+  const many = Object.entries(counts).filter(([t, n]) => n >= 4 && t !== '연결 칸' && t !== '기타');
+  const missing = MUST.filter(t => !used.includes(t)).length;
+  q('#dupNote').textContent = (used.length ? `${items.length}칸 중 ${used.length}칸 분류 · 필수 리액션 ${MUST.length - missing}/${MUST.length}개` : '')
+    + (many.length ? ` · 많이 겹치는 감정: ${many.map(([t, n]) => `${t} ${n}칸`).join(', ')} → 일부를 빠진 리액션으로 바꾸는 걸 고려해 보세요` : '');
+}
+
+/* ===== 테마 갤러리 ===== */
+// 실제 카톡 테마를 비슷하게 흉내 낸 색 (공식 색상 코드는 공개되어 있지 않음)
+const SKINS = [
+  { name: '기본',   bg: '#bacee0', mine: '#fee500', mineInk: '#191919', other: '#ffffff', otherInk: '#191919' },
+  { name: '다크',   bg: '#1c1c1e', mine: '#fee500', mineInk: '#191919', other: '#2c2c2e', otherInk: '#f2f2f2' },
+  { name: '화이트', bg: '#ffffff', mine: '#fee500', mineInk: '#191919', other: '#f1f1f1', otherInk: '#191919' },
+  { name: '블랙',   bg: '#000000', mine: '#3a3a3c', mineInk: '#ffffff', other: '#1f1f1f', otherInk: '#ffffff' },
+  { name: '고대비', bg: '#000000', mine: '#ffff00', mineInk: '#000000', other: '#ffffff', otherInk: '#000000' },
+  { name: '핑크',   bg: '#fde4ec', mine: '#ff9fbb', mineInk: '#191919', other: '#ffffff', otherInk: '#191919' },
+  { name: '민트',   bg: '#d6f1ea', mine: '#76d4bd', mineInk: '#191919', other: '#ffffff', otherInk: '#191919' },
+];
+// 대사마다 어울리는 리액션을 지정 → 「리액션 구성」에서 고른 칸이 우선 들어감
+const SCENES = {
+  '연인': [
+    ['other', '오늘 회사 너무 힘들었어', '슬픔·눈물'], ['mine', '헐 고생했어', '사랑·하트'], ['other', '맛있는 거 사줘', '장난·메롱'],
+    ['mine', '', '연결 칸'], ['other', '고마워!!', '감사'], ['mine', '잘 자 내일 봐', '잘자'],
+  ],
+  '친구 단톡': [
+    ['other', '이번 주 토요일 다들 시간 돼?', '질문'], ['mine', '나 완전 콜', 'OK·알겠어'], ['other', '아 나 그날 알바', '미안'],
+    ['mine', '', '화남'], ['other', '대신 다음엔 내가 쏠게', '웃음·기쁨'], ['mine', '오 진짜?', '놀람'],
+  ],
+  '회사': [
+    ['other', '자료 공유드렸습니다', '인사'], ['mine', '확인했습니다 감사합니다', '감사'], ['other', '수정 사항 있으면 말씀 주세요', 'OK·알겠어'],
+    ['mine', '', '칭찬·엄지'], ['other', '내일 회의 10시입니다', '인사'], ['mine', '넵 알겠습니다', 'OK·알겠어'],
+  ],
+};
+let scene = '연인';
+q('#sceneChips').innerHTML = Object.keys(SCENES).map(s => `<button data-s="${s}" aria-pressed="${s === scene}">${s}</button>`).join('');
+q('#sceneChips').onclick = e => { const b = e.target.closest('button'); if (!b) return; scene = b.dataset.s; q('#sceneChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); drawThemes(); };
+
+function pickFor(tag, i, usable) {
+  const tagged = usable.filter(it => tagOf.get(items.indexOf(it)) === tag);
+  if (tag === '연결 칸' && tagged.length) return tagged;           // 연결 칸은 묶음 전체를 이어서
+  if (tagged.length) return [tagged[i % tagged.length]];
+  if (tag === '연결 칸') return K().inline ? usable.slice(Math.max(0, usable.length - 4), usable.length - 1) : [usable[i % usable.length]];
+  return [usable[(i * 7) % usable.length]];
+}
+function drawThemes() {
+  const box = q('#phones');
+  const usable = items.filter(it => it.src && !it.problems.blank);
+  if (!usable.length) { box.innerHTML = '<div class="card muted">먼저 「규격 검수」에서 이모티콘을 불러와 주세요.</div>'; return; }
+  const lines = SCENES[scene].map(([who, text, tag], i) => ({ who, text, emos: pickFor(tag, i, usable) }));
+  box.innerHTML = SKINS.map(sk => `<div class="phone"><header>${sk.name}</header><div class="room" style="background:${sk.bg}">${lines.map(l => line(l, sk)).join('')}</div></div>`).join('');
+}
+function line({ who, text, emos }, sk) {
+  const bg = who === 'mine' ? sk.mine : sk.other, ink = who === 'mine' ? sk.mineInk : sk.otherInk;
+  const side = who === 'mine' ? 'me' : 'you';
+  if (K().inline) {
+    if (!text) { const s = emos.length === 1 ? 64 : 34; return `<div class="msg ${side}"><div class="solo">${emos.map(e => `<img src="${e.src}" width="${s}" height="${s}" alt="">`).join('')}</div></div>`; }
+    return `<div class="msg ${side}"><div class="bub" style="background:${bg};color:${ink}">${esc(text)} <span class="seq">${emos.map(e => `<img src="${e.src}" width="18" height="18" alt="">`).join('')}</span></div></div>`;
+  }
+  const e = emos[0], base = kind === 'large' ? 140 : 96, s = base / Math.max(e.w, e.h);
+  return `<div class="msg ${side}"><img src="${e.src}" width="${Math.round(e.w * s)}" height="${Math.round(e.h * s)}" alt="">${text ? `<div class="bub" style="background:${bg};color:${ink}">${esc(text)}</div>` : ''}</div>`;
+}
+
+/* ===== 제출 정보 (공식 안내서 기준) ===== */
+const FIELDS = [
+  { id: 'author', label: '작가명 (국문)', max: 15 },
+  { id: 'authorEn', label: '작가명 (영문)', max: 36, en: true },
+  { id: 'series', label: '시리즈명 (국문, 영문 미지원)', max: 15, series: true },
+  { id: 'title', label: '이모티콘명 (국문) · 이모티콘샵에 보이는 제목', max: 22, search: true },
+  { id: 'titleEn', label: '이모티콘명 (영문)', max: 36, en: true },
+];
+const ALLOWED = /[^\p{L}\p{N}\s!?~()“”‘’:&,.#]/gu;
+const TOO_PLAIN = ['엄마', '아빠', '강아지', '고양이', '사랑', '친구', '커플', '토끼', '곰'];
+q('#fields').innerHTML = FIELDS.map(f => `<div class="field"><label for="f-${f.id}">${f.label}</label><input id="f-${f.id}" data-id="${f.id}" autocomplete="off"><div class="meta"><span id="m-${f.id}"></span><span id="c-${f.id}">0 / ${f.max}</span></div></div>`).join('');
+q('#fields').oninput = e => {
+  const inp = e.target.closest('input'); if (!inp) return;
+  const f = FIELDS.find(x => x.id === inp.dataset.id), v = inp.value, n = [...v].length;
+  const bad = [...new Set(v.match(ALLOWED) || [])];
+  const notes = [];
+  if (n > f.max) notes.push(`<span class="bad">${n - f.max}자 초과</span>`);
+  if (bad.length) notes.push(`<span class="bad">쓸 수 없는 기호: ${esc(bad.join(' '))}</span>`);
+  if (f.en && /[ㄱ-ㅎ가-힣]/.test(v)) notes.push('<span class="bad">영문 칸에 한글이 있어요</span>');
+  if (f.series && TOO_PLAIN.includes(v.trim())) notes.push('<span class="bad">너무 흔한 단어예요 (안내서: 일반 단어만으로 된 시리즈명은 피하기)</span>');
+  if (!notes.length && n) notes.push('<span class="ok">통과</span>');
+  if ((f.series || f.search) && v.trim()) notes.push(`<a href="https://e.kakao.com/search?q=${encodeURIComponent(v.trim())}" target="_blank" rel="noopener">이모티콘샵에서 같은 이름 찾아보기</a>`);
+  q('#m-' + f.id).innerHTML = notes.join(' · ');
+  const c = q('#c-' + f.id); c.textContent = `${n} / ${f.max}`; c.className = n > f.max ? 'bad' : '';
+};
+</script>
+</body>
+</html>
