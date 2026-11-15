@@ -96,7 +96,7 @@ h1,h2,h3{letter-spacing:-.03em;margin:0}
 .receipt .v{display:flex;align-items:center;gap:6px;font-weight:700}
 .receipt .v.ok{color:var(--pass)}.receipt .v.no{color:var(--retake)}
 .receipt .sub{font-size:12px;color:var(--ink-2);font-weight:500}
-.rail .print{margin-top:16px;width:100%;justify-content:center}
+.rail .printout{margin-top:16px;width:100%;justify-content:center}
 .sample-note{margin-top:12px;background:var(--sky);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--sky-ink)}
 
 .board{padding:20px}
@@ -183,7 +183,7 @@ footer a{color:var(--navy);text-underline-offset:3px}
   .sheet-row{gap:14px;flex-wrap:wrap}
 }
 @media print{
-  .top,.rail .print,.reload,.tabs,.kinds,footer,.scene .kinds{display:none !important}
+  .top,.rail .printout,.reload,.tabs,.kinds,footer,.scene .kinds{display:none !important}
   body,html{background:#fff}
   .view{display:block !important}
   .desk{grid-template-columns:1fr}
@@ -257,7 +257,7 @@ footer a{color:var(--navy);text-underline-offset:3px}
         <button class="btn btn-line btn-s reload" data-act="pick"><svg class="i"><use href="#i-up"/></svg>다른 PNG 맡기기</button>
         <div class="sample-note" id="sampleNote" hidden>예시 시트를 보고 있어요. 내 PNG를 맡기면 바로 바뀌어요.</div>
         <div class="receipt" id="receipt"></div>
-        <button class="btn btn-soft btn-s print" id="printBtn"><svg class="i"><use href="#i-print"/></svg>검수 결과 인쇄·PDF</button>
+        <button class="btn btn-soft btn-s printout" id="printBtn"><svg class="i"><use href="#i-print"/></svg>검수 결과 인쇄·PDF</button>
       </aside>
 
       <section class="card board" aria-label="칸 목록">
