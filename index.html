@@ -81,15 +81,6 @@ section.tab.on{display:block}
 .pair .tiny{display:flex;gap:2px;padding:4px 6px;background:#fee500;border-radius:8px}
 .meter{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:4px}
 .meter i{display:block;height:100%;background:var(--bad)}
-/* 구성 */
-.tagGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
-.tagItem{border:1px solid var(--line);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:5px}
-.tagItem .cell{border:0}
-.tagItem select{font:inherit;font-size:12px;padding:3px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--text)}
-.cover{display:flex;flex-wrap:wrap;gap:6px}
-.cover span{font-size:13px;padding:4px 10px;border-radius:999px;border:1px solid var(--line)}
-.cover span.has{background:var(--good-bg);color:var(--good);border-color:transparent;font-weight:600}
-.cover span.miss{background:var(--bad-bg);color:var(--bad);border-color:transparent;font-weight:600}
 /* 테마 */
 .phones{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
 .phone{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel)}
@@ -105,14 +96,6 @@ section.tab.on{display:block}
 .bub .seq img{display:block}
 .solo{display:flex}
 .solo img{display:block}
-/* 제출 정보 */
-.fields{display:grid;gap:12px;max-width:640px}
-.field label{display:block;font-weight:600;font-size:14px;margin-bottom:4px}
-.field input,.field textarea{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text)}
-.field textarea{min-height:90px;resize:vertical}
-.field .meta{display:flex;justify-content:space-between;gap:8px;font-size:12px;margin-top:4px}
-.field .meta .bad{color:var(--bad);font-weight:600}
-.field .meta .ok{color:var(--good);font-weight:600}
 a{color:var(--accent)}
 footer{max-width:1180px;margin:0 auto;padding:4px 16px 28px}
 @media print{
@@ -129,13 +112,11 @@ footer{max-width:1180px;margin:0 auto;padding:4px 16px 28px}
 <body>
 <header>
   <div class="bar">
-    <h1>이모티콘 검수실 <small>제안 버튼 누르기 전 마지막 점검</small></h1>
+    <h1>이모티콘 검수실</h1>
     <nav role="tablist">
       <button role="tab" data-tab="review" aria-selected="true">규격 검수</button>
       <button role="tab" data-tab="look" aria-selected="false">닮은꼴·실제 크기</button>
-      <button role="tab" data-tab="lineup" aria-selected="false">리액션 구성</button>
       <button role="tab" data-tab="themes" aria-selected="false">테마 갤러리</button>
-      <button role="tab" data-tab="info" aria-selected="false">제출 정보</button>
     </nav>
     <button class="btn line" id="printBtn" style="margin-left:auto">검수 리포트 인쇄·PDF</button>
   </div>
@@ -145,7 +126,7 @@ footer{max-width:1180px;margin:0 auto;padding:4px 16px 28px}
 <!-- 규격 검수 -->
 <section class="tab on" id="tab-review">
   <div class="card">
-    <h2>1. 이모티콘 불러오기</h2>
+    <h2>불러오기</h2>
     <div class="row">
       <span class="muted">종류</span>
       <div class="chips" id="kindChips"></div>
@@ -163,16 +144,15 @@ footer{max-width:1180px;margin:0 auto;padding:4px 16px 28px}
   </div>
 
   <div class="card" id="reviewCard" hidden>
-    <h2>2. 규격 체크리스트</h2>
+    <h2>규격</h2>
     <div class="checks" id="checks"></div>
   </div>
 
   <div class="card" id="cellsCard" hidden>
     <div class="row" style="justify-content:space-between">
-      <h2 style="margin:0">3. 칸별 결과</h2>
+      <h2 style="margin:0">칸별 결과</h2>
       <label class="muted noprint"><input type="checkbox" id="onDark"> 검정 배경에 놓고 보기</label>
     </div>
-    <p class="muted">주황 표시: <b>여백</b> 그림이 끝에 닿음 · <b>네모</b> 배경까지 칠해져 글자 옆에서 사각형으로 보임 · <b>다크</b> 외곽이 어두워 다크모드에서 묻힘 · <b>빈칸</b> · <b>크기</b> · <b>용량</b> · <b>형식</b></p>
     <div class="grid" id="cells"></div>
   </div>
 </section>
@@ -180,29 +160,15 @@ footer{max-width:1180px;margin:0 auto;padding:4px 16px 28px}
 <!-- 닮은꼴·실제 크기 -->
 <section class="tab" id="tab-look">
   <div class="card">
-    <h2>가장 헷갈리는 짝 TOP 8</h2>
-    <p class="muted">채팅창에 실제로 보이는 크기(약 24px)로 줄였을 때 서로 가장 비슷하게 보이는 짝이에요. 위에 있을수록 구분이 어려워요. 같은 캐릭터라 얼굴형은 원래 비슷하니, <b>표정·소품으로 확실히 구분되는지</b>를 보세요.</p>
+    <h2>닮은꼴 TOP 8 <span class="muted">(24px 기준)</span></h2>
     <div class="pairs" id="pairs"><div class="muted">먼저 「규격 검수」에서 이모티콘을 불러와 주세요.</div></div>
   </div>
   <div class="card">
-    <h2>실제 크기로 한눈에</h2>
-    <p class="muted">글자 옆(약 20px)과 단독 전송(약 40px) 크기예요. 이 크기에서 안 보이는 디테일은 심사에서도 안 보여요.</p>
-    <h3>글자 크기 · 밝은 말풍선</h3><div class="strip" id="stripS1" style="background:#fee500"></div>
-    <h3>글자 크기 · 다크 배경</h3><div class="strip" id="stripS2" style="background:#1c1c1e"></div>
-    <h3>단독 크기 · 기본 배경</h3><div class="strip" id="stripM" style="background:#bacee0"></div>
+    <h2>실제 크기</h2>
+    <h3>20px · 노란 말풍선</h3><div class="strip" id="stripS1" style="background:#fee500"></div>
+    <h3>20px · 검정 배경</h3><div class="strip" id="stripS2" style="background:#1c1c1e"></div>
+    <h3>40px · 기본 배경</h3><div class="strip" id="stripM" style="background:#bacee0"></div>
   </div>
-</section>
-
-<!-- 리액션 구성 -->
-<section class="tab" id="tab-lineup">
-  <div class="card">
-    <h2>자주 쓰는 리액션이 다 있나요?</h2>
-    <p class="muted">각 칸에 어떤 감정·용도인지 골라 주세요. 채팅에서 자주 쓰이는 리액션 중 빠진 게 무엇인지 알려 드려요. 고른 값은 「테마 갤러리」 예시 대화에도 쓰여요.</p>
-    <h3>필수 리액션</h3><div class="cover" id="coverMust"></div>
-    <h3>있으면 좋은 리액션</h3><div class="cover" id="coverNice"></div>
-    <p class="muted" id="dupNote"></p>
-  </div>
-  <div class="card"><div class="tagGrid" id="tagGrid"><div class="muted">먼저 「규격 검수」에서 이모티콘을 불러와 주세요.</div></div></div>
 </section>
 
 <!-- 테마 갤러리 -->
@@ -212,23 +178,13 @@ footer{max-width:1180px;margin:0 auto;padding:4px 16px 28px}
       <span class="muted">대화 상황</span>
       <div class="chips" id="sceneChips"></div>
     </div>
-    <p class="muted" style="margin:8px 0 0">같은 대화를 여러 카톡 테마에 동시에 띄워요. 「리액션 구성」에서 감정을 골라 두면 대사에 맞는 이모티콘이 자동으로 들어가요. 테마 색은 실제 카톡을 비슷하게 흉내 낸 값이에요.</p>
   </div>
   <div class="phones" id="phones"></div>
-</section>
-
-<!-- 제출 정보 -->
-<section class="tab" id="tab-info">
-  <div class="card">
-    <h2>제출 정보 글자 수 검사</h2>
-    <p class="muted">카카오 이모티콘 스튜디오 공식 안내서의 글자 수·특수기호 규칙으로 검사해요. 사용 가능한 특수기호: <code>! ? ~ ( ) “ ” ‘ ’ : &amp; , . #</code></p>
-    <div class="fields" id="fields"></div>
-  </div>
 </section>
 </main>
 
 <footer class="muted">
-  개인이 만든 무료 도구이며 카카오와 관련이 없어요. 규격은 바뀔 수 있으니 제안 전 카카오 이모티콘 스튜디오에서 꼭 다시 확인해 주세요. 불러온 이미지는 서버로 전송되지 않고 이 브라우저 안에서만 처리돼요.
+  카카오와 무관한 개인 도구 · 이미지는 서버로 전송되지 않아요
 </footer>
 
 <script>
@@ -250,9 +206,9 @@ const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&
 document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('nav button').forEach(x => x.setAttribute('aria-selected', x === b));
   document.querySelectorAll('section.tab').forEach(s => s.classList.toggle('on', s.id === 'tab-' + b.dataset.tab));
-  ({ look: drawLook, lineup: drawLineup, themes: drawThemes })[b.dataset.tab]?.();
+  ({ look: drawLook, themes: drawThemes })[b.dataset.tab]?.();
 });
-q('#printBtn').onclick = () => { drawLook(); drawLineup(); drawThemes(); window.print(); };
+q('#printBtn').onclick = () => { drawLook(); drawThemes(); window.print(); };
 
 /* ===== 종류 ===== */
 q('#kindChips').innerHTML = Object.entries(KINDS).map(([k, v]) => `<button data-k="${k}" aria-pressed="${k === kind}">${v.name}</button>`).join('');
@@ -429,29 +385,6 @@ function drawLook() {
   strip('#stripS1', 20); strip('#stripS2', 20); strip('#stripM', 40);
 }
 
-/* ===== 리액션 구성 ===== */
-const MUST = ['인사', '감사', '미안', 'OK·알겠어', '사랑·하트', '웃음·기쁨', '슬픔·눈물', '화남', '놀람', '잘자'];
-const NICE = ['축하', '응원·화이팅', '질문', '거절·싫어', '당황·땀', '배고픔', '부끄러움', '장난·메롱', '피곤', '칭찬·엄지'];
-const ALL_TAGS = [...MUST, ...NICE, '연결 칸', '기타'];
-function drawLineup() {
-  const g = q('#tagGrid');
-  if (!items.length) return;
-  g.innerHTML = items.map((it, i) => `<div class="tagItem"><div class="cell">${it.src ? `<img src="${it.src}" alt="">` : ''}<span class="no">${it.no}</span></div>
-    <select data-i="${i}" aria-label="${it.no}번 감정"><option value="">— 고르기 —</option>${ALL_TAGS.map(t => `<option${tagOf.get(i) === t ? ' selected' : ''}>${t}</option>`).join('')}</select></div>`).join('');
-  g.onchange = e => { const s = e.target.closest('select'); if (!s) return; s.value ? tagOf.set(+s.dataset.i, s.value) : tagOf.delete(+s.dataset.i); drawCover(); };
-  drawCover();
-}
-function drawCover() {
-  const used = [...tagOf.values()];
-  const chip = list => list.map(t => `<span class="${used.includes(t) ? 'has' : 'miss'}">${used.includes(t) ? '✓' : '✗'} ${t}</span>`).join('');
-  q('#coverMust').innerHTML = chip(MUST); q('#coverNice').innerHTML = chip(NICE);
-  const counts = {}; used.forEach(t => counts[t] = (counts[t] || 0) + 1);
-  const many = Object.entries(counts).filter(([t, n]) => n >= 4 && t !== '연결 칸' && t !== '기타');
-  const missing = MUST.filter(t => !used.includes(t)).length;
-  q('#dupNote').textContent = (used.length ? `${items.length}칸 중 ${used.length}칸 분류 · 필수 리액션 ${MUST.length - missing}/${MUST.length}개` : '')
-    + (many.length ? ` · 많이 겹치는 감정: ${many.map(([t, n]) => `${t} ${n}칸`).join(', ')} → 일부를 빠진 리액션으로 바꾸는 걸 고려해 보세요` : '');
-}
-
 /* ===== 테마 갤러리 ===== */
 // 실제 카톡 테마를 비슷하게 흉내 낸 색 (공식 색상 코드는 공개되어 있지 않음)
 const SKINS = [
@@ -507,31 +440,6 @@ function line({ who, text, emos }, sk) {
   return `<div class="msg ${side}"><img src="${e.src}" width="${Math.round(e.w * s)}" height="${Math.round(e.h * s)}" alt="">${text ? `<div class="bub" style="background:${bg};color:${ink}">${esc(text)}</div>` : ''}</div>`;
 }
 
-/* ===== 제출 정보 (공식 안내서 기준) ===== */
-const FIELDS = [
-  { id: 'author', label: '작가명 (국문)', max: 15 },
-  { id: 'authorEn', label: '작가명 (영문)', max: 36, en: true },
-  { id: 'series', label: '시리즈명 (국문, 영문 미지원)', max: 15, series: true },
-  { id: 'title', label: '이모티콘명 (국문) · 이모티콘샵에 보이는 제목', max: 22, search: true },
-  { id: 'titleEn', label: '이모티콘명 (영문)', max: 36, en: true },
-];
-const ALLOWED = /[^\p{L}\p{N}\s!?~()“”‘’:&,.#]/gu;
-const TOO_PLAIN = ['엄마', '아빠', '강아지', '고양이', '사랑', '친구', '커플', '토끼', '곰'];
-q('#fields').innerHTML = FIELDS.map(f => `<div class="field"><label for="f-${f.id}">${f.label}</label><input id="f-${f.id}" data-id="${f.id}" autocomplete="off"><div class="meta"><span id="m-${f.id}"></span><span id="c-${f.id}">0 / ${f.max}</span></div></div>`).join('');
-q('#fields').oninput = e => {
-  const inp = e.target.closest('input'); if (!inp) return;
-  const f = FIELDS.find(x => x.id === inp.dataset.id), v = inp.value, n = [...v].length;
-  const bad = [...new Set(v.match(ALLOWED) || [])];
-  const notes = [];
-  if (n > f.max) notes.push(`<span class="bad">${n - f.max}자 초과</span>`);
-  if (bad.length) notes.push(`<span class="bad">쓸 수 없는 기호: ${esc(bad.join(' '))}</span>`);
-  if (f.en && /[ㄱ-ㅎ가-힣]/.test(v)) notes.push('<span class="bad">영문 칸에 한글이 있어요</span>');
-  if (f.series && TOO_PLAIN.includes(v.trim())) notes.push('<span class="bad">너무 흔한 단어예요 (안내서: 일반 단어만으로 된 시리즈명은 피하기)</span>');
-  if (!notes.length && n) notes.push('<span class="ok">통과</span>');
-  if ((f.series || f.search) && v.trim()) notes.push(`<a href="https://e.kakao.com/search?q=${encodeURIComponent(v.trim())}" target="_blank" rel="noopener">이모티콘샵에서 같은 이름 찾아보기</a>`);
-  q('#m-' + f.id).innerHTML = notes.join(' · ');
-  const c = q('#c-' + f.id); c.textContent = `${n} / ${f.max}`; c.className = n > f.max ? 'bad' : '';
-};
 </script>
 </body>
 </html>
