@@ -69,15 +69,24 @@ h1,h2,h3{letter-spacing:-.03em;margin:0}
 .intake p.lead{font-size:16px;color:var(--ink-2);margin:0 0 26px;max-width:34em}
 .intake .acts{display:flex;gap:10px;flex-wrap:wrap}
 .intake .hint{margin-top:14px}
-.dropzone{border-radius:var(--radius);transition:box-shadow .2s,background .2s}
-.dropzone.over{box-shadow:0 0 0 3px var(--changed),var(--shadow);background:#f4f9ff}
 .demo{background:var(--sky);border-radius:var(--radius);padding:22px}
 .demo .sheet-row{background:var(--paper)}
 .err{margin:14px 0 0;color:var(--retake);font-weight:600;white-space:pre-line}
+.errbar{background:var(--retake-bg);border-radius:var(--radius);padding:12px 16px;margin:0 0 14px;color:var(--retake);font-weight:600;white-space:pre-line}
+.notes{list-style:none;margin:0 0 24px;padding:0;display:grid;gap:8px;max-width:36em}
+.notes li{display:flex;gap:8px;align-items:flex-start;font-size:14px;color:var(--ink-2)}
+.notes li svg{margin-top:3px;color:var(--sky-ink)}
+.guide{margin-top:12px;border-radius:10px;background:var(--sky);padding:8px 12px;font-size:13px;color:var(--ink-2)}
+.guide summary{cursor:pointer;font-weight:700;color:var(--navy)}
+.guide p{margin:8px 0}
+.guide .notes{margin:8px 0;gap:6px}
+.guide .notes li{font-size:13px}
+#veil{position:fixed;inset:10px;z-index:50;border:3px dashed var(--changed);border-radius:20px;background:rgba(228,238,252,.82);display:none;place-items:center;font-size:20px;font-weight:800;color:var(--changed);pointer-events:none}
+body.dragging #veil{display:grid}
 
 /* 출력 시트 (선택한 칸) */
 .sheet-row{border:1.5px dashed var(--sky-deep);border-radius:12px;padding:16px;display:flex;align-items:flex-end;gap:22px;position:relative}
-.sheet-row .sz{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.sheet-row .sz{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;line-height:1.35;text-align:center;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .sheet-row.dark{background:#1c1c1e;border-color:#3a3a3d}
 .sheet-row.dark .sz{color:#b9c2cc}
 .sheet-row .bubble{background:#fee500;color:#191919;border-radius:14px 4px 14px 14px;padding:8px 12px;display:inline-flex;align-items:center;gap:4px;font-size:14px;align-self:center;margin-left:auto}
@@ -85,7 +94,7 @@ h1,h2,h3{letter-spacing:-.03em;margin:0}
 
 /* 결과 화면 */
 .desk{display:grid;grid-template-columns:270px minmax(0,1fr) 380px;gap:18px;align-items:start}
-.rail,.inspector{position:sticky;top:78px}
+.rail,.inspector{position:sticky;top:78px;max-height:calc(100vh - 96px);overflow:auto}
 .rail{padding:20px}
 .rail h2,.board h2,.inspector h2{font-size:16px;color:var(--navy)}
 .rail .kinds{margin:12px 0 14px}
@@ -127,7 +136,7 @@ h1,h2,h3{letter-spacing:-.03em;margin:0}
 .now.retake{background:var(--retake-bg);color:var(--retake)}
 .now.pass{background:var(--pass-bg);color:var(--pass)}
 .now small{display:block;font-weight:500;color:var(--ink-2);margin-top:2px;font-size:13px}
-.inspector .sheet-row{margin-bottom:10px;flex-wrap:wrap}
+.inspector .sheet-row{margin-bottom:10px;flex-wrap:wrap;gap:14px;padding:12px}
 .inspector .sheet-row .bubble{margin-left:0}
 .facts{margin-top:12px;font-size:14px}
 .facts .row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #eef3f8;font-variant-numeric:tabular-nums}
@@ -170,7 +179,7 @@ footer a{color:var(--navy);text-underline-offset:3px}
 
 @media (max-width:1180px){
   .desk{grid-template-columns:240px minmax(0,1fr)}
-  .inspector{grid-column:1/-1;position:static}
+  .inspector{grid-column:1/-1;position:static;max-height:none;overflow:visible}
 }
 @media (max-width:760px){
   .top-in{gap:10px}
@@ -178,7 +187,7 @@ footer a{color:var(--navy);text-underline-offset:3px}
   .tabs button{flex:none}
   .intake{grid-template-columns:1fr;padding:26px 20px}
   .desk{grid-template-columns:1fr}
-  .rail{position:static}
+  .rail{position:static;max-height:none;overflow:visible}
   .prints{--cols:3 !important;gap:8px;padding:10px}
   .sheet-row{gap:14px;flex-wrap:wrap}
 }
@@ -187,7 +196,8 @@ footer a{color:var(--navy);text-underline-offset:3px}
   body,html{background:#fff}
   .view{display:block !important}
   .desk{grid-template-columns:1fr}
-  .rail,.inspector{position:static}
+  .rail,.inspector{position:static;max-height:none;overflow:visible}
+  .guide,#veil{display:none !important}
   .card{box-shadow:none;border:1px solid var(--line)}
 }
 </style>
@@ -225,19 +235,22 @@ footer a{color:var(--navy);text-underline-offset:3px}
   </div>
 </header>
 
+<div id="veil" aria-hidden="true">여기에 놓으면 바로 맡겨져요</div>
 <main>
   <input type="file" id="picker" multiple hidden>
 
   <!-- 규격 검수 -->
   <section class="view on" id="v-check">
     <!-- 접수: 아무것도 안 올렸을 때 -->
-    <div class="card intake dropzone" id="intake">
+    <p class="errbar" id="errDesk" role="alert" hidden></p>
+    <div class="card intake" id="intake">
       <div>
         <div class="kinds" id="kinds0" role="group" aria-label="이모티콘 종류"></div>
-        <h1>PNG를 맡기면<br>고칠 칸부터 찾아 드려요</h1>
-        <p class="lead">규격, 여백, 다크모드, 작게 봤을 때까지 한 번에 확인해요. 시트 한 장이든 낱장 여러 개든 그대로 끌어다 놓으세요.</p>
+        <h1 id="introTitle"></h1>
+        <p class="lead" id="introLead"></p>
+        <ul class="notes" id="introNotes"></ul>
         <div class="acts">
-          <button class="btn btn-main" data-act="pick"><svg class="i"><use href="#i-up"/></svg>PNG 맡기기</button>
+          <button class="btn btn-main" data-act="pick"><svg class="i"><use href="#i-up"/></svg><span class="pl"></span></button>
           <button class="btn btn-soft" data-act="sample"><svg class="i"><use href="#i-play"/></svg>예시로 둘러보기</button>
         </div>
         <p class="muted hint" id="hint0"></p>
@@ -251,11 +264,13 @@ footer a{color:var(--navy);text-underline-offset:3px}
 
     <!-- 결과 -->
     <div class="desk" id="desk" hidden>
-      <aside class="card rail dropzone" id="rail">
+      <aside class="card rail" id="rail">
         <h2>접수증</h2>
         <div class="kinds" id="kinds1" role="group" aria-label="이모티콘 종류"></div>
-        <button class="btn btn-line btn-s reload" data-act="pick"><svg class="i"><use href="#i-up"/></svg>다른 PNG 맡기기</button>
-        <div class="sample-note" id="sampleNote" hidden>예시 시트를 보고 있어요. 내 PNG를 맡기면 바로 바뀌어요.</div>
+        <button class="btn btn-line btn-s reload" data-act="pick"><svg class="i"><use href="#i-up"/></svg><span class="pl2"></span></button>
+        <div class="sample-note" id="sampleNote" hidden>예시를 보고 있어요. 내 파일을 맡기면 바로 바뀌어요.</div>
+        <div class="sample-note" id="kindNote" hidden></div>
+        <details class="guide" id="guide"></details>
         <div class="receipt" id="receipt"></div>
         <button class="btn btn-soft btn-s printout" id="printBtn"><svg class="i"><use href="#i-print"/></svg>검수 결과 인쇄·PDF</button>
       </aside>
@@ -279,14 +294,14 @@ footer a{color:var(--navy);text-underline-offset:3px}
   <section class="view" id="v-look">
     <div class="card panel">
       <h2>헷갈리는 짝 TOP 8</h2>
-      <p class="muted">채팅창 크기(24px)로 줄였을 때 서로 가장 비슷한 짝이에요.</p>
+      <p class="muted" id="pairDesc"></p>
       <div class="pairs" id="pairs"></div>
     </div>
     <div class="card panel strip-wrap">
       <h2>실제 크기</h2>
-      <h3>20px · 노란 말풍선 옆</h3><div class="strip" id="s1" style="background:#fee500"></div>
-      <h3>20px · 다크모드</h3><div class="strip" id="s2" style="background:#1c1c1e"></div>
-      <h3>40px · 기본 배경</h3><div class="strip" id="s3" style="background:#bacee0"></div>
+      <h3 id="t1"></h3><div class="strip" id="s1"></div>
+      <h3 id="t2"></h3><div class="strip" id="s2" style="background:#1c1c1e"></div>
+      <h3 id="t3"></h3><div class="strip" id="s3" style="background:#bacee0"></div>
     </div>
   </section>
 
@@ -314,6 +329,31 @@ const KINDS = {
   anim:  { name: '움직이는',    need: 24, dims: [[360, 360]], maxKB: 650,  types: ['png', 'webp', 'gif'], grid: null,   official: false, inline: false },
   large: { name: '큰 이모티콘', need: 16, dims: [[540, 540], [540, 300], [300, 540]], maxKB: 1024, types: ['png', 'webp', 'gif'], grid: null, official: false, inline: false },
 };
+// 미리보기 크기: [최대 변(px), 이름표]. 원본보다 키우지는 않아요
+const VIEW = {
+  mini:  [[180, '180px'], [40, '40px'], [20, '20px']],
+  still: [[132, '원본(축소)'], [88, '채팅창<br>약 88px'], [44, '키보드 목록<br>약 44px']],
+  large: [[132, '원본(축소)'], [110, '채팅창<br>약 110px'], [44, '키보드 목록<br>약 44px']],
+};
+VIEW.anim = VIEW.still;
+const INTRO = {
+  mini: { title: '미니 이모티콘,<br>작게 봐도 괜찮은지 봐 드려요',
+    lead: '글자 사이에 쏙 들어가는 작은 이모티콘이에요. 42개를 시트 한 장(1080×1260px, 6열 7행)으로 올리거나 180×180px 낱장으로 올려 주세요.',
+    notes: ['글자 크기(약 20px)로 줄어도 표정이 보이는지가 가장 중요해요', '여러 개를 이어 붙이는 연결 칸은 칸 끝에 닿아도 괜찮아요', '한 장에 100KB까지 돼요'],
+    hint: '카카오 이모티콘 스튜디오 공식 안내서 기준이에요.' },
+  still: { title: '멈춰있는 이모티콘,<br>규격부터 꼼꼼히 봐 드려요',
+    lead: '말풍선 위에 크게 붙는 기본 이모티콘이에요. 32개를 360×360px PNG 낱장으로 올려 주세요. 360px 칸으로 이어 붙인 시트 한 장도 읽을 수 있어요.',
+    notes: ['배경은 투명해야 해요. 배경을 칠하면 네모난 판처럼 보여요', '키보드 목록에서는 아주 작게 보여요. 작게 줄여도 서로 구분되는지 확인해 보세요', '한 장에 150KB까지 돼요'] },
+  anim: { title: '움직이는 이모티콘,<br>파일 규격을 확인해 드려요',
+    lead: '움직이는 이모티콘 24개예요. 360×360px로 만든 WebP, GIF, PNG 파일을 낱장으로 올려 주세요.',
+    notes: ['움직이는 파일은 첫 장면으로 여백과 다크모드를 검사해요', '움직임 자체(장면 수, 재생 시간)는 검사하지 못해요. 스튜디오 미리보기로 확인해 주세요', '한 장에 650KB까지 돼요'] },
+  large: { title: '큰 이모티콘,<br>세 가지 크기에 맞는지 봐 드려요',
+    lead: '채팅창에 크게 보이는 이모티콘 16개예요. 크기는 정사각형(540×540), 가로형(540×300), 세로형(300×540) 중 하나여야 해요.',
+    notes: ['세 가지 크기 중 어느 것과도 다르면 「크기」로 표시해요', '움직이는 파일은 첫 장면으로 검사해요', '한 장에 1MB까지 돼요'] },
+};
+const PUBLIC_HINT = '공개 자료 기준이에요. 제안 전에 카카오 이모티콘 스튜디오에서 한 번 더 확인해 주세요.';
+['still', 'anim', 'large'].forEach(k => INTRO[k].hint = PUBLIC_HINT);
+let switchNote = '';
 let kind = 'mini';
 const K = () => KINDS[kind];
 let items = [], selected = 0, isSample = false, lastHashes = null;
@@ -333,13 +373,25 @@ function go(v) {
 }
 
 /* ===== 종류 ===== */
+const kindLabel = k => k.name.endsWith('이모티콘') ? k.name : k.name + ' 이모티콘';
+const specText = k => (Array.isArray(k.grid) ? `시트 ${k.dims[0][0] * k.grid[0]}×${k.dims[0][1] * k.grid[1]}px 또는 ` : '') + `낱장 ${k.dims.map(d => d.join('×')).join(' / ')}px`;
 function drawKinds() {
   const html = Object.entries(KINDS).map(([k, v]) => `<button data-k="${k}" aria-pressed="${k === kind}">${v.name}</button>`).join('');
   $('#kinds0').innerHTML = html; $('#kinds1').innerHTML = html;
-  const k = K(), [cw, ch] = k.dims[0];
-  const sheet = Array.isArray(k.grid) ? `시트 ${cw * k.grid[0]}×${ch * k.grid[1]}px 또는 ` : k.grid === 'free' ? `시트(${cw}px 배수) 또는 ` : '';
-  $('#hint0').textContent = `${k.name} ${k.need}개 · ${sheet}낱장 ${k.dims.map(d => d.join('×')).join(' / ')}px · ${limitText()} 이하` + (k.official ? '' : ' · 공개 자료 기준이라 스튜디오에서 한 번 더 확인해 주세요');
+  const k = K(), intro = INTRO[kind];
+  const notes = intro.notes.map(n => `<li><svg class="i"><use href="#i-ok"/></svg><span>${n}</span></li>`).join('');
+  $('#introTitle').innerHTML = intro.title; $('#introLead').textContent = intro.lead; $('#introNotes').innerHTML = notes;
+  $('#hint0').textContent = intro.hint;
+  $('#guide').innerHTML = `<summary>${k.name} 안내 보기</summary><p>${esc(intro.lead)}</p><ul class="notes">${notes}</ul><p class="muted">${intro.hint}</p>`;
+  const what = k.types.length === 1 ? 'PNG' : '파일';
+  $('.pl').textContent = what + ' 맡기기'; $('.pl2').textContent = '다른 ' + what + ' 맡기기';
   $('#picker').accept = k.types.map(t => '.' + t).join(',');
+  drawDemo();
+}
+function refreshTab() {
+  const on = document.querySelector('.view.on')?.id;
+  if (on === 'v-look') drawLook();
+  if (on === 'v-themes') drawThemes();
 }
 document.addEventListener('click', e => {
   const kb = e.target.closest('[data-k]');
@@ -349,40 +401,67 @@ document.addEventListener('click', e => {
   if (act?.dataset.act === 'sample') loadSample();
 });
 $('#picker').onchange = () => $('#picker').files.length && ingest([...$('#picker').files]);
-document.querySelectorAll('.dropzone').forEach(z => {
-  z.ondragover = e => { e.preventDefault(); z.classList.add('over'); };
-  z.ondragleave = () => z.classList.remove('over');
-  z.ondrop = e => { e.preventDefault(); z.classList.remove('over'); e.dataTransfer.files.length && ingest([...e.dataTransfer.files]); };
+// 화면 어디에 놓아도 맡겨져요
+let dragDepth = 0;
+const hasFiles = e => [...(e.dataTransfer?.types || [])].includes('Files');
+document.addEventListener('dragenter', e => { if (!hasFiles(e)) return; e.preventDefault(); dragDepth++; document.body.classList.add('dragging'); });
+document.addEventListener('dragover', e => { if (!hasFiles(e)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; document.body.classList.add('dragging'); });
+document.addEventListener('dragleave', e => { if (!hasFiles(e)) return; dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth || !e.relatedTarget) { dragDepth = 0; document.body.classList.remove('dragging'); } });
+document.addEventListener('drop', e => {
+  if (!hasFiles(e)) return;
+  e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging');
+  e.dataTransfer.files.length && ingest([...e.dataTransfer.files]);
 });
 $('#printBtn').onclick = () => { drawLook(); drawThemes(); print(); };
 
 function showIntake() {
   items.forEach(it => it.src?.startsWith('blob:') && URL.revokeObjectURL(it.src));
-  items = []; isSample = false;
+  items = []; isSample = false; switchNote = '';
   $('#intake').hidden = false; $('#desk').hidden = true; showErr('');
+  refreshTab();
 }
-function showErr(m) { const p = $('#err'); p.textContent = m || ''; p.hidden = !m; if (m) { $('#intake').hidden = false; $('#desk').hidden = true; } }
+// 오류는 지금 보이는 화면(접수 또는 결과)에 보여 줘요. 이전 결과는 지우지 않아요
+function showErr(m) {
+  const deskOn = !$('#desk').hidden;
+  $('#err').textContent = m || ''; $('#err').hidden = !m || deskOn;
+  $('#errDesk').textContent = m || ''; $('#errDesk').hidden = !m || !deskOn;
+  if (m && !$('#v-check').classList.contains('on')) go('check');
+}
 
 /* ===== 불러오기 ===== */
 const typeOf = f => (f.name.split('.').pop() || '').toLowerCase();
 const dimOk = (w, h) => K().dims.some(([a, b]) => a === w && b === h);
+function sheetOf(k, w, h) {
+  if (!k.grid) return null;
+  const [cw, ch] = k.dims[0];
+  const cols = Array.isArray(k.grid) ? k.grid[0] : w / cw, rows = Array.isArray(k.grid) ? k.grid[1] : h / ch;
+  return Number.isInteger(cols) && Number.isInteger(rows) && cols * rows > 1 && w === cw * cols && h === ch * rows ? [cols, rows] : null;
+}
+const fitsKind = (key, w, h, canSheet) => KINDS[key].dims.some(([a, b]) => a === w && b === h) || (canSheet && !!sheetOf(KINDS[key], w, h));
 
 async function ingest(files, sample = false) {
-  const prev = items; items = []; isSample = sample; showErr('');
-  const k = K();
-  files.sort((a, b) => a.name.localeCompare(b.name, 'ko', { numeric: true }));
-  if (files.length === 1 && k.grid && typeOf(files[0]) === 'png') {
-    let bmp; try { bmp = await createImageBitmap(files[0]); } catch { return showErr('이 파일은 열 수 없어요. PNG가 맞는지 확인해 주세요.'); }
-    const [cw, ch] = k.dims[0];
-    const cols = Array.isArray(k.grid) ? k.grid[0] : bmp.width / cw, rows = Array.isArray(k.grid) ? k.grid[1] : bmp.height / ch;
-    const sheet = bmp.width === cw * cols && bmp.height === ch * rows && Number.isInteger(cols) && Number.isInteger(rows) && cols * rows > 1;
-    if (sheet) { await fromSheet(bmp, cw, ch, cols, rows); return done(prev); }
-    if (!dimOk(bmp.width, bmp.height)) {
-      const m = `${bmp.width}×${bmp.height}px 이미지예요.\n${k.name}는 ` + (Array.isArray(k.grid) ? `시트 ${cw * k.grid[0]}×${ch * k.grid[1]}px 또는 ` : '') + `낱장 ${k.dims.map(d => d.join('×')).join(' / ')}px이어야 해요.`;
-      bmp.close(); return showErr(m);
+  files = [...files].sort((a, b) => a.name.localeCompare(b.name, 'ko', { numeric: true }));
+  const single = files.length === 1, ext = typeOf(files[0]);
+  let bmp = null; try { bmp = await createImageBitmap(files[0]); } catch {}
+  let note = '';
+  if (bmp && !sample) {
+    const fit = key => fitsKind(key, bmp.width, bmp.height, single && ext === 'png');
+    if (!fit(kind)) {
+      // 지금 종류에는 안 맞지만 다른 종류와 맞으면 그 종류로 바꿔서 검사해요 (파일 형식까지 맞는 종류 우선)
+      const others = Object.keys(KINDS).filter(key => key !== kind && fit(key));
+      const pick = others.find(key => KINDS[key].types.includes(ext)) || others[0];
+      if (pick) { kind = pick; note = `파일 크기가 「${KINDS[pick].name}」 규격이라 종류를 바꿔서 검사했어요.`; lastHashes = null; drawKinds(); }
+      else if (single) {
+        const m = `${bmp.width}×${bmp.height}px 이미지는 어느 종류의 규격과도 맞지 않아요.
+${kindLabel(K())}은 ${specText(K())}이어야 해요.`;
+        bmp.close(); return showErr(m);
+      }
     }
-    bmp.close();
   }
+  const prev = items; items = []; isSample = sample; switchNote = note; showErr('');
+  const k = K(), sh = single && bmp && ext === 'png' ? sheetOf(k, bmp.width, bmp.height) : null;
+  if (sh) { await fromSheet(bmp, k.dims[0][0], k.dims[0][1], sh[0], sh[1]); return done(prev); }
+  bmp?.close();
   for (const f of files) await fromFile(f);
   done(prev);
 }
@@ -409,9 +488,9 @@ async function fromFile(f) {
 function inspect(it) {
   const k = K(), p = {};
   p.type = !k.types.includes(it.type);
-  p.size = it.broken || !dimOk(it.w, it.h);
+  if (it.broken) { p.open = true; return p; }
+  p.size = !dimOk(it.w, it.h);
   p.weight = it.kb > k.maxKB;
-  if (!it.canvas) { p.blank = true; return p; }
   const { width: w, height: h } = it.canvas;
   const d = it.canvas.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, w, h).data;
   const a = (x, y) => (x < 0 || y < 0 || x >= w || y >= h) ? 0 : d[(y * w + x) * 4 + 3];
@@ -432,18 +511,19 @@ function inspect(it) {
   return p;
 }
 // 가장 먼저 손볼 문제 순서
-const ORDER = ['type', 'size', 'weight', 'blank', 'square', 'dark', 'margin'];
-const SHORT = { type: '형식', size: '크기', weight: '용량', blank: '빈칸', square: '네모', dark: '다크', margin: '여백' };
+const ORDER = ['open', 'type', 'size', 'weight', 'blank', 'square', 'dark', 'margin'];
+const SHORT = { open: '열기 실패', type: '형식', size: '크기', weight: '용량', blank: '빈칸', square: '네모', dark: '다크', margin: '여백' };
 function sayProblem(key, it) {
-  const k = K();
+  const k = K(), mini = kind === 'mini';
   return ({
+    open: ['열 수 없는 파일이에요', '이미지 파일이 맞는지, 손상되지 않았는지 확인해 주세요.'],
     type: [`${it.type.toUpperCase() || '이 형식'} 파일은 받지 않아요`, `${k.types.join('/').toUpperCase()}로 저장해 주세요.`],
     size: [`크기가 ${it.w}×${it.h}px이에요`, `${k.dims.map(d => d.join('×')).join(' / ')}px로 맞춰 주세요.`],
     weight: [`용량이 ${kbText(it.kb)}예요`, `${limitText()} 이하로 줄여 주세요.`],
     blank: ['그림이 없는 빈칸이에요', '그림을 넣거나 칸을 빼 주세요.'],
-    square: ['배경까지 칠해져 있어요', '글자 옆에서 네모 타일처럼 보여요.'],
+    square: ['배경까지 칠해져 있어요', mini ? '글자 옆에서 네모 타일처럼 보여요.' : '채팅창에서 네모난 판처럼 보여요.'],
     dark: ['다크모드에서 외곽이 묻혀요', '흰 테두리 2~3px이면 또렷해져요.'],
-    margin: ['그림이 칸 끝에 닿아요', '이어지는 연결 칸이 아니라면 여백을 주세요.'],
+    margin: ['그림이 칸 끝에 닿아요', mini ? '이어지는 연결 칸이 아니라면 여백을 주세요.' : '끝이 잘려 보일 수 있으니 여백을 주세요.'],
   })[key];
 }
 
@@ -469,22 +549,24 @@ function done(prev) {
   selected = firstBad < 0 ? 0 : firstBad;
   $('#intake').hidden = true; $('#desk').hidden = false;
   $('#sampleNote').hidden = !isSample;
-  drawReceipt(); drawPrints(true); drawInspector();
+  $('#kindNote').hidden = !switchNote; $('#kindNote').textContent = switchNote;
+  drawReceipt(); drawPrints(true); drawInspector(); refreshTab();
   if (prev) prev.forEach(it => it.src?.startsWith('blob:') && URL.revokeObjectURL(it.src));
 }
 
 function drawReceipt() {
   const k = K(), n = key => items.filter(it => it.problems[key]).length;
   const maxKb = Math.max(0, ...items.map(it => it.kb));
+  const diff = k.need - items.length, bad = items.filter(it => it.problems.type || it.problems.open).length;
   const rows = [
-    ['개수', items.length === k.need, `${items.length} / ${k.need}`],
-    ['파일 형식', !n('type'), n('type') ? `${n('type')}개` : '통과'],
+    ['개수', !diff, `${items.length} / ${k.need}`, diff > 0 ? `${diff}개 더 필요해요` : diff < 0 ? `${-diff}개 많아요` : ''],
+    ['파일 형식', !bad, bad ? `${bad}개` : '통과', n('open') ? `열 수 없는 파일 ${n('open')}개 포함` : ''],
     ['크기', !n('size'), n('size') ? `${n('size')}개` : '통과'],
     ['용량', !n('weight'), kbText(maxKb), `최대 ${limitText()}`],
     ['빈칸', !n('blank'), n('blank') ? `${n('blank')}칸` : '없음'],
     ['투명 배경', !n('square'), n('square') ? `${n('square')}칸` : '통과'],
     ['다크모드', !n('dark'), n('dark') ? `${n('dark')}칸` : '통과'],
-    ['여백', !n('margin'), n('margin') ? `${n('margin')}칸` : '통과', n('margin') ? '연결 칸이면 괜찮아요' : ''],
+    ['여백', !n('margin'), n('margin') ? `${n('margin')}칸` : '통과', n('margin') && kind === 'mini' ? '연결 칸이면 괜찮아요' : ''],
   ];
   $('#receipt').innerHTML = rows.map(([t, ok, v, sub]) => `<div class="row"><span>${t}${sub ? `<br><span class="sub">${sub}</span>` : ''}</span><span class="v ${ok ? 'ok' : 'no'}"><svg class="i"><use href="#i-${ok ? 'ok' : 'no'}"/></svg>${v}</span></div>`).join('');
 }
@@ -516,11 +598,10 @@ $('#night').onchange = () => drawPrints(false);
 $('#onlyBad').onchange = () => drawPrints(false);
 
 function sizes(it) {
-  const big = Math.min(180, Math.max(it.w, it.h));
-  return [big, 40, 20].map(s => { const r = s / Math.max(it.w, it.h); return [Math.round(it.w * r), Math.round(it.h * r), s]; });
+  return VIEW[kind].map(([s, cap]) => { const r = Math.min(1, s / Math.max(it.w, it.h)); return [Math.round(it.w * r), Math.round(it.h * r), cap]; });
 }
 function sheetRow(it, dark) {
-  const cells = sizes(it).map(([w, h, s]) => `<div class="sz"><img class="ph" src="${it.src}" width="${w}" height="${h}" alt="">${s}px</div>`).join('');
+  const cells = sizes(it).map(([w, h, cap]) => `<div class="sz"><img class="ph" src="${it.src}" width="${w}" height="${h}" alt="">${cap}</div>`).join('');
   const bubble = !dark && K().inline ? `<span class="bubble">알겠어 <img src="${it.src}" width="18" height="18" alt=""></span>` : '';
   return cells + bubble;
 }
@@ -534,7 +615,7 @@ function drawInspector() {
     <div class="now ${first ? 'retake' : 'pass'}"><svg class="i"><use href="#i-${first ? 'no' : 'ok'}"/></svg><div>${head}<small>${sub}</small></div></div>
     ${it.src ? `<div class="sheet-row">${sheetRow(it, false)}</div><div class="sheet-row dark">${sheetRow(it, true)}</div>` : ''}
     <div class="facts">
-      <div class="row"><span>크기</span><span class="${it.problems.size ? 'bad' : ''}">${it.w}×${it.h}px</span></div>
+      <div class="row"><span>크기</span><span class="${it.problems.size ? 'bad' : ''}">${it.broken ? '알 수 없음' : `${it.w}×${it.h}px`}</span></div>
       <div class="row"><span>용량</span><span class="${it.problems.weight ? 'bad' : ''}">${kbText(it.kb)}</span></div>
       <div class="row"><span>형식</span><span class="${it.problems.type ? 'bad' : ''}">${esc(it.type.toUpperCase())}</span></div>
       ${rest.map(r => `<div class="row"><span>그리고</span><span class="bad">${r}</span></div>`).join('')}
@@ -544,7 +625,7 @@ function drawInspector() {
 /* ===== 예시 시트 (직접 그린 가상 캐릭터, 일부러 문제를 섞어 둠) ===== */
 function drawFace(x, n, opts = {}) {
   const S = 180, cx = 90, cy = 98;
-  x.save();
+  x.save(); if (opts.scale) x.scale(opts.scale, opts.scale);
   if (opts.fill) { x.fillStyle = '#ffe8a3'; x.fillRect(0, 0, S, S); }
   const r = opts.big ? 96 : 62;
   const ox = opts.big ? 40 : 0;
@@ -577,33 +658,51 @@ function drawFace(x, n, opts = {}) {
   else { x.arc(cx + ox, my - 2, 5, 0, 7); x.stroke(); }
   x.restore();
 }
+let sampling = false;
 async function loadSample() {
-  kind = 'mini'; drawKinds();
-  const cv = Object.assign(document.createElement('canvas'), { width: 1080, height: 1260 });
-  const x = cv.getContext('2d');
-  for (let i = 0; i < 42; i++) {
-    const c = document.createElement('canvas'); c.width = c.height = 180;
+  if (sampling) return; sampling = true;
+  try {
+    const k = K(), [w, h] = k.dims[0], sc = w / 180, toBlob = cv => new Promise(ok => cv.toBlob(ok, 'image/png'));
     // 일부 칸은 일부러 문제를 넣어 둔 예시예요
-    drawFace(c.getContext('2d'), i, { fill: i === 15 || i === 28, big: i === 9, outline: i % 3 === 1, soft: i % 5 === 2 });
-    x.drawImage(c, (i % 6) * 180, Math.floor(i / 6) * 180);
-  }
-  const blob = await new Promise(ok => cv.toBlob(ok, 'image/png'));
-  await ingest([new File([blob], '예시시트.png', { type: 'image/png' })], true);
+    const face = (x, i) => drawFace(x, i, { fill: i === 15 || i === 28, big: i === 9, outline: i % 3 === 1, soft: i % 5 === 2, scale: sc });
+    if (Array.isArray(k.grid)) {
+      const cv = Object.assign(document.createElement('canvas'), { width: w * k.grid[0], height: h * k.grid[1] });
+      const x = cv.getContext('2d');
+      for (let i = 0; i < k.need; i++) {
+        const c = Object.assign(document.createElement('canvas'), { width: w, height: h });
+        face(c.getContext('2d'), i);
+        x.drawImage(c, (i % k.grid[0]) * w, Math.floor(i / k.grid[0]) * h);
+      }
+      await ingest([new File([await toBlob(cv)], '예시시트.png', { type: 'image/png' })], true);
+    } else {
+      const files = [];
+      for (let i = 0; i < k.need; i++) {
+        const c = Object.assign(document.createElement('canvas'), { width: w, height: h });
+        face(c.getContext('2d'), i);
+        files.push(new File([await toBlob(c)], `예시${String(i + 1).padStart(2, '0')}.png`, { type: 'image/png' }));
+      }
+      await ingest(files, true);
+    }
+  } finally { sampling = false; }
 }
-// 접수 화면의 미리 보기도 같은 가상 캐릭터로 그려요
-(function demo() {
-  const c = document.createElement('canvas'); c.width = c.height = 180;
-  drawFace(c.getContext('2d'), 13, {});
-  const url = c.toDataURL();
-  const row = dark => [180, 40, 20].map(s => `<div class="sz"><img src="${url}" width="${Math.min(s, 132)}" height="${Math.min(s, 132)}" alt="">${s}px</div>`).join('')
-    + (dark ? '' : `<span class="bubble">알겠어 <img src="${url}" width="18" height="18" alt=""></span>`);
+// 접수 화면의 미리 보기도 같은 가상 캐릭터로 그려요 (종류에 맞는 크기로)
+let demoUrl = '';
+function drawDemo() {
+  if (!demoUrl) { const c = document.createElement('canvas'); c.width = c.height = 180; drawFace(c.getContext('2d'), 13, {}); demoUrl = c.toDataURL(); }
+  const row = dark => VIEW[kind].map(([s, cap]) => `<div class="sz"><img src="${demoUrl}" width="${Math.min(s, 132)}" height="${Math.min(s, 132)}" alt="">${cap}</div>`).join('')
+    + (dark || !K().inline ? '' : `<span class="bubble">알겠어 <img src="${demoUrl}" width="18" height="18" alt=""></span>`);
   $('#demoSheet').innerHTML = row(false); $('#demoDark').innerHTML = row(true);
-})();
+}
 
 /* ===== 닮은꼴·실제 크기 ===== */
 function noFile(box) { box.innerHTML = `<div class="empty-tab">먼저 PNG를 맡기거나 예시로 둘러보세요.<br><button class="btn btn-soft btn-s" data-act="sample">예시로 둘러보기</button></div>`; }
 function drawLook() {
   const usable = items.filter(it => it.canvas && !it.problems.blank);
+  const mini = kind === 'mini';
+  $('#pairDesc').textContent = (mini ? '채팅창 크기(24px)로 줄였을 때' : '작게(24px) 줄였을 때') + ' 서로 가장 비슷한 짝이에요.';
+  const T = mini ? ['20px · 노란 말풍선 옆', '20px · 다크모드', '40px · 이모티콘만 보낼 때'] : ['키보드 목록 크기 · 밝은 배경', '키보드 목록 크기 · 다크모드', '채팅창 크기'];
+  ['#t1', '#t2', '#t3'].forEach((id, i) => $(id).textContent = T[i]);
+  $('#s1').style.background = mini ? '#fee500' : '#ffffff';
   if (!usable.length) { noFile($('#pairs')); ['#s1', '#s2', '#s3'].forEach(s => $(s).innerHTML = ''); return; }
   const pairs = [];
   for (let a = 0; a < usable.length; a++) for (let b = a + 1; b < usable.length; b++) {
@@ -616,7 +715,8 @@ function drawLook() {
       <div class="two"><figure><img src="${a.src}" alt="">${a.no}번</figure><figure><img src="${b.src}" alt="">${b.no}번</figure></div>
       <div><div class="rank">${i + 1}위</div><span class="tiny"><img src="${a.src}" width="22" height="22" alt=""><img src="${b.src}" width="22" height="22" alt=""></span></div></div>`).join('');
   const strip = (sel, s) => $(sel).innerHTML = usable.map(it => `<img src="${it.src}" width="${s}" height="${s}" title="${it.no}번" alt="" style="object-fit:contain">`).join('');
-  strip('#s1', 20); strip('#s2', 20); strip('#s3', 40);
+  const px = mini ? [20, 20, 40] : [44, 44, VIEW[kind][1][0]];
+  strip('#s1', px[0]); strip('#s2', px[1]); strip('#s3', px[2]);
 }
 
 /* ===== 테마 갤러리 ===== */
