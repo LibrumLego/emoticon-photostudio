@@ -136,7 +136,7 @@ body.dragging #veil{display:grid}
 .now.retake{background:var(--retake-bg);color:var(--retake)}
 .now.pass{background:var(--pass-bg);color:var(--pass)}
 .now small{display:block;font-weight:500;color:var(--ink-2);margin-top:2px;font-size:13px}
-.inspector .sheet-row{margin-bottom:10px;flex-wrap:wrap;gap:14px;padding:12px}
+.inspector .sheet-row{margin-bottom:10px;flex-wrap:wrap;gap:10px;padding:12px 10px}
 .inspector .sheet-row .bubble{margin-left:0}
 .facts{margin-top:12px;font-size:14px}
 .facts .row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #eef3f8;font-variant-numeric:tabular-nums}
@@ -597,8 +597,11 @@ $('#prints').onclick = e => {
 $('#night').onchange = () => drawPrints(false);
 $('#onlyBad').onchange = () => drawPrints(false);
 
+// 출력 시트 안에서만 원본(축소)을 더 작게 그려요. 접수 미리보기와 실제 크기 탭은 VIEW를 그대로 써요
+const SHEET_ORIG = { large: 100 };
 function sizes(it) {
-  return VIEW[kind].map(([s, cap]) => { const r = Math.min(1, s / Math.max(it.w, it.h)); return [Math.round(it.w * r), Math.round(it.h * r), cap]; });
+  return VIEW[kind].map(([s, cap], i) => { if (i === 0 && SHEET_ORIG[kind]) s = SHEET_ORIG[kind];
+    const r = Math.min(1, s / Math.max(it.w, it.h)); return [Math.round(it.w * r), Math.round(it.h * r), cap]; });
 }
 function sheetRow(it, dark) {
   const cells = sizes(it).map(([w, h, cap]) => `<div class="sz"><img class="ph" src="${it.src}" width="${w}" height="${h}" alt="">${cap}</div>`).join('');
