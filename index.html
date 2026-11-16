@@ -132,6 +132,7 @@ body.dragging #veil{display:grid}
 .board{padding:20px}
 .board-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .board-head .sp{flex:1}
+.board-head .chip{max-width:100%;line-height:1.4;padding:3px 10px;text-align:left}
 .toggle{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer}
 .toggle input{accent-color:var(--navy);width:16px;height:16px}
 .prints{display:grid;grid-template-columns:repeat(var(--cols,6),minmax(0,1fr));gap:12px;background:var(--sky);padding:14px;border-radius:12px}
@@ -638,6 +639,17 @@ function done(prev) {
   if (prev) prev.forEach(it => it.src?.startsWith('blob:') && URL.revokeObjectURL(it.src));
 }
 
+// 세트 단위 위반(개수, 움직이는 WebP 수). 칸 위반과 따로 세요. 접수증과 같은 숫자를 써요
+function setIssues() {
+  const k = K(), out = [], diff = k.need - items.length;
+  if (diff > 0) out.push(`개수 ${diff}개 더 필요해요`);
+  else if (diff < 0) out.push(`개수 ${-diff}개 많아요`);
+  if (k.motion) {
+    const webp = items.filter(it => it.type === 'webp' && it.animated).length;
+    if (webp < k.motion.min) out.push(`움직이는 WebP ${k.motion.min - webp}개 더 필요해요`);
+  }
+  return out;
+}
 function drawReceipt() {
   const k = K(), n = key => items.filter(it => it.problems[key]).length;
   const maxKb = Math.max(0, ...items.map(it => it.kb));
@@ -674,8 +686,10 @@ function drawPrints(develop) {
   const only = $('#onlyBad').checked;
   const bad = items.filter(it => it.bad.length).length, noted = items.filter(it => it.note.length).length;
   $('#boardTitle').textContent = `칸 ${items.length}개`;
-  $('#retakeCount').textContent = bad ? `손볼 칸 ${bad}` : '규격 통과';
-  $('#retakeCount').className = 'chip ' + (bad ? 'retake' : 'pass');
+  // 요약 칩: 칸 위반이 있으면 「손볼 칸」, 칸은 괜찮고 세트가 모자라면 세트 문제(개수 먼저), 둘 다 없을 때만 초록 「규격 통과」
+  const issues = setIssues();
+  $('#retakeCount').textContent = bad ? `손볼 칸 ${bad}` : issues.length ? issues[0] : '규격 통과';
+  $('#retakeCount').className = 'chip ' + (bad || issues.length ? 'retake' : 'pass');
   $('#noteCount').textContent = `참고 ${noted}`; $('#noteCount').hidden = !noted;
   box.innerHTML = items.map((it, i) => {
     // 「표시가 있는 칸만」: 위반·참고·바뀜이 있는 칸은 남기고 나머지는 자리만 남겨요
@@ -718,7 +732,11 @@ function drawInspector() {
   // 맨 위 상자: 위반이 있으면 빨강 「지금 고칠 것」, 참고만 있으면 중립 「참고」, 없으면 초록
   const all = [...it.bad, ...it.note], primary = all[0];
   const isBad = it.bad.length > 0, isNote = !isBad && it.note.length > 0;
-  const [head, sub] = primary ? sayProblem(primary, it) : ['손볼 곳이 없어요', '규격과 표시 모두 통과했어요.'];
+  // 칸에 대한 말이라서 범위를 분명히 해요. 세트가 모자라면 그것은 접수증에서 확인하라고 알려요
+  const setLeft = setIssues().length > 0;
+  const [head, sub] = primary ? sayProblem(primary, it) : setLeft
+    ? ['이 칸은 손볼 곳이 없어요', '칸 자체는 통과했어요. 세트 개수와 WebP 수는 접수증에서 확인해 주세요.']
+    : ['손볼 곳이 없어요', '규격과 표시 모두 통과했어요.'];
   const rest = all.slice(1).map(b => `<div class="row"><span>그리고</span><span class="${it.bad.includes(b) ? 'bad' : 'note'}">${sayProblem(b, it)[0]}</span></div>`).join('');
   const format = it.broken ? '' : it.type === 'webp' ? (it.animated ? ` · 움직임 · ${it.frames}프레임` : ' · 정지') : it.type === 'png' ? ' · 정지' : '';
   $('#inspector').innerHTML = `
