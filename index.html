@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="ko">
 <head>
+<!-- 콘텐츠 보안 정책: 이 페이지는 어떤 주소로도 데이터를 보낼 수 없어요(connect-src 'none'). 올린 파일은 브라우저 안에서만 열려요.
+     frame-ancestors는 메타 태그로 지정할 수 없어서, Cloudflare 이전 때 _headers에 넣어요. script-src 해시는 README의 개발 메모에 계산 방법이 있어요. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-4s0xRapn5MtIVsOgDCoYdMeMlE0OuMdc7vXSUwqqGzE='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>이모티콘 사진관 · 이모티콘 제안 전 검수</title>
@@ -22,7 +25,7 @@
 <meta name="twitter:title" content="이모티콘 사진관 · 이모티콘 제안 전 검수">
 <meta name="twitter:description" content="이모티콘 작가를 위한 무료 검수 도구예요. PNG·WebP를 맡기면 규격, 여백, 다크모드, 실제 크기를 한 번에 확인해요. 파일은 기기 밖으로 나가지 않아요. 카카오와 관련 없는 개인 도구예요.">
 <meta name="twitter:image" content="https://librumlego.github.io/emoticon-photostudio/og.png">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" integrity="sha384-GIdEBaqGN9mNkDkMkzMHW8EKUqtpPIe/sLj1X7DIrnc9uPtLROJgmuDlh+3rBw0j" crossorigin="anonymous">
 <style>
 :root{
   --sky:#d9ebf8; --sky-deep:#b9d6ee; --sky-ink:#3f6687;
@@ -285,6 +288,7 @@ footer a{color:var(--navy);text-underline-offset:3px}
         </div>
         <p class="muted hint" id="hint0"></p>
         <p class="muted disc">카카오와 관련 없는 개인 도구예요. 카카오 이모티콘 스튜디오의 공식 검수가 아니에요.</p>
+        <p class="muted disc">올린 파일은 이 브라우저 안에서만 열고, 저장하거나 서버로 보내지 않아요. 창을 닫으면 사라져요.</p>
         <p class="err" id="err" hidden></p>
       </div>
       <div class="demo" aria-hidden="true">
@@ -476,10 +480,33 @@ function sheetOf(k, w, h) {
 }
 const fitsKind = (key, w, h, canSheet) => KINDS[key].dims.some(([a, b]) => a === w && b === h) || (canSheet && !!sheetOf(KINDS[key], w, h));
 
+// 안전 상한: 한 번에 맡기는 파일 수, 파일 크기, 가로·세로(디코딩 전에 헤더에서 읽어요)
+const MAX_FILES = 100, MAX_BYTES = 20 * 1024 * 1024, MAX_SIDE = 4096;
+// 헤더의 가로·세로를 읽어요 (PNG, GIF, WebP VP8X/VP8/VP8L). 모르는 형식이면 null
+function imageDims(dv) {
+  const n = dv.byteLength, s = o => String.fromCharCode(dv.getUint8(o), dv.getUint8(o + 1), dv.getUint8(o + 2), dv.getUint8(o + 3));
+  if (n >= 24 && dv.getUint32(0) === 0x89504e47) return [dv.getUint32(16), dv.getUint32(20)];
+  if (n >= 10 && s(0) === 'GIF8') return [dv.getUint16(6, true), dv.getUint16(8, true)];
+  if (n >= 30 && s(0) === 'RIFF' && s(8) === 'WEBP') {
+    const tag = s(12);
+    if (tag === 'VP8X') return [1 + dv.getUint8(24) + (dv.getUint8(25) << 8) + (dv.getUint8(26) << 16), 1 + dv.getUint8(27) + (dv.getUint8(28) << 8) + (dv.getUint8(29) << 16)];
+    if (tag === 'VP8 ') return [dv.getUint16(26, true) & 0x3fff, dv.getUint16(28, true) & 0x3fff];
+    if (tag === 'VP8L') { const v = dv.getUint32(21, true); return [(v & 0x3fff) + 1, ((v >>> 14) & 0x3fff) + 1]; }
+  }
+  return null;
+}
+// 너무 큰 파일이면 디코딩하지 않아요
+async function tooBig(f) {
+  if (f.size > MAX_BYTES) return true;
+  const dims = imageDims(new DataView(await f.slice(0, 64).arrayBuffer()));
+  return !!dims && (dims[0] > MAX_SIDE || dims[1] > MAX_SIDE);
+}
 async function ingest(files, sample = false) {
   files = [...files].sort((a, b) => a.name.localeCompare(b.name, 'ko', { numeric: true }));
+  if (!sample && files.length > MAX_FILES) return showErr(`한 번에 ${MAX_FILES}개까지 맡길 수 있어요. 나눠서 맡겨 주세요.`);
   const single = files.length === 1, ext = typeOf(files[0]);
-  let bmp = null; try { bmp = await createImageBitmap(files[0]); } catch {}
+  let bmp = null;
+  if (sample || !(await tooBig(files[0]))) { try { bmp = await createImageBitmap(files[0]); } catch {} }
   let note = '';
   if (bmp && !sample) {
     const fit = key => fitsKind(key, bmp.width, bmp.height, single && ext === 'png');
@@ -544,6 +571,7 @@ async function lastFrame(f, w, h) {
 }
 async function fromFile(f) {
   const type = typeOf(f);
+  if (await tooBig(f)) { items.push({ label: f.name, w: 0, h: 0, type, kb: f.size / 1024, src: '', canvas: null, broken: true, huge: true }); return; }
   let bmp; try { bmp = await createImageBitmap(f); } catch { items.push({ label: f.name, w: 0, h: 0, type, kb: f.size / 1024, src: '', canvas: null, broken: true }); return; }
   const cv = Object.assign(document.createElement('canvas'), { width: bmp.width, height: bmp.height });
   cv.getContext('2d', { willReadFrequently: true }).drawImage(bmp, 0, 0);
@@ -602,7 +630,7 @@ const SHORT = { open: '열기 실패', type: '형식', size: '크기', weight: '
 function sayProblem(key, it) {
   const k = K(), mini = kind === 'mini';
   return ({
-    open: ['열 수 없는 파일이에요', '이미지 파일이 맞는지, 손상되지 않았는지 확인해 주세요.'],
+    open: it.huge ? ['너무 큰 파일이라 열지 않았어요', '가로·세로 4096px, 20MB 이하로 줄여 주세요.'] : ['열 수 없는 파일이에요', '이미지 파일이 맞는지, 손상되지 않았는지 확인해 주세요.'],
     type: [`${it.type.toUpperCase() || '이 형식'} 파일은 받지 않아요`, `${k.types.join('/').toUpperCase()}로 저장해 주세요.`],
     size: [`크기가 ${it.w}×${it.h}px이에요`, `${k.dims.map(d => d.join('×')).join(' / ')}px로 맞춰 주세요.`],
     weight: [`용량이 ${kbText(it.kb)}예요`, `${limitText()} 이하로 줄여 주세요.`],
@@ -740,11 +768,11 @@ function drawInspector() {
   const [head, sub] = primary ? sayProblem(primary, it) : setLeft
     ? ['이 칸은 손볼 곳이 없어요', '칸 자체는 통과했어요. 세트 개수와 WebP 수는 접수증에서 확인해 주세요.']
     : ['손볼 곳이 없어요', '규격과 표시 모두 통과했어요.'];
-  const rest = all.slice(1).map(b => `<div class="row"><span>그리고</span><span class="${it.bad.includes(b) ? 'bad' : 'note'}">${sayProblem(b, it)[0]}</span></div>`).join('');
+  const rest = all.slice(1).map(b => `<div class="row"><span>그리고</span><span class="${it.bad.includes(b) ? 'bad' : 'note'}">${esc(sayProblem(b, it)[0])}</span></div>`).join('');
   const format = it.broken ? '' : it.type === 'webp' ? (it.animated ? ` · 움직임 · ${it.frames}프레임` : ' · 정지') : it.type === 'png' ? ' · 정지' : '';
   $('#inspector').innerHTML = `
     <div class="title"><h2>${it.no}번</h2><span class="muted">${esc(it.label)}</span></div>
-    <div class="now ${isBad ? 'retake' : isNote ? 'note' : 'pass'}"><svg class="i"><use href="#i-${isBad ? 'no' : isNote ? 'info' : 'ok'}"/></svg><div>${isBad ? '<em class="kick">지금 고칠 것</em>' : isNote ? '<em class="kick">참고</em>' : ''}${head}<small>${sub}</small></div></div>
+    <div class="now ${isBad ? 'retake' : isNote ? 'note' : 'pass'}"><svg class="i"><use href="#i-${isBad ? 'no' : isNote ? 'info' : 'ok'}"/></svg><div>${isBad ? '<em class="kick">지금 고칠 것</em>' : isNote ? '<em class="kick">참고</em>' : ''}${esc(head)}<small>${esc(sub)}</small></div></div>
     ${it.src ? `<div class="sheet-row">${sheetRow(it, false)}</div><div class="sheet-row dark">${sheetRow(it, true)}</div>` : ''}
     <div class="facts">
       <div class="row"><span>크기</span><span class="${it.problems.size ? 'bad' : ''}">${it.broken ? '알 수 없음' : `${it.w}×${it.h}px`}</span></div>

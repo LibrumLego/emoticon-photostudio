@@ -23,3 +23,12 @@
 규격은 카카오 이모티콘 스튜디오가 공개한 안내서를 기준으로 했어요(2026년 11월 확인). 규격은 바뀔 수 있어요. 움직이는 이모티콘의 24프레임 기준은 큰 이모티콘 페이지의 값을 같이 적용한 것이에요.
 
 카카오와 무관한 개인 도구예요. 카카오 이모티콘 스튜디오의 공식 검수가 아니에요. 카카오톡은 (주)카카오의 상표예요.
+
+## 개발 메모
+- **보안:** 페이지는 CSP로 어떤 주소로도 데이터를 보내지 못하게 막아요(`connect-src 'none'`). 저장(localStorage, IndexedDB, 쿠키)과 네트워크 전송 코드를 넣지 않아요.
+- **인라인 스크립트를 고치면** `index.html`의 CSP `script-src` 해시를 다시 맞춰요. 아래 명령의 결과를 `'sha256-…'` 자리에 넣어요.
+  ```bash
+  node -e "const s=require('fs').readFileSync('index.html','utf8');const m=s.match(/<script>([\s\S]*?)<\/script>/);console.log('sha256-'+require('crypto').createHash('sha256').update(m[1].replace(/\r\n/g,'\n')).digest('base64'))"
+  ```
+  HTML은 줄바꿈을 LF로 바꿔서 읽으니, 해시도 CRLF를 LF로 바꾼 글자로 계산해야 해요(`replace(/\r\n/g,'\n')`).
+- **테스트 이미지**는 `qa/`나 `_test/`에 두고 커밋하지 않아요(`.gitignore`에 있어요).

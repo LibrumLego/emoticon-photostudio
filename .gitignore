@@ -3,3 +3,7 @@
 .impeccable/answer.log
 .impeccable/mocks/
 .impeccable/review/*.png
+# 테스트용 이미지는 저장소에 올리지 않아요 (작가의 저작물이 섞일 수 있어요)
+qa/
+_test/
+*.local.png
