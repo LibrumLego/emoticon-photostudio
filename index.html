@@ -3,7 +3,7 @@
 <head>
 <!-- 콘텐츠 보안 정책: 이 페이지는 어떤 주소로도 데이터를 보낼 수 없어요(connect-src 'none'). 올린 파일은 브라우저 안에서만 열려요.
      frame-ancestors는 메타 태그로 지정할 수 없어서, Cloudflare 이전 때 _headers에 넣어요. script-src 해시는 README의 개발 메모에 계산 방법이 있어요. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-4s0xRapn5MtIVsOgDCoYdMeMlE0OuMdc7vXSUwqqGzE='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-H11pAFXuO8hgy3wBtTakX5Sv8drvZ6c03u05RFumfXE='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>이모티콘 사진관 · 이모티콘 제안 전 검수</title>
@@ -288,7 +288,7 @@ footer a{color:var(--navy);text-underline-offset:3px}
         </div>
         <p class="muted hint" id="hint0"></p>
         <p class="muted disc">카카오와 관련 없는 개인 도구예요. 카카오 이모티콘 스튜디오의 공식 검수가 아니에요.</p>
-        <p class="muted disc">올린 파일은 이 브라우저 안에서만 열고, 저장하거나 서버로 보내지 않아요. 창을 닫으면 사라져요.</p>
+        <p class="muted disc">올린 파일은 이 브라우저 안에서만 열고, 저장하거나 서버로 보내지 않아요. 창을 닫으면 사라져요. 방문 수 같은 숫자만 익명으로 세요(Umami).</p>
         <p class="err" id="err" hidden></p>
       </div>
       <div class="demo" aria-hidden="true">
@@ -403,6 +403,31 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const kbText = kb => kb >= 1024 ? (kb / 1024).toFixed(2) + 'MB' : kb.toFixed(1) + 'KB';
 const limitText = () => K().maxKB >= 1024 ? (K().maxKB / 1024) + 'MB' : K().maxKB + 'KB';
 
+/* ===== 익명 사용 통계 (Umami Cloud) =====
+   보내는 것: 방문 1회, upload(kind·파일 개수 구간·sheet·switched), sample(kind), tab(tab), print.
+   파일 이름, 이미지, 크기·용량 숫자, 검사 결과는 보내지 않아요. 외부 스크립트 없이 여기서 직접 보내요. */
+const UMAMI = { website: 'c2701a57-300d-43ba-8bb2-024a4d6f359f', endpoint: 'https://gateway.umami.is/api/send', hosts: ['librumlego.github.io'] };
+const tabSeen = new Set();
+function trackOn() {
+  try {
+    if (!UMAMI.hosts.includes(location.hostname)) return false;      // 로컬이나 파일로 연 경우는 보내지 않아요
+    if (navigator.doNotTrack === '1' || navigator.globalPrivacyControl) return false;
+    if (new URLSearchParams(location.search).has('notrack')) return false; // 운영자 자기 방문 제외용
+    return true;
+  } catch { return false; }
+}
+// name이 없으면 방문(pageview)이에요. 실패해도 화면에는 아무 영향이 없어요
+function track(name, data) {
+  if (!trackOn()) return;
+  try {
+    const demo = new URLSearchParams(location.search).has('demo');
+    const payload = { website: UMAMI.website, hostname: location.hostname, url: location.pathname + (demo ? '?demo' : ''), title: document.title, language: navigator.language, screen: `${window.screen.width}x${window.screen.height}` };
+    if (name) { payload.name = name; if (data) payload.data = data; }
+    fetch(UMAMI.endpoint, { method: 'POST', keepalive: true, credentials: 'omit', headers: { 'Content-Type': 'application/json', 'x-umami-website-id': UMAMI.website, 'x-umami-hostname': location.hostname }, body: JSON.stringify({ type: 'event', payload }) }).catch(() => {});
+  } catch {}
+}
+const fileBand = n => n === 1 ? '1' : n <= 10 ? '2-10' : n <= 50 ? '11-50' : '51+';
+
 /* ===== 화면 전환 ===== */
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => go(b.dataset.view));
 function go(v) {
@@ -410,6 +435,7 @@ function go(v) {
   document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
   if (v === 'look') drawLook();
   if (v === 'themes') drawThemes();
+  if ((v === 'look' || v === 'themes') && !tabSeen.has(v)) { tabSeen.add(v); track('tab', { tab: v }); }
   scrollTo({ top: 0 });
 }
 
@@ -439,7 +465,7 @@ document.addEventListener('click', e => {
   if (kb && kb.dataset.k !== kind) { kind = kb.dataset.k; lastHashes = null; drawKinds(); showIntake(); return; }
   const act = e.target.closest('[data-act]');
   if (act?.dataset.act === 'pick') { $('#picker').value = ''; $('#picker').click(); }
-  if (act?.dataset.act === 'sample') loadSample();
+  if (act?.dataset.act === 'sample') { track('sample', { kind }); loadSample(); }
 });
 $('#picker').onchange = () => $('#picker').files.length && ingest([...$('#picker').files]);
 // 화면 어디에 놓아도 맡겨져요
@@ -453,7 +479,7 @@ document.addEventListener('drop', e => {
   e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging');
   e.dataTransfer.files.length && ingest([...e.dataTransfer.files]);
 });
-$('#printBtn').onclick = () => { drawLook(); drawThemes(); print(); };
+$('#printBtn').onclick = () => { track('print'); drawLook(); drawThemes(); print(); };
 
 function showIntake() {
   items.forEach(it => it.src?.startsWith('blob:') && URL.revokeObjectURL(it.src));
@@ -523,11 +549,12 @@ ${kindLabel(K())}은 ${specText(K())}이어야 해요.`;
     }
   }
   const prev = items; items = []; isSample = sample; switchNote = note; showErr('');
+  const up = sample ? null : { n: files.length, sheet: false };
   const k = K(), sh = single && bmp && ext === 'png' ? sheetOf(k, bmp.width, bmp.height) : null;
-  if (sh) { await fromSheet(bmp, k.dims[0][0], k.dims[0][1], sh[0], sh[1]); return done(prev); }
+  if (sh) { up && (up.sheet = true); await fromSheet(bmp, k.dims[0][0], k.dims[0][1], sh[0], sh[1]); return done(prev, up); }
   bmp?.close();
   for (const f of files) await fromFile(f);
-  done(prev);
+  done(prev, up);
 }
 
 async function fromSheet(bmp, cw, ch, cols, rows) {
@@ -654,7 +681,8 @@ function thumbOf(it) {
 }
 const hashOf = it => { const v = thumbOf(it); let h = 0; for (let i = 0; i < v.length; i += 3) h = (h * 31 + (v[i] >> 3)) | 0; return h; };
 
-function done(prev) {
+function done(prev, up) {
+  if (up) track('upload', { kind, files: fileBand(up.n), sheet: up.sheet, switched: !!switchNote });
   items.forEach((it, i) => { it.no = i + 1; it.problems = inspect(it); it.bad = VIOLATION.filter(k => it.problems[k]); it.note = NOTE.filter(k => it.problems[k]); });
   // 같은 종류·같은 개수를 다시 맡기면, 바뀐 칸에 표시를 남겨요
   const hashes = items.map(hashOf);
@@ -921,6 +949,7 @@ function line({ who, text, emos }, sk) {
 
 drawKinds();
 // ?demo 로 열면 예시 시트를 바로 보여 줘요 (공유·소개용 링크)
+track();
 if (new URLSearchParams(location.search).has('demo')) loadSample();
 </script>
 </body>
