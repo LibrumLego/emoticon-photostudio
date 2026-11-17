@@ -3,24 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>이모티콘 사진관 · 카톡 이모티콘 제안 전 검수</title>
-<meta name="description" content="PNG를 맡기면 규격, 여백, 다크모드, 실제 크기를 한 번에 확인해요. 파일은 기기 밖으로 나가지 않아요. 무료 공개 중.">
+<title>이모티콘 사진관 · 이모티콘 제안 전 검수</title>
+<meta name="description" content="이모티콘 작가를 위한 무료 검수 도구예요. PNG·WebP를 맡기면 규격, 여백, 다크모드, 실제 크기를 한 번에 확인해요. 파일은 기기 밖으로 나가지 않아요. 카카오와 관련 없는 개인 도구예요.">
 <meta name="theme-color" content="#d9ebf8">
 <link rel="canonical" href="https://librumlego.github.io/emoticon-photostudio/">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="이모티콘 사진관">
-<meta property="og:title" content="이모티콘 사진관 · 카톡 이모티콘 제안 전 검수">
-<meta property="og:description" content="PNG를 맡기면 규격, 여백, 다크모드, 실제 크기를 한 번에 확인해요. 파일은 기기 밖으로 나가지 않아요. 무료 공개 중.">
+<meta property="og:title" content="이모티콘 사진관 · 이모티콘 제안 전 검수">
+<meta property="og:description" content="이모티콘 작가를 위한 무료 검수 도구예요. PNG·WebP를 맡기면 규격, 여백, 다크모드, 실제 크기를 한 번에 확인해요. 파일은 기기 밖으로 나가지 않아요. 카카오와 관련 없는 개인 도구예요.">
 <meta property="og:url" content="https://librumlego.github.io/emoticon-photostudio/">
 <meta property="og:image" content="https://librumlego.github.io/emoticon-photostudio/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="이모티콘 사진관 · 카톡 이모티콘 제안 전 검수">
-<meta name="twitter:description" content="PNG를 맡기면 규격, 여백, 다크모드, 실제 크기를 한 번에 확인해요. 파일은 기기 밖으로 나가지 않아요. 무료 공개 중.">
+<meta name="twitter:title" content="이모티콘 사진관 · 이모티콘 제안 전 검수">
+<meta name="twitter:description" content="이모티콘 작가를 위한 무료 검수 도구예요. PNG·WebP를 맡기면 규격, 여백, 다크모드, 실제 크기를 한 번에 확인해요. 파일은 기기 밖으로 나가지 않아요. 카카오와 관련 없는 개인 도구예요.">
 <meta name="twitter:image" content="https://librumlego.github.io/emoticon-photostudio/og.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
@@ -87,6 +87,7 @@ h1,h2,h3{letter-spacing:-.03em;margin:0}
 .intake p.lead{font-size:16px;color:var(--ink-2);margin:0 0 26px;max-width:34em}
 .intake .acts{display:flex;gap:10px;flex-wrap:wrap}
 .intake .hint{margin-top:14px}
+.disc{margin:10px 0 0;font-size:13px}
 .demo{background:var(--sky);border-radius:var(--radius);padding:22px}
 .demo .sheet-row{background:var(--paper)}
 .err{margin:14px 0 0;color:var(--retake);font-weight:600;white-space:pre-line}
@@ -283,6 +284,7 @@ footer a{color:var(--navy);text-underline-offset:3px}
           <button class="btn btn-soft" data-act="sample"><svg class="i"><use href="#i-play"/></svg>예시로 둘러보기</button>
         </div>
         <p class="muted hint" id="hint0"></p>
+        <p class="muted disc">카카오와 관련 없는 개인 도구예요. 카카오 이모티콘 스튜디오의 공식 검수가 아니에요.</p>
         <p class="err" id="err" hidden></p>
       </div>
       <div class="demo" aria-hidden="true">
@@ -301,6 +303,7 @@ footer a{color:var(--navy);text-underline-offset:3px}
         <div class="sample-note" id="kindNote" hidden></div>
         <details class="guide" id="guide"></details>
         <div class="receipt" id="receipt"></div>
+        <p class="muted disc">카카오와 관련 없는 개인 도구예요. 카카오 이모티콘 스튜디오의 공식 검수가 아니에요.</p>
         <button class="btn btn-soft btn-s printout" id="printBtn"><svg class="i"><use href="#i-print"/></svg>검수 결과 인쇄·PDF</button>
       </aside>
 
@@ -352,8 +355,8 @@ footer a{color:var(--navy);text-underline-offset:3px}
 </footer>
 
 <script>
-/* ===== 규격 (미니: 공식 안내서 확인 / 나머지: 공개 정리 자료) ===== */
-// 규격은 카카오 이모티콘 스튜디오 공식 안내서 기준이에요 (2026-11-15 확인).
+/* ===== 규격 (카카오 이모티콘 스튜디오가 공개한 안내서 기준) ===== */
+// 규격은 카카오 이모티콘 스튜디오가 공개한 안내서를 기준으로 했어요 (2026-11-15 확인).
 // motion: 움직이는 WebP를 min개 이상 내야 하고, 프레임은 maxFrames 이하예요.
 // 프레임 24 기준: 큰 이모티콘 페이지에 적힌 값을 움직이는 이모티콘에도 같이 적용해요.
 // 움직이는 이모티콘 페이지에서 프레임 제한은 이 세션에서 확인하지 못했어요.
@@ -385,8 +388,8 @@ const INTRO = {
     notes: ['세 가지 크기 중 어느 것과도 다르면 「크기」로 표시해요', '24프레임 이하로 만들어 주세요. 재생이 끝나는 마지막 장면이 이모티콘샵과 키보드 미리보기에 쓰여요', '배경은 투명으로 만들어 주세요', '한 장에 1MB까지 돼요'] },
 };
 // 모든 종류가 같은 출처 안내를 써요
-const OFFICIAL_HINT = '카카오 이모티콘 스튜디오 공식 안내서 기준이에요(2026년 11월 확인). 규격은 바뀔 수 있어요.';
-Object.values(INTRO).forEach(v => v.hint = OFFICIAL_HINT);
+const SOURCE_HINT = '카카오 이모티콘 스튜디오가 공개한 안내서를 기준으로 했어요(2026년 11월 확인). 규격은 바뀔 수 있어요.';
+Object.values(INTRO).forEach(v => v.hint = SOURCE_HINT);
 let switchNote = '';
 let kind = 'mini';
 const K = () => KINDS[kind];
@@ -605,8 +608,8 @@ function sayProblem(key, it) {
     weight: [`용량이 ${kbText(it.kb)}예요`, `${limitText()} 이하로 줄여 주세요.`],
     blank: ['그림이 없는 빈칸이에요', '그림을 넣거나 칸을 빼 주세요.'],
     frames: [`프레임이 ${it.frames}개예요`, `${k.motion ? k.motion.maxFrames : 24}프레임 이하로 줄여 주세요.`],
-    square: ['배경이 칠해져 있어요', '공식 안내서는 투명 배경으로 만들라고 해요.'],
-    dark: ['다크모드에서 일부가 묻혀 보일 수 있어요', '테마 갤러리의 다크 테마에서 확인해 보세요. 글자는 흰 테두리를 권해요(공식 안내서).'],
+    square: ['배경이 칠해져 있어요', '이모티콘 스튜디오 안내서는 배경을 투명하게 만들라고 해요.'],
+    dark: ['다크모드에서 일부가 묻혀 보일 수 있어요', '테마 갤러리의 다크 테마에서 확인해 보세요. 안내서는 글자에 흰 테두리를 넣으라고 해요.'],
     margin: mini ? ['그림이 칸 끝에 닿아요', '이어 붙이는 연결 칸이면 괜찮아요.'] : ['그림이 끝에 닿아요', '잘려 보이지 않는지 확인해 보세요.'],
   })[key];
 }
@@ -662,14 +665,14 @@ function drawReceipt() {
     ['크기', !n('size'), n('size') ? `${n('size')}개` : '통과'],
     ['용량', !n('weight'), kbText(maxKb), `최대 ${limitText()}`],
     ['빈칸', !n('blank'), n('blank') ? `${n('blank')}칸` : '없음'],
-    ['투명 배경', !n('square'), n('square') ? `${n('square')}칸` : '통과', n('square') ? '공식 안내서는 투명 배경이에요' : ''],
+    ['투명 배경', !n('square'), n('square') ? `${n('square')}칸` : '통과', n('square') ? '안내서는 배경을 투명하게 만들라고 해요' : ''],
   ];
   if (k.motion) {
     const webp = items.filter(it => it.type === 'webp' && it.animated).length, min = k.motion.min;
     rules.push(['프레임', !n('frames'), n('frames') ? `${n('frames')}칸` : '통과', `${k.motion.maxFrames}프레임 이하`]);
     rules.push(['움직이는 WebP', webp >= min, `${webp}개`, webp >= min ? '' : `${min}개 이상 필요해요`]);
   }
-  // 참고: 공식 규격이 아닌 보기 점검이라 빨강을 쓰지 않아요
+  // 참고: 안내서의 규격이 아닌 보기 점검이라 빨강을 쓰지 않아요
   const notes = [
     ['다크모드', n('dark'), n('dark') ? `${n('dark')}칸 참고` : '통과', n('dark') ? '테마 갤러리에서 확인해 보세요' : ''],
     ['여백', n('margin'), n('margin') ? `${n('margin')}칸 참고` : '통과', n('margin') && kind === 'mini' ? '연결 칸이면 괜찮아요' : ''],
@@ -852,7 +855,7 @@ function drawLook() {
 }
 
 /* ===== 테마 갤러리 ===== */
-// 실제 카톡 테마를 비슷하게 흉내 낸 색이에요 (공식 색상 코드는 공개되어 있지 않음)
+// 실제 카톡 테마를 비슷하게 흉내 낸 색이에요 (카카오가 공개한 색상 코드는 없어요)
 const SKINS = [
   { name: '기본',   bg: '#bacee0', mine: '#fee500', mineInk: '#191919', other: '#ffffff', otherInk: '#191919' },
   { name: '다크',   bg: '#1c1c1e', mine: '#fee500', mineInk: '#191919', other: '#2c2c2e', otherInk: '#f2f2f2' },
