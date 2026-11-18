@@ -3,7 +3,7 @@
 <head>
 <!-- 콘텐츠 보안 정책: 이 페이지는 어떤 주소로도 데이터를 보낼 수 없어요(connect-src 'none'). 올린 파일은 브라우저 안에서만 열려요.
      frame-ancestors는 메타 태그로 지정할 수 없어서, Cloudflare 이전 때 _headers에 넣어요. script-src 해시는 README의 개발 메모에 계산 방법이 있어요. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-s7TSLeH5tKm1r6rpmfNsLVnLAbo3CT4NMgfyTB1nBAo='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Ap9XRA88awHY+jS+IvF0iAe0Fl4IVnbXCE8unIRnasc='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>이모티콘 사진관 · 이모티콘 제안 전 검수</title>
@@ -91,8 +91,26 @@ h1,h2,h3{letter-spacing:-.03em;margin:0}
 .intake .acts{display:flex;gap:10px;flex-wrap:wrap}
 .intake .hint{margin-top:14px}
 .disc{margin:10px 0 0;font-size:13px}
-.demo{background:var(--sky);border-radius:var(--radius);padding:22px}
+.demo{background:var(--sky);border-radius:var(--radius);padding:22px;min-height:340px;display:flex;flex-direction:column;justify-content:center;gap:12px}
 .demo .sheet-row{background:var(--paper)}
+/* 종류별 미리보기: 투명한 그림은 바둑판 무늬 위에 보여요 */
+.dm .tp{display:block;max-width:100%;border-radius:4px;background:conic-gradient(var(--sky) 25%,var(--paper) 0 50%,var(--sky) 0 75%,var(--paper) 0) 0 0/8px 8px}
+.dm-card{background:var(--paper);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.dm-card.dark{background:#1c1c1e}
+.dm-row{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.dm-cell{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;line-height:1.35;color:var(--ink-2);text-align:center;font-variant-numeric:tabular-nums}
+.dm-card.dark .dm-cell{color:#b9c2cc}
+.dm-msg{display:flex;flex-direction:column;gap:4px;max-width:90%}
+.dm-msg.me{align-self:flex-end;align-items:flex-end}
+.dm-msg.you{align-self:flex-start;align-items:flex-start}
+.dm-bub{background:#fee500;color:#191919;border-radius:14px 4px 14px 14px;padding:6px 10px;display:inline-flex;align-items:center;gap:6px;font-size:14px;line-height:1.4}
+.dm-bub.white{background:#fff;color:var(--ink);border-radius:4px 14px 14px 14px;box-shadow:inset 0 0 0 1px var(--line)}
+.dm-kbd{display:grid;grid-template-columns:repeat(4,44px);gap:6px;justify-content:start}
+.dm-strip{display:flex;gap:3px;align-items:flex-end}
+.dm-strip .last{box-shadow:0 0 0 2px var(--navy)}
+.dm-frames{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;justify-content:center}
+.dm-note{font-size:12px;color:var(--ink-2)}
+@media (max-width:760px){.demo{min-height:0}}
 .err{margin:14px 0 0;color:var(--retake);font-weight:600;white-space:pre-line}
 .errbar{background:var(--retake-bg);border-radius:var(--radius);padding:12px 16px;margin:0 0 14px;color:var(--retake);font-weight:600;white-space:pre-line}
 .notes{list-style:none;margin:0 0 24px;padding:0;display:grid;gap:8px;max-width:36em}
@@ -297,8 +315,7 @@ footer a{color:var(--navy);text-underline-offset:3px}
         <p class="err" id="err" hidden></p>
       </div>
       <div class="demo" aria-hidden="true">
-        <div class="sheet-row" id="demoSheet"></div>
-        <div class="sheet-row dark" id="demoDark" style="margin-top:10px"></div>
+        <div id="demo"></div>
       </div>
     </div>
 
@@ -1127,13 +1144,80 @@ async function loadSample() {
     } else await ingest(await sampleFiles(kind), true);
   } finally { sampling = false; }
 }
-// 접수 화면의 미리 보기도 같은 가상 캐릭터로 그려요 (종류에 맞는 크기로)
-let demoUrl = '';
+// 접수 화면 오른쪽 미리보기: 종류마다 다른 장면을 그려요. 한 번 만든 HTML은 저장해 두고 다시 써요
+const demoCache = {};
+function scaleUrl(src, px) {
+  const r = Math.min(1, px / Math.max(src.width, src.height)), w = Math.max(1, Math.round(src.width * r)), h = Math.max(1, Math.round(src.height * r));
+  const c = Object.assign(document.createElement('canvas'), { width: w, height: h });
+  c.getContext('2d').drawImage(src, 0, 0, w, h);
+  return c.toDataURL();
+}
+const sampleUrl = (sp, t, px) => { const cv = Object.assign(document.createElement('canvas'), { width: sp.w, height: sp.h }); renderSample(cv, sp, t); return scaleUrl(cv, px); };
+const faceCanvas = n => { const c = Object.assign(document.createElement('canvas'), { width: 180, height: 180 }); drawFace(c.getContext('2d'), n, {}); return c; };
+// 미니 여러 개를 가로로 이어 붙인 한 장
+function faceStrip(ns, px) {
+  const c = Object.assign(document.createElement('canvas'), { width: px * ns.length, height: px }), x = c.getContext('2d');
+  ns.forEach((n, i) => x.drawImage(faceCanvas(n), i * px, 0, px, px));
+  return c.toDataURL();
+}
+const DEMO_BUILD = {
+  mini() {
+    const sizes = dark => VIEW.mini.map(([s, cap]) => { const px = Math.min(s, 110); return `<div class="dm-cell"><img class="tp" src="${scaleUrl(faceCanvas(13), px)}" width="${px}" height="${px}" alt="">${cap}</div>`; }).join('');
+    return `<div class="dm">
+      <div class="dm-card"><div class="dm-row">${sizes()}</div>
+        <div class="dm-msg me"><span class="dm-bub">사랑해 <img class="tp" src="${faceStrip([13, 20, 7], 26)}" width="78" height="26" alt=""></span></div></div>
+      <div class="dm-card dark"><div class="dm-row">${sizes(true)}</div></div></div>`;
+  },
+  still() {
+    const sp = sampleSpecs('still');
+    const cells = [0, 1, 2, 3, 4, 5, 6, 7].map(i => `<img class="tp" src="${sampleUrl(sp[i], undefined, 44)}" width="44" height="44" alt="">`).join('');
+    return `<div class="dm">
+      <div class="dm-card"><div class="dm-msg you"><span class="dm-bub white">오늘 뭐해?</span></div>
+        <div class="dm-msg me"><img class="tp" src="${sampleUrl(sp[1], undefined, 88)}" width="88" height="88" alt=""><span class="dm-note">채팅창 약 88px</span></div></div>
+      <div class="dm-card"><div class="dm-kbd">${cells}</div><span class="dm-note">키보드 목록 약 44px</span></div></div>`;
+  },
+  anim() {
+    const sp = sampleSpecs('anim')[0];   // 손을 흔드는 장면 (움직이는 WebP는 demoAnim()이 만들어요)
+    const scene = [0, 1, 2, 3, 4, 5, 6, 7].map(f => `<img class="tp${f === 7 ? ' last' : ''}" src="${sampleUrl(sp, f / 8, 30)}" width="30" height="30" alt="">`).join('');
+    return `<div class="dm">
+      <div class="dm-card"><div class="dm-msg you"><span class="dm-bub white">같이 가자!</span></div>
+        <div class="dm-msg me"><img class="tp" data-anim src="${sampleUrl(sp, .5, 110)}" width="110" height="110" alt=""><span class="dm-note">채팅창 약 110px</span></div>
+        <p class="dm-note" data-anim-note hidden>이 브라우저에서는 움직이는 예시를 만들 수 없어요. 정지 그림으로 보여 드려요.</p></div>
+      <div class="dm-card"><div class="dm-strip">${scene}</div>
+        <div class="dm-row"><span class="chip note">움직이는 WebP 3개 이상</span><span class="dm-note">마지막 장면이 미리보기로 쓰여요</span></div></div></div>`;
+  },
+  large() {
+    const sp = sampleSpecs('large'), k = 96 / 540;
+    const frame = (s, cap) => { const w = Math.round(s.w * k), h = Math.round(s.h * k); return `<div class="dm-cell"><img class="tp" src="${sampleUrl(s, undefined, 96)}" width="${w}" height="${h}" alt="">${cap}</div>`; };
+    return `<div class="dm">
+      <div class="dm-card"><div class="dm-frames">${frame(sp[0], '540×540')}${frame(sp[1], '540×300')}${frame(sp[2], '300×540')}</div></div>
+      <div class="dm-card"><div class="dm-msg me"><img class="tp" src="${sampleUrl(sp[3], undefined, 110)}" width="110" height="110" alt=""><span class="dm-note">채팅창 약 110px</span></div></div></div>`;
+  },
+};
+// 움직이는 예시: 8장면을 WebP로 조립해 한 번만 만들어 두고 다시 써요 (실패하면 null)
+let demoAnimP = null;
+function demoAnim() {
+  if (!demoAnimP) demoAnimP = (async () => {
+    const sp = sampleSpecs('anim')[0], frames = [];
+    for (let f = 0; f < 8; f++) {
+      const cv = Object.assign(document.createElement('canvas'), { width: sp.w, height: sp.h });
+      renderSample(cv, sp, f / 8);
+      const enc = await encodeWebp(cv);
+      if (!enc) return null;
+      frames.push(enc);
+    }
+    return URL.createObjectURL(new Blob([assembleWebp(frames, sp.w, sp.h, 100)], { type: 'image/webp' }));
+  })().catch(() => null);
+  return demoAnimP;
+}
 function drawDemo() {
-  if (!demoUrl) { const c = document.createElement('canvas'); c.width = c.height = 180; drawFace(c.getContext('2d'), 13, {}); demoUrl = c.toDataURL(); }
-  const row = dark => VIEW[kind].map(([s, cap]) => `<div class="sz"><img src="${demoUrl}" width="${Math.min(s, 132)}" height="${Math.min(s, 132)}" alt="">${cap}</div>`).join('')
-    + (dark || !K().inline ? '' : `<span class="bubble">알겠어 <img src="${demoUrl}" width="18" height="18" alt=""></span>`);
-  $('#demoSheet').innerHTML = row(false); $('#demoDark').innerHTML = row(true);
+  if (!demoCache[kind]) demoCache[kind] = DEMO_BUILD[kind]();
+  $('#demo').innerHTML = demoCache[kind];
+  if (kind === 'anim') demoAnim().then(url => {
+    const box = $('#demo'), im = box.querySelector('img[data-anim]'), note = box.querySelector('[data-anim-note]');
+    if (url && im) im.src = url;
+    if (!url && note) note.hidden = false;
+  });
 }
 
 /* ===== 닮은꼴·실제 크기 ===== */
@@ -1201,6 +1285,7 @@ function line({ who, text, emos }, sk) {
 }
 
 drawKinds();
+demoAnim(); // 움직이는 예시를 미리 조립해 둬요 (첫 화면에서 빨리 보이도록)
 // ?demo 로 열면 예시 시트를 바로 보여 줘요 (공유·소개용 링크)
 track();
 if (new URLSearchParams(location.search).has('demo')) loadSample();
