@@ -3,7 +3,7 @@
 <head>
 <!-- 콘텐츠 보안 정책: 이 페이지는 어떤 주소로도 데이터를 보낼 수 없어요(connect-src 'none'). 올린 파일은 브라우저 안에서만 열려요.
      frame-ancestors는 메타 태그로 지정할 수 없어서, Cloudflare 이전 때 _headers에 넣어요. script-src 해시는 README의 개발 메모에 계산 방법이 있어요. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-FYAlLKV5PcqVhiL41MmjjSyHJNeChHdSQ1b1plF3TLU='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-s7TSLeH5tKm1r6rpmfNsLVnLAbo3CT4NMgfyTB1nBAo='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>이모티콘 사진관 · 이모티콘 제안 전 검수</title>
@@ -145,6 +145,11 @@ body.dragging #veil{display:grid}
 .print .face{aspect-ratio:1;display:grid;place-items:center;border-radius:3px;overflow:hidden}
 .prints.night .print .face{background:#1c1c1e}
 .print img{max-width:100%;max-height:100%}
+/* 투명한 부분이 보이도록 그림 바로 뒤에 옅은 바둑판 무늬를 깔아요. 배경을 칠한 그림은 무늬를 가려서 바로 눈에 띄어요 */
+.print .face img,.sheet-row:not(.dark) .ph{background:conic-gradient(var(--sky) 25%,var(--paper) 0 50%,var(--sky) 0 75%,var(--paper) 0) 0 0/10px 10px}
+.sheet-row:not(.dark) .ph{background-size:8px 8px}
+.prints.night .print .face img{background:none}
+.checker-note{margin:10px 0 0}
 .print .no{position:absolute;top:9px;left:9px;font-size:11px;font-weight:700;color:var(--ink-2);background:rgba(255,255,255,.85);border-radius:6px;padding:0 5px;font-variant-numeric:tabular-nums}
 /* 표시는 칸 아래 띠(padding-bottom)에만 놓여 그림 얼굴을 가리지 않아요. 최대 2개 + 「+N」 */
 .print .mark{position:absolute;left:6px;bottom:4px;right:6px;display:flex;gap:2px;overflow:hidden}
@@ -321,6 +326,7 @@ footer a{color:var(--navy);text-underline-offset:3px}
           <label class="toggle"><input type="checkbox" id="onlyBad"> 표시가 있는 칸만</label>
         </div>
         <div class="prints" id="prints"></div>
+        <p class="muted checker-note">바둑판 무늬는 투명한 부분이에요. 흰색이나 다른 색으로 칠한 배경은 무늬를 가려서 바로 보여요.</p>
       </section>
 
       <aside class="card inspector" id="inspector" aria-live="polite"></aside>
@@ -627,6 +633,63 @@ async function fromFile(f) {
 // 다크 참고 판정: 어두운 픽셀(밝기 DARK_L 미만)이 가장자리에서 안쪽으로 thick 이상 이어지는 가장자리가 30% 이상일 때만 참고로 봐요.
 // 얇은 검은 외곽선은 깊이가 얕아 걸리지 않고, 실루엣이 통째로 어두운 그림은 걸려요
 const DARK_L = 50;
+// 배경 판 판정(투명 배경 아님). 칠해진 픽셀이 95%를 넘지 않아도 아래 둘 중 하나면 걸려요. 흰색·밝은 색 판도 같아요.
+//  1) 가장자리 띠(2~3px)의 불투명 비율이 60% 이상 — 판이 가장자리까지 닿아요. 칸 끝에 닿는 그림은 띠의 일부만 차지해서 안 걸려요
+//  2) 같은 색으로 이어진 큰 면(구멍은 메워서 잰 넓이)이 캔버스 폭·높이의 대부분을 덮고 모양이 네모(둥근 네모)나 꽉 찬 원이에요.
+//     캐릭터 얼굴(폭·높이 70% 안팎)이나 흰 외곽선(5~8px 두께)은 크기나 모양이 달라서 안 걸려요
+function plateOf(d, w, h) {
+  const band = Math.max(2, Math.round(Math.min(w, h) / 90)), n = w * h;
+  let ring = 0, ringOn = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (x >= band && y >= band && x < w - band && y < h - band) { x = w - band - 1; continue; }
+    ring++; if (d[(y * w + x) * 4 + 3] > 8) ringOn++;
+  }
+  if (ringOn / ring >= 0.6) return true;
+  // 색을 16단계로 묶어 가장 많은 색 3개를 봐요 (판이 그림에 가려 둘로 갈라질 수 있어요)
+  const sq = Math.min(w, h) ** 2, q = new Int32Array(n).fill(-1), hist = new Map();
+  for (let i = 0; i < n; i++) {
+    if (d[i * 4 + 3] < 200) continue;
+    const c = (d[i * 4] >> 4) << 8 | (d[i * 4 + 1] >> 4) << 4 | d[i * 4 + 2] >> 4;
+    q[i] = c; hist.set(c, (hist.get(c) || 0) + 1);
+  }
+  const top = [...hist].sort((a, b) => b[1] - a[1]).slice(0, 3).filter(([, v]) => v > sq * 0.12);
+  const seen = new Uint8Array(n), stack = new Int32Array(n);
+  for (const [c] of top) {
+    seen.fill(0);
+    for (let s = 0; s < n; s++) {
+      if (q[s] !== c || seen[s]) continue;
+      // 같은 색으로 이어진 면 하나를 찾아요
+      let sp = 0, area = 0, x0 = w, x1 = -1, y0 = h, y1 = -1;
+      const rowMin = new Int32Array(h).fill(w), rowMax = new Int32Array(h).fill(-1), colMin = new Int32Array(w).fill(h), colMax = new Int32Array(w).fill(-1);
+      stack[sp++] = s; seen[s] = 1;
+      while (sp) {
+        const i = stack[--sp], x = i % w, y = (i - x) / w;
+        area++; if (x < rowMin[y]) rowMin[y] = x; if (x > rowMax[y]) rowMax[y] = x; if (y < colMin[x]) colMin[x] = y; if (y > colMax[x]) colMax[x] = y;
+        if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+        if (x > 0 && q[i - 1] === c && !seen[i - 1]) { seen[i - 1] = 1; stack[sp++] = i - 1; }
+        if (x < w - 1 && q[i + 1] === c && !seen[i + 1]) { seen[i + 1] = 1; stack[sp++] = i + 1; }
+        if (y > 0 && q[i - w] === c && !seen[i - w]) { seen[i - w] = 1; stack[sp++] = i - w; }
+        if (y < h - 1 && q[i + w] === c && !seen[i + w]) { seen[i + w] = 1; stack[sp++] = i + w; }
+      }
+      if (area < sq * 0.12) continue;
+      const bw = x1 - x0 + 1, bh = y1 - y0 + 1;
+      const short = Math.min(w, h);
+      if (bw < short * 0.6 || bh < short * 0.6) continue;
+      let filled = 0; for (let y = y0; y <= y1; y++) if (rowMax[y] >= 0) filled += rowMax[y] - rowMin[y] + 1;
+      const fill = filled / (bw * bh);
+      // 곧은 변: 바깥 테두리를 따라 곧게 이어진 변이 3개 이상이면 네모(둥근 네모)예요. 원이나 칸에 잘린 얼굴은 곧은 변이 적어요
+      const t = Math.max(2, Math.round(Math.min(bw, bh) * 0.02));
+      let sl = 0, sr = 0, st = 0, sb = 0;
+      for (let y = y0; y <= y1; y++) { if (rowMin[y] <= x0 + t) sl++; if (rowMax[y] >= x1 - t) sr++; }
+      for (let x = x0; x <= x1; x++) { if (colMin[x] <= y0 + t) st++; if (colMax[x] >= y1 - t) sb++; }
+      const straight = (sl / bh >= 0.5) + (sr / bh >= 0.5) + (st / bw >= 0.5) + (sb / bw >= 0.5);
+      if (filled >= n * 0.3 && fill >= 0.85 && straight >= 3) return true;                       // 네모·둥근 네모 판
+      const ratio = bw / bh;
+      if (fill >= 0.74 && fill <= 0.84 && Math.min(bw, bh) >= short * 0.85 && ratio >= 0.8 && ratio <= 1.25) return true; // 꽉 찬 원 판
+    }
+  }
+  return false;
+}
 function inspect(it) {
   const k = K(), p = {};
   p.type = !k.types.includes(it.type);
@@ -655,7 +718,7 @@ function inspect(it) {
     }
   }
   p.blank = ink === 0;
-  p.square = ink / (w * h) > 0.95;
+  p.square = ink / (w * h) > 0.95 || plateOf(d, w, h);
   p.margin = !p.square && touch > (w + h) / 18;
   p.dark = !p.square && rim > 0 && thickRim / rim >= 0.3;
   return p;
@@ -704,6 +767,7 @@ function done(prev, up) {
   selected = firstBad >= 0 ? firstBad : firstNote >= 0 ? firstNote : 0;
   $('#intake').hidden = true; $('#desk').hidden = false;
   $('#sampleNote').hidden = !isSample;
+  $('#sampleNote').textContent = '예시를 보고 있어요. 내 파일을 맡기면 바로 바뀌어요.' + (isSample && sampleWarn ? ' ' + sampleWarn : '');
   $('#kindNote').hidden = !switchNote; $('#kindNote').textContent = switchNote;
   drawReceipt(); drawPrints(true); drawInspector(); refreshTab();
   if (prev) prev.forEach(it => it.src?.startsWith('blob:') && URL.revokeObjectURL(it.src));
@@ -830,9 +894,9 @@ function drawFace(x, n, opts = {}) {
   const r = opts.big ? 96 : 62;
   const ox = opts.big ? 40 : 0;
   // 검은 덩어리 예시: 실루엣 둘레가 두껍게 어두워요 (다크 참고 확인용)
-  if (opts.dark) { x.beginPath(); x.arc(cx + ox, cy, r + 16, 0, 7); x.fillStyle = '#141414'; x.fill(); }
+  if (opts.dark) { x.beginPath(); x.arc(cx + ox, cy, r + (opts.darkR || 12), 0, 7); x.fillStyle = '#141414'; x.fill(); }
   x.lineWidth = 5; x.strokeStyle = opts.soft ? '#7a5b45' : '#1a1a1a';
-  if (opts.outline) { x.beginPath(); x.arc(cx + ox, cy, r + 6, 0, 7); x.fillStyle = '#fff'; x.fill(); }
+  if (opts.outline) { x.beginPath(); x.arc(cx + ox, cy, r + 4, 0, 7); x.fillStyle = '#fff'; x.fill(); }
   x.beginPath(); x.arc(cx + ox, cy, r, 0, 7); x.fillStyle = '#fff1ea'; x.fill(); x.stroke();
   x.beginPath(); x.moveTo(cx + ox - r - 2, cy - 4); x.quadraticCurveTo(cx + ox - r + 6, cy - r - 18, cx + ox, cy - r - 4);
   x.quadraticCurveTo(cx + ox + r - 6, cy - r - 18, cx + ox + r + 2, cy - 4); x.quadraticCurveTo(cx + ox, cy - r * .55, cx + ox - r - 2, cy - 4);
@@ -860,14 +924,198 @@ function drawFace(x, n, opts = {}) {
   else { x.arc(cx + ox, my - 2, 5, 0, 7); x.stroke(); }
   x.restore();
 }
+/* ===== 새 예시 (멈춰있는·움직이는·큰 이모티콘): 직접 그린 가상 캐릭터에 몸, 소품, 움직임을 더했어요 ===== */
+const FONT = '"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif', INK = '#1a1a1a';
+// 외곽선이 있는 팔다리: 어두운 굵은 선 위에 색 선을 한 번 더 그려요
+function limb(x, pts, w, col) {
+  x.save(); x.lineCap = x.lineJoin = 'round';
+  x.beginPath(); pts.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b));
+  x.strokeStyle = INK; x.lineWidth = w + 10 * (w / 16); x.stroke(); x.strokeStyle = col; x.lineWidth = w; x.stroke(); x.restore();
+}
+function heartPath(x, X, Y, k) {
+  x.beginPath(); x.moveTo(X, Y + 7 * k); x.bezierCurveTo(X - 12 * k, Y - 2 * k, X - 5 * k, Y - 10 * k, X, Y - 3 * k);
+  x.bezierCurveTo(X + 5 * k, Y - 10 * k, X + 12 * k, Y - 2 * k, X, Y + 7 * k); x.closePath();
+}
+// 소품: 하트, 땀방울, 반짝임, 졸음, 음표, 느낌표, 물음표, 화남, 꽃, 별, 눈물, 말풍선 글자
+function prop(x, name, X, Y, sz, text) {
+  x.save(); x.lineWidth = Math.max(3, sz * .11); x.lineJoin = x.lineCap = 'round'; x.strokeStyle = INK; x.textAlign = 'center'; x.textBaseline = 'middle';
+  const star = (n, r1, r2, col) => { x.beginPath(); for (let i = 0; i < n * 2; i++) { const a = i * Math.PI / n - Math.PI / 2, r = i % 2 ? r2 : r1; x.lineTo(X + Math.cos(a) * r, Y + Math.sin(a) * r); } x.closePath(); x.fillStyle = col; x.fill(); x.stroke(); };
+  if (name === 'heart') { heartPath(x, X, Y, sz / 6); x.fillStyle = '#e8453c'; x.fill(); x.stroke(); }
+  else if (name === 'sweat' || name === 'tear') {
+    x.beginPath(); x.moveTo(X, Y - sz * .9); x.bezierCurveTo(X + sz * .9, Y - sz * .1, X + sz * .6, Y + sz * .8, X, Y + sz * .8);
+    x.bezierCurveTo(X - sz * .6, Y + sz * .8, X - sz * .9, Y - sz * .1, X, Y - sz * .9); x.fillStyle = '#8fd3ff'; x.fill(); x.stroke();
+  }
+  else if (name === 'sparkle') star(4, sz, sz * .3, '#ffd23f');
+  else if (name === 'star') star(5, sz, sz * .45, '#ffd23f');
+  else if (name === 'zzz') { x.fillStyle = '#9ad0f5'; [[0, 0, 1], [sz * .8, -sz * .9, .75], [sz * 1.5, -sz * 1.7, .55]].forEach(([a, b, f]) => { x.font = `800 ${sz * 1.2 * f}px ${FONT}`; x.strokeText('Z', X + a, Y + b); x.fillText('Z', X + a, Y + b); }); }
+  else if (name === 'note') {
+    x.beginPath(); x.ellipse(X - sz * .3, Y + sz * .6, sz * .42, sz * .3, -.4, 0, 7); x.fillStyle = '#2f6fd6'; x.fill(); x.stroke();
+    x.beginPath(); x.moveTo(X + sz * .08, Y + sz * .5); x.lineTo(X + sz * .08, Y - sz * .9); x.quadraticCurveTo(X + sz * .9, Y - sz * .6, X + sz * .6, Y - sz * .1); x.stroke();
+  }
+  else if (name === 'bang') {
+    x.beginPath(); x.roundRect(X - sz * .22, Y - sz, sz * .44, sz * 1.3, sz * .2); x.fillStyle = '#e8453c'; x.fill(); x.stroke();
+    x.beginPath(); x.arc(X, Y + sz * .72, sz * .24, 0, 7); x.fill(); x.stroke();
+  }
+  else if (name === 'question') { x.font = `800 ${sz * 2}px ${FONT}`; x.fillStyle = '#2f6fd6'; x.lineWidth = sz * .16; x.strokeText('?', X, Y); x.fillText('?', X, Y); }
+  else if (name === 'anger') {
+    x.strokeStyle = '#d93b2f'; x.lineWidth = sz * .24;
+    [[-1, -1, 0, 1.57], [1, -1, 1.57, 3.14], [1, 1, 3.14, 4.71], [-1, 1, 4.71, 6.28]].forEach(([sx, sy, a0, a1]) => { x.beginPath(); x.arc(X + sx * sz * .5, Y + sy * sz * .5, sz * .5, a0, a1); x.stroke(); });
+  }
+  else if (name === 'flower') {
+    for (let i = 0; i < 5; i++) { const a = i * 1.2566; x.beginPath(); x.arc(X + Math.cos(a) * sz * .55, Y + Math.sin(a) * sz * .55, sz * .42, 0, 7); x.fillStyle = '#ff9fbb'; x.fill(); x.stroke(); }
+    x.beginPath(); x.arc(X, Y, sz * .38, 0, 7); x.fillStyle = '#ffd23f'; x.fill(); x.stroke();
+  }
+  else if (name === 'bubble') {
+    x.font = `800 ${sz * .62}px ${FONT}`; const bw = x.measureText(text).width + sz * .9, bh = sz * 1.1;
+    x.beginPath(); x.roundRect(X - bw / 2, Y - bh / 2, bw, bh, bh * .42); x.moveTo(X - bw * .2, Y + bh / 2 - 2); x.lineTo(X - bw * .32, Y + bh / 2 + sz * .38); x.lineTo(X, Y + bh / 2 - 2);
+    x.fillStyle = '#fff'; x.fill(); x.stroke(); x.fillStyle = INK; x.fillText(text, X, Y + sz * .04);
+  }
+  x.restore();
+}
+// 사람: 머리(drawFace) + 몸통 + 팔다리. o.lie는 누운 모양이에요. arms는 어깨에서 손까지의 거리(머리 크기 s 단위)예요
+function person(x, o) {
+  const { hx, hy, s } = o, skin = '#fff1ea', pants = '#44576a', shirt = o.shirt || '#9ad0f5';
+  const hand = (X, Y) => { x.beginPath(); x.arc(X, Y, 10 * s, 0, 7); x.fillStyle = skin; x.fill(); x.lineWidth = 5 * s; x.strokeStyle = INK; x.stroke(); };
+  const body = (a, b, w, h) => { x.beginPath(); x.roundRect(a, b, w, h, 16 * s); x.fillStyle = shirt; x.fill(); x.lineWidth = 5 * s; x.strokeStyle = INK; x.stroke(); };
+  x.save();
+  if (o.lie) {
+    const tx = hx + 54 * s, ty = hy + 6 * s, tw = 118 * s, th = 64 * s;
+    (o.legs || []).forEach(([dx, dy]) => limb(x, [[tx + tw - 10 * s, ty + th * .5], [tx + tw + dx * s, ty + th * .5 + dy * s]], 18 * s, pants));
+    body(tx, ty, tw, th);
+    [[tx + 22 * s, ty + 6 * s], [tx + 58 * s, ty + 6 * s]].forEach(([sx, sy], i) => { const [dx, dy] = o.arms[i]; limb(x, [[sx, sy], [sx + dx * s, sy + dy * s]], 16 * s, skin); hand(sx + dx * s, sy + dy * s); });
+  } else {
+    const ty = hy + 56 * s, th = (o.legs ? 66 : 80) * s;
+    (o.legs || []).forEach(([dx, dy], i) => limb(x, [[hx + (i ? 16 : -16) * s, ty + th - 6 * s], [hx + dx * s, ty + th + dy * s]], 20 * s, pants));
+    body(hx - 36 * s, ty, 72 * s, th);
+    [-1, 1].forEach((sd, i) => { const sx = hx + sd * 30 * s, sy = ty + 14 * s, [dx, dy] = o.arms[i]; limb(x, [[sx, sy], [sx + dx * s, sy + dy * s]], 16 * s, skin); hand(sx + dx * s, sy + dy * s); });
+  }
+  x.translate(hx + (o.hdx || 0) - 90 * s, hy + (o.hdy || 0) - 98 * s);
+  drawFace(x, o.n, { scale: s, outline: o.outline, dark: o.dark, darkR: 24, soft: o.soft });
+  x.restore();
+}
+const POSES = [[[-26, 66], [26, 66]], [[-26, 66], [58, -18]], [[-60, -14], [60, -14]], [[-26, 66], [30, -4]], [[18, 34], [-18, 34]], [[-34, 50], [54, 18]]];
+const PROPS = ['bubble', 'heart', 'sweat', 'sparkle', 'zzz', 'note', 'bang', 'question', 'anger', 'flower', 'star', 'tear'];
+const BUBBLE = ['안녕', '굿', 'ㅇㅋ', '헉', 'ㅠㅠ', '최고', '좋아', '감사'];
+const SHIRTS = ['#ffd966', '#9ad0f5', '#f5a3b5', '#b5e0a8', '#c9b6f0', '#ffb877'];
+// 한 칸의 그림을 그려요. t가 없으면 마지막 장면이에요 (0~1이면 움직이는 장면)
+function renderSample(cv, sp, t) {
+  const { w: W, h: H } = sp, x = cv.getContext('2d', { willReadFrequently: true }), moving = t != null, tt = moving ? t : .5;
+  x.clearRect(0, 0, W, H);
+  if (sp.plate === 'fill') { x.fillStyle = '#ffe8a3'; x.fillRect(0, 0, W, H); }
+  else if (sp.plate === 'white') { const m = Math.min(W, H) * .05; x.beginPath(); x.roundRect(m, m, W - 2 * m, H - 2 * m, Math.min(W, H) * .14); x.fillStyle = '#ffffff'; x.fill(); }
+  const lie = sp.form === 'wide', tall = sp.form === 'tall';
+  let s = lie ? .95 : tall ? 1.2 : 1.15 * W / 360;
+  let hx = lie ? W * .2 : tall ? W / 2 : W * .47, hy = lie ? H * .46 : tall ? H * .27 : W * .46;
+  if (sp.touch) { s *= 1.75; hx = W * .25; hy = H * .5; }
+  const o = { hx, hy, s, n: sp.n, shirt: sp.shirt, outline: sp.outline, dark: sp.dark, soft: sp.soft, lie };
+  o.arms = (lie ? [[-24, -64], [50, -70]] : POSES[sp.pose]).map(a => a.slice());
+  if (lie) o.legs = [[44, -26], [52, 30]]; else if (tall) o.legs = [[-18, 130], [18, 130]];
+  const psz = lie ? 30 : 38 * W / 360 * (tall ? 1.15 : 1), py = hy - 84 * s;
+  let dy = 0, drop = 0, pop = 1, raise = 0, name = lie && !sp.motion ? 'heart' : sp.prop;
+  const m = sp.motion;
+  if (m === 'wave') o.arms[1] = lie ? [50, -70 + 22 * Math.sin(tt * 2 * Math.PI)] : [60, -16 + 26 * Math.sin(tt * 2 * Math.PI)];
+  if (m === 'nod') o.hdy = 10 * s * Math.sin(tt * 2 * Math.PI);
+  if (m === 'shake') o.hdx = 12 * s * Math.sin(tt * 6 * Math.PI);
+  if (m === 'jump') { const u = 4 * tt * (1 - tt); dy = -34 * s * u; o.arms = [[-60, -14], [60, -14]]; if (o.legs && !lie) o.legs = [[-20 - 6 * (1 - u), 130], [20 + 6 * (1 - u), 130]]; }
+  if (m === 'heart') { pop = Math.min(1, .25 + tt * 1.3); raise = -24 * s * tt; name = 'heart'; }
+  if (m === 'drop') { drop = 80 * s * tt; name = 'sweat'; }
+  x.save(); x.translate(0, dy);
+  person(x, o);
+  const px = hx + (sp.side ? -1 : 1) * 96 * s, pyy = py + drop + raise;
+  const X = lie ? W * .86 : name === 'bubble' ? Math.max(psz * 1.6, Math.min(W - psz * 1.6, px)) : Math.max(psz * 1.5, Math.min(W - psz * (name === 'zzz' ? 2.8 : 1.5), px));
+  prop(x, name, X, lie ? H * .22 : name === 'zzz' ? pyy + psz : pyy, psz * pop, BUBBLE[sp.text % 8]);
+  x.restore();
+}
+// 종류별 예시 칸 목록. 일부 칸에는 일부러 문제를 넣어 둬요 (칸 수의 4분의 1 이하)
+function sampleSpecs(key) {
+  const out = [];
+  const base = i => ({ n: (i * 5 + 2) % 42, pose: i % 6, prop: PROPS[i % 12], text: (i * 3) % 8, side: i % 2, shirt: SHIRTS[i % 6], outline: i % 5 === 2, soft: i % 4 === 3 });
+  if (key === 'still') {
+    for (let i = 0; i < 32; i++) {
+      const sp = { w: 360, h: 360, form: 'sq', ...base(i) };
+      if (i === 7) sp.plate = 'white'; if (i === 12) sp.plate = 'fill'; if (i === 20) sp.touch = true; if (i === 25) sp.w = sp.h = 300; if (i === 29) sp.dark = true;
+      out.push(sp);
+    }
+  } else if (key === 'anim') {
+    const mot = { 0: 'wave', 2: 'nod', 5: 'heart', 8: 'jump', 11: 'shake', 14: 'drop', 17: 'wave', 20: 'heart', 22: 'jump' };
+    for (let i = 0; i < 24; i++) {
+      const sp = { w: 360, h: 360, form: 'sq', ...base(i + 3) };
+      if (mot[i]) { sp.motion = mot[i]; sp.frames = 8; }
+      if (i === 20) sp.plate = 'white'; if (i === 22) sp.frames = 26; if (i === 9) sp.w = sp.h = 300; if (i === 15) sp.touch = true; if (i === 18) sp.dark = true;
+      out.push(sp);
+    }
+  } else {
+    const forms = ['sq', 'wide', 'tall', 'sq', 'sq', 'wide', 'tall', 'sq', 'sq', 'wide', 'tall', 'sq', 'sq', 'wide', 'tall', 'sq'], mot = { 0: 'wave', 1: 'nod', 2: 'jump', 3: 'heart', 15: 'jump' };
+    forms.forEach((form, i) => {
+      const sp = { form, w: form === 'tall' ? 300 : 540, h: form === 'wide' ? 300 : 540, ...base(i + 1) };
+      if (form === 'tall') sp.pose = [1, 2, 3, 5][i % 4];
+      if (mot[i]) { sp.motion = mot[i]; sp.frames = 8; }
+      if (i === 15) sp.frames = 25; if (i === 9) sp.plate = 'white'; if (i === 13) sp.w = 400; if (i === 6) sp.touch = true;
+      out.push(sp);
+    });
+  }
+  return out;
+}
+/* ===== 움직이는 WebP 조립: 장면마다 canvas.toBlob('image/webp')로 정지 WebP를 만들고, RIFF(VP8X + ANIM + ANMF)로 이어 붙여요 ===== */
+const u32 = n => [n & 255, (n >> 8) & 255, (n >> 16) & 255, (n >>> 24) & 255], u24 = n => u32(n).slice(0, 3), tag4 = s => [...s].map(c => c.charCodeAt(0));
+async function encodeWebp(cv) {
+  const blob = await new Promise(ok => cv.toBlob(ok, 'image/webp', 0.8));
+  if (!blob || blob.type !== 'image/webp') return null;
+  const buf = new Uint8Array(await blob.arrayBuffer()), dv = new DataView(buf.buffer), tg = o => String.fromCharCode(buf[o], buf[o + 1], buf[o + 2], buf[o + 3]);
+  if (buf.length < 20 || tg(0) !== 'RIFF' || tg(8) !== 'WEBP') return null;
+  const parts = []; let o = 12;
+  while (o + 8 <= buf.length) {
+    const t = tg(o), size = dv.getUint32(o + 4, true), end = o + 8 + size + (size & 1);
+    if (t === 'ALPH' || t === 'VP8 ' || t === 'VP8L') parts.push(buf.subarray(o, Math.min(end, buf.length)));
+    o = end;
+  }
+  return parts.length ? parts : null;
+}
+function assembleWebp(frames, w, h, ms) {
+  const chunk = (t, body) => [...tag4(t), ...u32(body.length), ...body, ...(body.length & 1 ? [0] : [])];
+  const head = [...chunk('VP8X', [0x12, 0, 0, 0, ...u24(w - 1), ...u24(h - 1)]), ...chunk('ANIM', [0, 0, 0, 0, 0, 0])];
+  const anmf = frames.map(parts => {
+    const dl = parts.reduce((a, p) => a + p.length, 0), pre = [0, 0, 0, 0, 0, 0, ...u24(w - 1), ...u24(h - 1), ...u24(ms), 0x02];
+    const out = new Uint8Array(8 + pre.length + dl); out.set([...tag4('ANMF'), ...u32(pre.length + dl)], 0); out.set(pre, 8);
+    let p0 = 8 + pre.length; parts.forEach(p => { out.set(p, p0); p0 += p.length; }); return out;
+  });
+  const total = 4 + head.length + anmf.reduce((a, c) => a + c.length, 0), out = new Uint8Array(8 + total);
+  out.set([...tag4('RIFF'), ...u32(total), ...tag4('WEBP'), ...head], 0);
+  let p = 12 + head.length; anmf.forEach(c => { out.set(c, p); p += c.length; });
+  return out;
+}
+let sampleWarn = '';
+async function sampleFiles(key) {
+  const specs = sampleSpecs(key), files = [], pad = i => String(i + 1).padStart(2, '0');
+  let webpOk = true;
+  for (let i = 0; i < specs.length; i++) {
+    const sp = specs[i], mk = t => { const cv = Object.assign(document.createElement('canvas'), { width: sp.w, height: sp.h }); renderSample(cv, sp, t); return cv; };
+    if (sp.motion && webpOk) {
+      const F = 8, enc = [];
+      for (let f = 0; f < F && webpOk; f++) { const e = await encodeWebp(mk(f / F)); if (e) enc.push(e); else webpOk = false; }
+      if (webpOk) {
+        const n = sp.frames || F, seq = Array.from({ length: n }, (_, j) => enc[j % F]);
+        files.push(new File([assembleWebp(seq, sp.w, sp.h, 100)], `예시${pad(i)}.webp`, { type: 'image/webp' })); continue;
+      }
+    }
+    const blob = await new Promise(ok => mk(sp.motion ? .5 : undefined).toBlob(ok, 'image/png'));
+    files.push(new File([blob], `예시${pad(i)}.png`, { type: 'image/png' }));
+  }
+  sampleWarn = webpOk ? '' : '이 브라우저에서는 움직이는 예시를 만들 수 없어요. 정지 그림으로 보여 드려요.';
+  return files;
+}
 let sampling = false;
 async function loadSample() {
-  if (sampling) return; sampling = true;
+  if (sampling) return; sampling = true; sampleWarn = '';
   try {
-    const k = K(), [w, h] = k.dims[0], sc = w / 180, toBlob = cv => new Promise(ok => cv.toBlob(ok, 'image/png'));
-    // 일부 칸은 일부러 문제를 넣어 둔 예시예요
-    const face = (x, i) => drawFace(x, i, { fill: i === 15 || i === 28, big: i === 9, dark: i === 5, outline: i % 3 === 1, soft: i % 5 === 2, scale: sc });
+    const k = K();
     if (Array.isArray(k.grid)) {
+      // 미니: 시트 한 장. 일부 칸은 일부러 문제를 넣어 둔 예시예요
+      const [w, h] = k.dims[0], toBlob = cv => new Promise(ok => cv.toBlob(ok, 'image/png'));
+      const face = (x, i) => {
+        if (i === 33) { x.beginPath(); x.roundRect(8, 8, 164, 164, 26); x.fillStyle = '#ffffff'; x.fill(); }
+        drawFace(x, i, { fill: i === 15 || i === 28, big: i === 9, dark: i === 5, outline: i % 3 === 1, soft: i % 5 === 2 });
+      };
       const cv = Object.assign(document.createElement('canvas'), { width: w * k.grid[0], height: h * k.grid[1] });
       const x = cv.getContext('2d');
       for (let i = 0; i < k.need; i++) {
@@ -876,15 +1124,7 @@ async function loadSample() {
         x.drawImage(c, (i % k.grid[0]) * w, Math.floor(i / k.grid[0]) * h);
       }
       await ingest([new File([await toBlob(cv)], '예시시트.png', { type: 'image/png' })], true);
-    } else {
-      const files = [];
-      for (let i = 0; i < k.need; i++) {
-        const c = Object.assign(document.createElement('canvas'), { width: w, height: h });
-        face(c.getContext('2d'), i);
-        files.push(new File([await toBlob(c)], `예시${String(i + 1).padStart(2, '0')}.png`, { type: 'image/png' }));
-      }
-      await ingest(files, true);
-    }
+    } else await ingest(await sampleFiles(kind), true);
   } finally { sampling = false; }
 }
 // 접수 화면의 미리 보기도 같은 가상 캐릭터로 그려요 (종류에 맞는 크기로)
