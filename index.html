@@ -3,7 +3,7 @@
 <head>
 <!-- 콘텐츠 보안 정책: 이 페이지는 어떤 주소로도 데이터를 보낼 수 없어요(connect-src 'none'). 올린 파일은 브라우저 안에서만 열려요.
      frame-ancestors는 메타 태그로 지정할 수 없어서, Cloudflare 이전 때 _headers에 넣어요. script-src 해시는 README의 개발 메모에 계산 방법이 있어요. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Ap9XRA88awHY+jS+IvF0iAe0Fl4IVnbXCE8unIRnasc='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-kpJQpN9et2SHSQiTynz8s7g7D23a0gqXvUB7tA4bitM='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>이모티콘 사진관 · 이모티콘 제안 전 검수</title>
@@ -95,22 +95,25 @@ h1,h2,h3{letter-spacing:-.03em;margin:0}
 .demo .sheet-row{background:var(--paper)}
 /* 종류별 미리보기: 투명한 그림은 바둑판 무늬 위에 보여요 */
 .dm .tp{display:block;max-width:100%;border-radius:4px;background:conic-gradient(var(--sky) 25%,var(--paper) 0 50%,var(--sky) 0 75%,var(--paper) 0) 0 0/8px 8px}
-.dm-card{background:var(--paper);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
+#demo{flex:1;display:flex;flex-direction:column;min-height:0}
+.dm{flex:1;display:flex;flex-direction:column;gap:12px;width:100%}
+.dm-card{background:var(--paper);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;flex:1 1 0;min-height:0}
 .dm-card.dark{background:#1c1c1e}
-.dm-row{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.dm-row{display:flex;align-items:flex-end;justify-content:center;gap:14px;flex-wrap:wrap}
 .dm-cell{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;line-height:1.35;color:var(--ink-2);text-align:center;font-variant-numeric:tabular-nums}
 .dm-card.dark .dm-cell{color:#b9c2cc}
-.dm-msg{display:flex;flex-direction:column;gap:4px;max-width:90%}
-.dm-msg.me{align-self:flex-end;align-items:flex-end}
-.dm-msg.you{align-self:flex-start;align-items:flex-start}
+.dm-msg{display:flex;flex-direction:column;gap:4px;max-width:100%;width:100%}
+.dm-msg.me{align-self:stretch;align-items:center}
+.dm-msg.you{align-self:stretch;align-items:center}
 .dm-bub{background:#fee500;color:#191919;border-radius:14px 4px 14px 14px;padding:6px 10px;display:inline-flex;align-items:center;gap:6px;font-size:14px;line-height:1.4}
 .dm-bub.white{background:#fff;color:var(--ink);border-radius:4px 14px 14px 14px;box-shadow:inset 0 0 0 1px var(--line)}
-.dm-kbd{display:grid;grid-template-columns:repeat(4,44px);gap:6px;justify-content:start}
-.dm-strip{display:flex;gap:3px;align-items:flex-end}
+.dm-kbd{display:grid;grid-template-columns:repeat(4,44px);gap:8px;justify-content:center}
+.dm-strip{display:flex;gap:3px;align-items:flex-end;justify-content:space-between;width:100%}
+.dm-strip img{width:min(30px,calc((100% - 21px) / 8));height:auto}
 .dm-strip .last{box-shadow:0 0 0 2px var(--navy)}
 .dm-frames{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;justify-content:center}
 .dm-note{font-size:12px;color:var(--ink-2)}
-@media (max-width:760px){.demo{min-height:0}}
+@media (max-width:760px){.demo{min-height:0}.dm-card{flex:none;padding:14px}}
 .err{margin:14px 0 0;color:var(--retake);font-weight:600;white-space:pre-line}
 .errbar{background:var(--retake-bg);border-radius:var(--radius);padding:12px 16px;margin:0 0 14px;color:var(--retake);font-weight:600;white-space:pre-line}
 .notes{list-style:none;margin:0 0 24px;padding:0;display:grid;gap:8px;max-width:36em}
@@ -1162,7 +1165,7 @@ function faceStrip(ns, px) {
 }
 const DEMO_BUILD = {
   mini() {
-    const sizes = dark => VIEW.mini.map(([s, cap]) => { const px = Math.min(s, 110); return `<div class="dm-cell"><img class="tp" src="${scaleUrl(faceCanvas(13), px)}" width="${px}" height="${px}" alt="">${cap}</div>`; }).join('');
+    const sizes = dark => VIEW.mini.map(([s, cap]) => { const px = Math.min(s, 132); return `<div class="dm-cell"><img class="tp" src="${scaleUrl(faceCanvas(13), px)}" width="${px}" height="${px}" alt="">${cap}</div>`; }).join('');
     return `<div class="dm">
       <div class="dm-card"><div class="dm-row">${sizes()}</div>
         <div class="dm-msg me"><span class="dm-bub">사랑해 <img class="tp" src="${faceStrip([13, 20, 7], 26)}" width="78" height="26" alt=""></span></div></div>
@@ -1173,25 +1176,27 @@ const DEMO_BUILD = {
     const cells = [0, 1, 2, 3, 4, 5, 6, 7].map(i => `<img class="tp" src="${sampleUrl(sp[i], undefined, 44)}" width="44" height="44" alt="">`).join('');
     return `<div class="dm">
       <div class="dm-card"><div class="dm-msg you"><span class="dm-bub white">오늘 뭐해?</span></div>
-        <div class="dm-msg me"><img class="tp" src="${sampleUrl(sp[1], undefined, 88)}" width="88" height="88" alt=""><span class="dm-note">채팅창 약 88px</span></div></div>
-      <div class="dm-card"><div class="dm-kbd">${cells}</div><span class="dm-note">키보드 목록 약 44px</span></div></div>`;
+        <div class="dm-msg me"><img class="tp" src="${sampleUrl(sp[1], undefined, 132)}" width="132" height="132" alt=""><span class="dm-note">원본 축소 132px</span></div></div>
+      <div class="dm-card"><div class="dm-row">
+        <div class="dm-cell"><img class="tp" src="${sampleUrl(sp[1], undefined, 88)}" width="88" height="88" alt="">채팅창 약 88px</div>
+        <div class="dm-cell"><div class="dm-kbd">${cells}</div>키보드 목록 약 44px</div></div></div></div>`;
   },
   anim() {
     const sp = sampleSpecs('anim')[0];   // 손을 흔드는 장면 (움직이는 WebP는 demoAnim()이 만들어요)
     const scene = [0, 1, 2, 3, 4, 5, 6, 7].map(f => `<img class="tp${f === 7 ? ' last' : ''}" src="${sampleUrl(sp, f / 8, 30)}" width="30" height="30" alt="">`).join('');
     return `<div class="dm">
       <div class="dm-card"><div class="dm-msg you"><span class="dm-bub white">같이 가자!</span></div>
-        <div class="dm-msg me"><img class="tp" data-anim src="${sampleUrl(sp, .5, 110)}" width="110" height="110" alt=""><span class="dm-note">채팅창 약 110px</span></div>
+        <div class="dm-msg me"><img class="tp" data-anim src="${sampleUrl(sp, .5, 132)}" width="132" height="132" alt=""><span class="dm-note">원본 축소 132px</span></div>
         <p class="dm-note" data-anim-note hidden>이 브라우저에서는 움직이는 예시를 만들 수 없어요. 정지 그림으로 보여 드려요.</p></div>
       <div class="dm-card"><div class="dm-strip">${scene}</div>
         <div class="dm-row"><span class="chip note">움직이는 WebP 3개 이상</span><span class="dm-note">마지막 장면이 미리보기로 쓰여요</span></div></div></div>`;
   },
   large() {
-    const sp = sampleSpecs('large'), k = 96 / 540;
-    const frame = (s, cap) => { const w = Math.round(s.w * k), h = Math.round(s.h * k); return `<div class="dm-cell"><img class="tp" src="${sampleUrl(s, undefined, 96)}" width="${w}" height="${h}" alt="">${cap}</div>`; };
+    const sp = sampleSpecs('large'), k = 92 / 540;
+    const frame = (s, cap) => { const w = Math.round(s.w * k), h = Math.round(s.h * k); return `<div class="dm-cell"><img class="tp" src="${sampleUrl(s, undefined, 92)}" width="${w}" height="${h}" alt="">${cap}</div>`; };
     return `<div class="dm">
       <div class="dm-card"><div class="dm-frames">${frame(sp[0], '540×540')}${frame(sp[1], '540×300')}${frame(sp[2], '300×540')}</div></div>
-      <div class="dm-card"><div class="dm-msg me"><img class="tp" src="${sampleUrl(sp[3], undefined, 110)}" width="110" height="110" alt=""><span class="dm-note">채팅창 약 110px</span></div></div></div>`;
+      <div class="dm-card"><div class="dm-msg me"><img class="tp" src="${sampleUrl(sp[3], undefined, 132)}" width="132" height="132" alt=""><span class="dm-note">원본 축소 132px</span></div></div></div>`;
   },
 };
 // 움직이는 예시: 8장면을 WebP로 조립해 한 번만 만들어 두고 다시 써요 (실패하면 null)
