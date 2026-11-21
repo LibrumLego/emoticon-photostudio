@@ -3,7 +3,7 @@
 <head>
 <!-- 콘텐츠 보안 정책: 이 페이지는 어떤 주소로도 데이터를 보낼 수 없어요(connect-src 'none'). 올린 파일은 브라우저 안에서만 열려요.
      frame-ancestors는 메타 태그로 지정할 수 없어서, Cloudflare 이전 때 _headers에 넣어요. script-src 해시는 README의 개발 메모에 계산 방법이 있어요. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-kpJQpN9et2SHSQiTynz8s7g7D23a0gqXvUB7tA4bitM='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-qMwLILJhEAEviN+Wn3hBfPHLFHlBvTziSDbxQYY8XS8='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>이모티콘 사진관 · 이모티콘 제안 전 검수</title>
@@ -91,29 +91,46 @@ h1,h2,h3{letter-spacing:-.03em;margin:0}
 .intake .acts{display:flex;gap:10px;flex-wrap:wrap}
 .intake .hint{margin-top:14px}
 .disc{margin:10px 0 0;font-size:13px}
-.demo{background:var(--sky);border-radius:var(--radius);padding:22px;min-height:340px;display:flex;flex-direction:column;justify-content:center;gap:12px}
-.demo .sheet-row{background:var(--paper)}
-/* 종류별 미리보기: 투명한 그림은 바둑판 무늬 위에 보여요 */
-.dm .tp{display:block;max-width:100%;border-radius:4px;background:conic-gradient(var(--sky) 25%,var(--paper) 0 50%,var(--sky) 0 75%,var(--paper) 0) 0 0/8px 8px}
-#demo{flex:1;display:flex;flex-direction:column;min-height:0}
-.dm{flex:1;display:flex;flex-direction:column;gap:12px;width:100%}
-.dm-card{background:var(--paper);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;flex:1 1 0;min-height:0}
-.dm-card.dark{background:#1c1c1e}
-.dm-row{display:flex;align-items:flex-end;justify-content:center;gap:14px;flex-wrap:wrap}
-.dm-cell{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;line-height:1.35;color:var(--ink-2);text-align:center;font-variant-numeric:tabular-nums}
-.dm-card.dark .dm-cell{color:#b9c2cc}
-.dm-msg{display:flex;flex-direction:column;gap:4px;max-width:100%;width:100%}
-.dm-msg.me{align-self:stretch;align-items:center}
-.dm-msg.you{align-self:stretch;align-items:center}
-.dm-bub{background:#fee500;color:#191919;border-radius:14px 4px 14px 14px;padding:6px 10px;display:inline-flex;align-items:center;gap:6px;font-size:14px;line-height:1.4}
-.dm-bub.white{background:#fff;color:var(--ink);border-radius:4px 14px 14px 14px;box-shadow:inset 0 0 0 1px var(--line)}
-.dm-kbd{display:grid;grid-template-columns:repeat(4,44px);gap:8px;justify-content:center}
-.dm-strip{display:flex;gap:3px;align-items:flex-end;justify-content:space-between;width:100%}
-.dm-strip img{width:min(30px,calc((100% - 21px) / 8));height:auto}
-.dm-strip .last{box-shadow:0 0 0 2px var(--navy)}
-.dm-frames{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;justify-content:center}
-.dm-note{font-size:12px;color:var(--ink-2)}
-@media (max-width:760px){.demo{min-height:0}.dm-card{flex:none;padding:14px}}
+.demo-col{min-width:0}
+.skinp{background:var(--paper);border-radius:16px;padding:12px 16px;box-shadow:var(--shadow);margin-top:14px}
+.skinp summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--navy)}
+.sk-note{margin:6px 0 8px;font-size:13px}
+.sw-row{display:flex;gap:8px;overflow-x:auto;padding:6px 2px 8px;scrollbar-width:thin}
+.sw{flex:none;width:34px;height:34px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--sky-deep);cursor:pointer;padding:0}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 3px var(--navy)}
+.pick{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:4px}
+.pick label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--ink-2)}
+.pick input{width:100%;height:30px;padding:0;border:1px solid var(--sky-deep);border-radius:8px;background:#fff;cursor:pointer}
+.tog{display:flex;gap:8px;margin-top:10px}
+.tog .btn[aria-pressed="true"]{background:var(--navy);color:#fff}
+.sk-hint{margin:8px 0 0;font-size:13px;color:var(--retake)}
+.skin-slot{margin:0 0 4px}
+@media (max-width:760px){.pick{grid-template-columns:repeat(3,1fr)}}
+:root{--c-bg:#bacee0;--c-mine:#2f4f7a;--c-mine-ink:#ffffff;--c-other:#ffffff;--c-other-ink:#1d2b3a;--c-bar:#dfe9f3;--c-top-ink:#1d2b3a}
+.demo{background:var(--sky);border-radius:var(--radius);padding:18px;height:470px;display:flex;flex-direction:column}
+/* 접수 화면 미리보기: 내 이모티콘이 대화방에서 보이는 모습 한 장면 (카톡 색은 근사값) */
+#demo{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.ph{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--c-bg);border:6px solid #fff;border-radius:28px;overflow:hidden;box-shadow:0 1px 2px rgba(29,43,58,.06),0 8px 22px rgba(29,43,58,.12)}
+.ph-top{flex:none;height:42px;position:relative;display:flex;align-items:center;justify-content:center;background:var(--c-bar);font-size:14px;color:var(--c-top-ink)}
+.ph-top::before{content:"";position:absolute;left:16px;width:9px;height:9px;border-left:2px solid var(--c-top-ink);border-bottom:2px solid var(--c-top-ink);transform:rotate(45deg)}
+.ph-body{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;gap:9px;padding:12px;overflow:hidden}
+.ph-row{display:flex;align-items:flex-end;gap:8px;min-width:0}
+.ph-row.me{justify-content:flex-end}
+.ph-row .av{flex:none;width:32px;height:32px;border-radius:50%;background:#fff;align-self:flex-start}
+.ph-row img{display:block;max-width:100%;height:auto}
+.dm-bub{background:var(--c-mine);color:var(--c-mine-ink);border-radius:16px 4px 16px 16px;padding:8px 12px;display:inline-flex;align-items:center;gap:3px;font-size:14px;line-height:1.4}
+.dm-bub.white{background:var(--c-other);color:var(--c-other-ink);border-radius:4px 16px 16px 16px}
+.dm-bub img{display:inline-block;margin:-4px 0 -4px 2px}
+.ph-in{flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--c-bar);padding:10px 14px;font-size:13px;color:var(--c-top-ink);opacity:.95}
+.ph-in i{width:22px;height:22px;border-radius:50%;background:var(--c-mine);flex:none}
+.ph-kb{flex:none;background:var(--c-bar);padding:10px 10px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;justify-items:center}
+.ph-kb span{width:46px;height:46px;border-radius:10px;display:grid;place-items:center}
+.ph-kb .on{background:var(--c-bg)}
+.ph-kb img{display:block}
+.dm-tag{display:inline-flex;align-items:center;gap:5px;align-self:center;font-size:12px;font-weight:700;color:var(--navy);background:#fff;border-radius:999px;padding:4px 9px}
+.dm-tag::before{content:"";border-left:7px solid var(--navy);border-top:4.5px solid transparent;border-bottom:4.5px solid transparent}
+.dm-cap{flex:none;margin:0;font-size:12px;line-height:1.4;color:var(--sky-ink);text-align:center}
+@media (max-width:760px){.demo{height:460px;padding:14px}}
 .err{margin:14px 0 0;color:var(--retake);font-weight:600;white-space:pre-line}
 .errbar{background:var(--retake-bg);border-radius:var(--radius);padding:12px 16px;margin:0 0 14px;color:var(--retake);font-weight:600;white-space:pre-line}
 .notes{list-style:none;margin:0 0 24px;padding:0;display:grid;gap:8px;max-width:36em}
@@ -132,7 +149,7 @@ body.dragging #veil{display:grid}
 .sheet-row .sz{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;line-height:1.35;text-align:center;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .sheet-row.dark{background:#1c1c1e;border-color:#3a3a3d}
 .sheet-row.dark .sz{color:#b9c2cc}
-.sheet-row .bubble{background:#fee500;color:#191919;border-radius:14px 4px 14px 14px;padding:8px 12px;display:inline-flex;align-items:center;gap:4px;font-size:14px;align-self:center;margin-left:auto}
+.sheet-row .bubble{background:var(--c-mine);color:var(--c-mine-ink);border-radius:14px 4px 14px 14px;padding:8px 12px;display:inline-flex;align-items:center;gap:4px;font-size:14px;align-self:center;margin-left:auto}
 .ph{object-fit:contain}
 
 /* 결과 화면 */
@@ -211,7 +228,7 @@ body.dragging #veil{display:grid}
 .pair .two figure{margin:0;background:var(--paper);padding:4px;border-radius:5px;text-align:center;font-size:11px;color:var(--ink-2)}
 .pair .two img{width:60px;height:60px;object-fit:contain}
 .pair .rank{font-weight:800;color:var(--navy)}
-.pair .tiny{display:inline-flex;gap:2px;background:#fee500;border-radius:8px;padding:4px 6px;margin-top:6px}
+.pair .tiny{display:inline-flex;gap:2px;background:var(--c-mine);border-radius:8px;padding:4px 6px;margin-top:6px}
 .strip-wrap h3{font-size:14px;margin:16px 0 6px;color:var(--ink-2)}
 .strip{display:flex;flex-wrap:wrap;gap:3px;align-items:center;padding:12px;border-radius:12px}
 
@@ -317,8 +334,11 @@ footer a{color:var(--navy);text-underline-offset:3px}
         <p class="muted disc">올린 파일은 이 브라우저 안에서만 열고, 저장하거나 서버로 보내지 않아요. 창을 닫으면 사라져요. 방문 수 같은 숫자만 익명으로 세요(Umami).</p>
         <p class="err" id="err" hidden></p>
       </div>
-      <div class="demo" aria-hidden="true">
-        <div id="demo"></div>
+      <div class="demo-col">
+        <div class="demo" aria-hidden="true">
+          <div id="demo"></div>
+        </div>
+        <div id="skin0"></div>
       </div>
     </div>
 
@@ -362,6 +382,7 @@ footer a{color:var(--navy);text-underline-offset:3px}
     </div>
     <div class="card panel strip-wrap">
       <h2>실제 크기</h2>
+      <div id="skin1" class="skin-slot"></div>
       <h3 id="t1"></h3><div class="strip" id="s1"></div>
       <h3 id="t2"></h3><div class="strip" id="s2" style="background:#1c1c1e"></div>
       <h3 id="t3"></h3><div class="strip" id="s3" style="background:#bacee0"></div>
@@ -374,6 +395,7 @@ footer a{color:var(--navy);text-underline-offset:3px}
       <strong>대화 상황</strong>
       <div class="kinds" id="scenes" role="group" aria-label="대화 상황"></div>
     </div>
+    <div id="skin2" class="skin-slot"></div>
     <div class="phones" id="phones"></div>
   </section>
 </main>
@@ -906,171 +928,253 @@ function drawInspector() {
     ${it.animated ? `<p class="scene">${it.scene === 'last' ? '마지막 장면 기준으로 검사했어요' : '첫 장면 기준으로 검사했어요'}</p>` : ''}`;
 }
 
-/* ===== 예시 시트 (직접 그린 가상 캐릭터, 일부러 문제를 섞어 둠) ===== */
-function drawFace(x, n, opts = {}) {
-  const S = 180, cx = 90, cy = 98;
-  x.save(); if (opts.scale) x.scale(opts.scale, opts.scale);
-  if (opts.fill) { x.fillStyle = '#ffe8a3'; x.fillRect(0, 0, S, S); }
-  const r = opts.big ? 96 : 62;
-  const ox = opts.big ? 40 : 0;
-  // 검은 덩어리 예시: 실루엣 둘레가 두껍게 어두워요 (다크 참고 확인용)
-  if (opts.dark) { x.beginPath(); x.arc(cx + ox, cy, r + (opts.darkR || 12), 0, 7); x.fillStyle = '#141414'; x.fill(); }
-  x.lineWidth = 5; x.strokeStyle = opts.soft ? '#7a5b45' : '#1a1a1a';
-  if (opts.outline) { x.beginPath(); x.arc(cx + ox, cy, r + 4, 0, 7); x.fillStyle = '#fff'; x.fill(); }
-  x.beginPath(); x.arc(cx + ox, cy, r, 0, 7); x.fillStyle = '#fff1ea'; x.fill(); x.stroke();
-  x.beginPath(); x.moveTo(cx + ox - r - 2, cy - 4); x.quadraticCurveTo(cx + ox - r + 6, cy - r - 18, cx + ox, cy - r - 4);
-  x.quadraticCurveTo(cx + ox + r - 6, cy - r - 18, cx + ox + r + 2, cy - 4); x.quadraticCurveTo(cx + ox, cy - r * .55, cx + ox - r - 2, cy - 4);
-  x.fillStyle = '#5b3a24'; x.fill(); x.stroke();
-  x.fillStyle = '#ffb9b0'; x.beginPath(); x.ellipse(cx + ox - 34, cy + 20, 12, 8, 0, 0, 7); x.ellipse(cx + ox + 34, cy + 20, 12, 8, 0, 0, 7); x.fill();
-  x.strokeStyle = '#1a1a1a'; x.fillStyle = '#1a1a1a'; x.lineWidth = 4.5; x.lineCap = 'round';
-  const e = n % 6, m = Math.floor(n / 6) % 7, ex = 22, ey = cy + 6;
-  [-1, 1].forEach(sd => {
-    const X = cx + ox + sd * ex;
-    x.beginPath();
-    if (e === 0) { x.arc(X, ey, 5, 0, 7); x.fill(); }
-    else if (e === 1) { x.moveTo(X - 7, ey + 3); x.quadraticCurveTo(X, ey - 6, X + 7, ey + 3); x.stroke(); }
-    else if (e === 2) { x.moveTo(X - 6 * sd, ey - 6); x.lineTo(X + 6 * sd, ey); x.lineTo(X - 6 * sd, ey + 6); x.stroke(); }
-    else if (e === 3) { x.moveTo(X - 7, ey); x.lineTo(X + 7, ey); x.stroke(); }
-    else if (e === 4) { x.fillStyle = '#e8453c'; x.moveTo(X, ey + 7); x.bezierCurveTo(X - 12, ey - 2, X - 5, ey - 10, X, ey - 3); x.bezierCurveTo(X + 5, ey - 10, X + 12, ey - 2, X, ey + 7); x.fill(); x.fillStyle = '#1a1a1a'; }
-    else { x.arc(X, ey, 7, 0, 7); x.stroke(); x.beginPath(); x.arc(X, ey, 2.5, 0, 7); x.fill(); }
+/* ===== 예시 캐릭터: 직접 그린 가상 햄스터 (매끈한 곡선, 좌우 대칭, 선 끝만 가늘게) ===== */
+const FONT = '"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif';
+const HC = { ol: '#6b4a3a', body: '#ffe0bd', shade: '#f2c8a4', belly: '#fff6ea', patch: '#f8c897', earIn: '#ffb7c5', pink: '#ffb3c1', hot: '#ff7f9c', sky: '#b9e2f7', gold: '#fff3a8', rose: '#ff8f8f' };
+// 끝이 살짝 가늘어지는 곡선: 2차 베지어를 따라 둥근 점을 이어 그려요
+function tq(x, p0, c, p1, w) {
+  x.save(); x.fillStyle = HC.ol;
+  for (let i = 0; i <= 28; i++) {
+    const t = i / 28, u = 1 - t, X = u * u * p0[0] + 2 * u * t * c[0] + t * t * p1[0], Y = u * u * p0[1] + 2 * u * t * c[1] + t * t * p1[1];
+    x.beginPath(); x.arc(X, Y, w / 2 * (.5 + .5 * Math.sqrt(Math.sin(Math.PI * t))), 0, 7); x.fill();
+  }
+  x.restore();
+}
+function hHeart(x, X, Y, k, fill) {
+  x.beginPath(); x.moveTo(X, Y + 9 * k); x.bezierCurveTo(X - 17 * k, Y - 2 * k, X - 8 * k, Y - 14 * k, X, Y - 5 * k); x.bezierCurveTo(X + 8 * k, Y - 14 * k, X + 17 * k, Y - 2 * k, X, Y + 9 * k); x.closePath();
+  x.fillStyle = fill; x.fill(); x.lineWidth = 5; x.strokeStyle = HC.ol; x.stroke();
+}
+function hStar(x, X, Y, r, fill) {
+  x.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4 - Math.PI / 2, rr = i % 2 ? r * .34 : r; x.lineTo(X + Math.cos(a) * rr, Y + Math.sin(a) * rr); }
+  x.closePath(); x.fillStyle = fill; x.fill(); x.lineWidth = 4; x.strokeStyle = HC.ol; x.stroke();
+}
+function hDrop(x, X, Y, s, fill) {
+  x.beginPath(); x.moveTo(X, Y - s); x.bezierCurveTo(X + s * .9, Y - s * .1, X + s * .6, Y + s * .8, X, Y + s * .8); x.bezierCurveTo(X - s * .6, Y + s * .8, X - s * .9, Y - s * .1, X, Y - s); x.closePath();
+  x.fillStyle = fill; x.fill(); x.lineWidth = 4; x.strokeStyle = HC.ol; x.stroke();
+}
+function hTicks(x, X, Y, a0, n) {
+  x.save(); x.strokeStyle = HC.ol; x.lineWidth = 7;
+  for (let i = 0; i < n; i++) { const a = a0 + i * .5; x.beginPath(); x.moveTo(X + Math.cos(a) * 22, Y + Math.sin(a) * 22); x.lineTo(X + Math.cos(a) * 40, Y + Math.sin(a) * 40); x.stroke(); }
+  x.restore();
+}
+function hGlyph(x, ch, X, Y, size, col) {
+  x.save(); x.font = `900 ${size}px ${FONT}`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineJoin = 'round';
+  x.strokeStyle = '#fff'; x.lineWidth = size * .28; x.strokeText(ch, X, Y); x.strokeStyle = HC.ol; x.lineWidth = size * .08; x.strokeText(ch, X, Y); x.fillStyle = col; x.fillText(ch, X, Y); x.restore();
+}
+function mochi(x, cx, cy, w, h) {
+  x.beginPath(); x.moveTo(cx, cy - h);
+  x.bezierCurveTo(cx + w * .72, cy - h, cx + w, cy - h * .55, cx + w, cy - h * .08); x.bezierCurveTo(cx + w, cy + h * .6, cx + w * .76, cy + h, cx, cy + h);
+  x.bezierCurveTo(cx - w * .76, cy + h, cx - w, cy + h * .6, cx - w, cy - h * .08); x.bezierCurveTo(cx - w, cy - h * .55, cx - w * .72, cy - h, cx, cy - h); x.closePath();
+}
+function hLimb(x, a, b, w) {
+  x.save(); x.lineCap = x.lineJoin = 'round'; x.beginPath(); x.moveTo(a[0], a[1]); x.lineTo(b[0], b[1]);
+  x.strokeStyle = HC.ol; x.lineWidth = w + 12; x.stroke(); x.strokeStyle = HC.body; x.lineWidth = w; x.stroke(); x.restore();
+}
+// 표정 스물한 가지. fx는 곁들이는 효과, fx2는 두 번째 변형에서 쓰는 효과예요
+const EXPR = {
+  joy:      { eyes: 'arc',   mouth: 'open',  fx: 'sparkle', fx2: 'ticks',   arms: 'up',     tilt: 4 },
+  laugh:    { eyes: 'arc',   mouth: 'big',   fx: 'ticks',   fx2: 'note',    arms: 'hug',    tilt: -5, tears: 'joy' },
+  surprise: { eyes: 'wide',  mouth: 'o',     fx: 'sweat',   fx2: 'bang',    arms: 'out',    tilt: -3, brow: 'up' },
+  angry:    { eyes: 'angry', mouth: 'frown', fx: 'anger',   fx2: 'ticks',   arms: 'hips',   tilt: 0,  brow: 'angry', puff: 1 },
+  love:     { eyes: 'heart', mouth: 'smile', fx: 'hearts',  fx2: 'sparkle', arms: 'heart',  tilt: 4 },
+  cry:      { eyes: 'down',  mouth: 'wavy',  fx: 'none',    fx2: 'sweat',   arms: 'out',    tilt: -3, tears: 'big' },
+  thumb:    { eyes: 'wink',  mouth: 'open',  fx: 'sparkle', fx2: 'stars',   arms: 'thumb',  tilt: 5 },
+  wink:     { eyes: 'wink',  mouth: 'tongue', fx: 'hearts', fx2: 'note',    arms: 'wave',   tilt: -4 },
+  sleepy:   { eyes: 'line',  mouth: 'o',     fx: 'zzz',     fx2: 'none',    arms: 'down',   tilt: 6 },
+  shy:      { eyes: 'dot',   mouth: 'smile', fx: 'ticks',   fx2: 'hearts',  arms: 'cheeks', tilt: -3, blush: 1.5 },
+  confused: { eyes: 'dot',   mouth: 'wavy',  fx: 'question', fx2: 'sweat',  arms: 'down',   tilt: 6 },
+  drool:    { eyes: 'star',  mouth: 'big',   fx: 'drool',   fx2: 'sparkle', arms: 'hug',    tilt: 0 },
+  proud:    { eyes: 'arc',   mouth: 'cat',   fx: 'stars',   fx2: 'flower',  arms: 'hips',   tilt: -4 },
+  awkward:  { eyes: 'dot',   mouth: 'wavy',  fx: 'sweat',   fx2: 'ticks',   arms: 'out',    tilt: 3, small: 1 },
+  sorry:    { eyes: 'dot',   mouth: 'frown', fx: 'sweat',   fx2: 'none',    arms: 'heart',  tilt: -4, brow: 'sad' },
+  sulk:     { eyes: 'dot',   mouth: 'flat',  fx: 'ticks',   fx2: 'anger',   arms: 'down',   tilt: -5, brow: 'angry', puff: 1 },
+  hello:    { eyes: 'arc',   mouth: 'smile', fx: 'note',    fx2: 'sparkle', arms: 'wave',   tilt: 4 },
+  dizzy:    { eyes: 'swirl', mouth: 'o',     fx: 'stars',   fx2: 'sweat',   arms: 'out',    tilt: 5 },
+  pray:     { eyes: 'arc',   mouth: 'smile', fx: 'flower',  fx2: 'hearts',  arms: 'heart',  tilt: 0 },
+  excited:  { eyes: 'star',  mouth: 'open',  fx: 'sparkle', fx2: 'stars',   arms: 'up',     tilt: -4 },
+  yum:      { eyes: 'arc',   mouth: 'tongue', fx: 'note',   fx2: 'drool',   arms: 'hug',    tilt: 4 },
+};
+const EXPR_NAMES = Object.keys(EXPR);
+// 글자(두 글자 이하)는 표정과 어울리는 말로, 칸 아래에 크게 얹어요
+const EXPR_TEXT = { joy: '최고', laugh: 'ㅋㅋ', surprise: '헐', angry: '흥', love: '사랑', cry: 'ㅠㅠ', thumb: '굿', wink: '쏘리', sleepy: '쿨쿨', shy: '쑥', confused: '응?', drool: '냠', proud: '짱', awkward: '앗', sorry: '미안', sulk: '칫', hello: '안녕', dizzy: '어질', pray: '감사', excited: '좋아', yum: '냠냠' };
+const POSE = {
+  down:   { L: [124, 306], R: [236, 306] },
+  up:     { L: [62, 214], R: [298, 214] },
+  out:    { L: [64, 254], R: [296, 254] },
+  hips:   { L: [112, 296], R: [248, 296] },
+  cheeks: { L: [100, 212], R: [260, 212], front: 2 },
+  heart:  { L: [166, 250], R: [194, 250], front: 2 },
+  hug:    { L: [158, 292], R: [202, 292], front: 2 },
+  thumb:  { L: [124, 306], R: [298, 208], front: 1, thumb: 1 },
+  wave:   { L: [124, 306], R: [296, 204], wave: 1 },
+};
+function hamFace(x, E, cx, cy, dx) {
+  const ol = HC.ol, EX = [cx - dx, cx + dx], my = cy + 24;
+  x.lineCap = x.lineJoin = 'round'; x.strokeStyle = ol; x.fillStyle = ol; x.lineWidth = 7;
+  const eye = (X, Y, rx, ry) => {
+    x.beginPath(); x.ellipse(X, Y, rx, ry, 0, 0, 7); x.fillStyle = ol; x.fill();
+    x.fillStyle = '#fff'; x.beginPath(); x.arc(X - rx * .3, Y - ry * .36, rx * .4, 0, 7); x.fill(); x.beginPath(); x.arc(X + rx * .38, Y + ry * .36, rx * .2, 0, 7); x.fill(); x.fillStyle = ol;
+  };
+  const cheek = k => { x.fillStyle = HC.pink; [cx - dx * 1.28, cx + dx * 1.28].forEach(X => { x.beginPath(); x.ellipse(X, cy + 22, 15 * k, 9 * k, 0, 0, 7); x.fill(); }); x.fillStyle = ol; };
+  cheek(E.puff ? 1.7 : E.blush || 1);
+  // 눈썹
+  if (E.brow === 'up') EX.forEach(X => tq(x, [X - 13, cy - 28], [X, cy - 38], [X + 13, cy - 28], 7));
+  if (E.brow === 'angry') { tq(x, [EX[0] - 16, cy - 22], [EX[0] - 3, cy - 19], [EX[0] + 10, cy - 13], 9); tq(x, [EX[1] + 16, cy - 22], [EX[1] + 3, cy - 19], [EX[1] - 10, cy - 13], 9); }
+  if (E.brow === 'sad') { tq(x, [EX[0] - 14, cy - 15], [EX[0], cy - 21], [EX[0] + 12, cy - 28], 7); tq(x, [EX[1] + 14, cy - 15], [EX[1], cy - 21], [EX[1] - 12, cy - 28], 7); }
+  // 눈
+  EX.forEach((X, i) => {
+    if (E.eyes === 'arc') tq(x, [X - 14, cy + 5], [X, cy - 17], [X + 14, cy + 5], 9);
+    else if (E.eyes === 'down') tq(x, [X - 14, cy - 3], [X, cy + 16], [X + 14, cy - 3], 9);
+    else if (E.eyes === 'line') tq(x, [X - 14, cy + 2], [X, cy + 9], [X + 14, cy + 2], 8);
+    else if (E.eyes === 'wide') eye(X, cy, 13, 17);
+    else if (E.eyes === 'angry') eye(X, cy + 4, 9, 11);
+    else if (E.eyes === 'heart') hHeart(x, X, cy + 1, 1.35, HC.hot);
+    else if (E.eyes === 'star') hStar(x, X, cy + 1, 17, HC.gold);
+    else if (E.eyes === 'swirl') { x.beginPath(); for (let a = 0; a < 12.5; a += .25) { const r = a * 1.2; x.lineTo(X + Math.cos(a) * r, cy + Math.sin(a) * r); } x.lineWidth = 4; x.stroke(); x.lineWidth = 7; }
+    else if (E.eyes === 'wink') { if (i === 0) eye(X, cy, 12, 16); else tq(x, [X - 10, cy - 9], [X + 4, cy], [X - 10, cy + 9], 8); }
+    else eye(X, cy + (E.small ? 3 : 0), E.small ? 9 : 12, E.small ? 12 : 16);
   });
-  x.beginPath(); const my = cy + 30;
-  if (m === 0) { x.arc(cx + ox, my - 6, 9, .2, Math.PI - .2); x.stroke(); }
-  else if (m === 1) { x.ellipse(cx + ox, my, 9, 11, 0, 0, 7); x.fillStyle = '#e86a6a'; x.fill(); x.stroke(); }
-  else if (m === 2) { x.moveTo(cx + ox - 8, my + 2); x.quadraticCurveTo(cx + ox, my - 6, cx + ox + 8, my + 2); x.stroke(); }
-  else if (m === 3) { x.moveTo(cx + ox - 7, my); x.lineTo(cx + ox + 7, my); x.stroke(); }
-  else if (m === 4) { x.arc(cx + ox, my - 4, 12, 0, Math.PI); x.fillStyle = '#e86a6a'; x.fill(); x.stroke(); }
-  else if (m === 5) { x.moveTo(cx + ox - 6, my - 4); x.quadraticCurveTo(cx + ox + 8, my, cx + ox - 6, my + 5); x.stroke(); }
-  else { x.arc(cx + ox, my - 2, 5, 0, 7); x.stroke(); }
-  x.restore();
+  // 눈물
+  if (E.tears === 'big') EX.forEach((X, i) => hDrop(x, X + (i ? 6 : -6), cy + 34, 13, HC.sky));
+  if (E.tears === 'joy') EX.forEach((X, i) => hDrop(x, X + (i ? 30 : -30), cy + 2, 9, HC.sky));
+  // 입
+  const M = E.mouth;
+  if (M === 'smile') tq(x, [cx - 10, my - 2], [cx, my + 14], [cx + 10, my - 2], 7);
+  else if (M === 'open') { x.beginPath(); x.moveTo(cx - 10, my - 6); x.quadraticCurveTo(cx, my + 16, cx + 10, my - 6); x.closePath(); x.fillStyle = ol; x.fill(); x.fillStyle = HC.pink; x.beginPath(); x.ellipse(cx, my + 6, 5, 3.5, 0, 0, 7); x.fill(); }
+  else if (M === 'big') { x.beginPath(); x.moveTo(cx - 15, my - 6); x.quadraticCurveTo(cx, my + 28, cx + 15, my - 6); x.closePath(); x.fillStyle = ol; x.fill(); x.fillStyle = HC.pink; x.beginPath(); x.ellipse(cx, my + 11, 8, 5, 0, 0, 7); x.fill(); }
+  else if (M === 'o') { x.beginPath(); x.ellipse(cx, my + 4, 7, 9, 0, 0, 7); x.fillStyle = ol; x.fill(); }
+  else if (M === 'frown') tq(x, [cx - 10, my + 5], [cx, my - 8], [cx + 10, my + 5], 7);
+  else if (M === 'flat') tq(x, [cx - 9, my + 2], [cx, my + 3], [cx + 9, my + 2], 7);
+  else if (M === 'wavy') { x.beginPath(); x.moveTo(cx - 11, my + 6); x.quadraticCurveTo(cx - 5, my - 4, cx, my + 4); x.quadraticCurveTo(cx + 5, my - 4, cx + 11, my + 6); x.lineWidth = 6; x.stroke(); x.lineWidth = 7; }
+  else if (M === 'cat') { x.lineWidth = 6; [-6, 6].forEach(d => { x.beginPath(); x.arc(cx + d, my - 1, 6, .1, Math.PI - .1); x.stroke(); }); x.lineWidth = 7; }
+  else if (M === 'tongue') { x.fillStyle = HC.pink; x.beginPath(); x.ellipse(cx + 3, my + 9, 6, 8, 0, 0, 7); x.fill(); x.lineWidth = 4; x.stroke(); x.lineWidth = 7; tq(x, [cx - 10, my - 2], [cx, my + 14], [cx + 10, my - 2], 7); }
 }
-/* ===== 새 예시 (멈춰있는·움직이는·큰 이모티콘): 직접 그린 가상 캐릭터에 몸, 소품, 움직임을 더했어요 ===== */
-const FONT = '"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif', INK = '#1a1a1a';
-// 외곽선이 있는 팔다리: 어두운 굵은 선 위에 색 선을 한 번 더 그려요
-function limb(x, pts, w, col) {
+function hamFx(x, name, o) {
+  const t = o.t == null ? .5 : o.t, L = 64, R = 304;
+  if (name === 'sparkle') { hStar(x, R, 66, 17, HC.gold); hStar(x, L, 104, 11, HC.gold); }
+  else if (name === 'stars') { hStar(x, R + 2, 84, 14, HC.gold); hStar(x, L, 70, 17, HC.gold); hStar(x, L + 6, 132, 10, HC.gold); }
+  else if (name === 'ticks') { hTicks(x, L + 6, 84, -2.6, 3); hTicks(x, R - 6, 84, -.55, 3); }
+  else if (name === 'sweat') hDrop(x, R - 2, 98 + (o.m === 'drop' ? 70 * t : 0), 14, HC.sky);
+  else if (name === 'bang') hGlyph(x, '!', R, 74, 64, HC.rose);
+  else if (name === 'question') hGlyph(x, '?', R, 74, 64, '#9ac7ee');
+  else if (name === 'anger') { x.save(); x.strokeStyle = HC.rose; x.lineWidth = 7; [[-1, -1, 0, 1.57], [1, -1, 1.57, 3.14], [1, 1, 3.14, 4.71], [-1, 1, 4.71, 6.28]].forEach(([a, b, s0, s1]) => { x.beginPath(); x.arc(R + 2 + a * 10, 64 + b * 10, 10, s0, s1); x.stroke(); }); x.restore(); }
+  else if (name === 'hearts') { const up = o.m === 'heart' ? -22 * t : 0; hHeart(x, R - 2, 70 + up, 1, HC.pink); hHeart(x, L + 4, 88 + up * .7, .8, HC.pink); }
+  else if (name === 'zzz') { hGlyph(x, 'z', R - 14, 108, 40, '#9ad0f5'); hGlyph(x, 'z', R + 6, 76, 32, '#9ad0f5'); hGlyph(x, 'z', R + 20, 50, 24, '#9ad0f5'); }
+  else if (name === 'note') { x.save(); x.fillStyle = HC.ol; x.beginPath(); x.ellipse(R - 6, 90, 10, 7, -.4, 0, 7); x.fill(); x.strokeStyle = HC.ol; x.lineWidth = 6; x.beginPath(); x.moveTo(R + 3, 86); x.lineTo(R + 3, 50); x.quadraticCurveTo(R + 20, 54, R + 14, 70); x.stroke(); x.restore(); }
+  else if (name === 'flower') { for (let i = 0; i < 5; i++) { const a = i * 1.2566; x.beginPath(); x.arc(R + Math.cos(a) * 11, 70 + Math.sin(a) * 11, 9, 0, 7); x.fillStyle = HC.pink; x.fill(); x.lineWidth = 4; x.strokeStyle = HC.ol; x.stroke(); } x.beginPath(); x.arc(R, 70, 8, 0, 7); x.fillStyle = HC.gold; x.fill(); x.stroke(); }
+  else if (name === 'drool') hDrop(x, 204, 222, 10, HC.sky);
+}
+// 햄스터 한 마리를 360×360 기준 좌표에 그려요. 움직임은 o.m(wave·nod·shake·jump·heart·drop)과 o.t(0~1)로 정해요
+function hamster(x, o) {
+  const E = EXPR[o.e], t = o.t == null ? .5 : o.t, m = o.m, ol = HC.ol, TAU = Math.PI * 2;
+  let dy = 0, hdy = 0, hrot = 0;
+  if (m === 'jump') dy = -30 * 4 * t * (1 - t);
+  if (m === 'nod') hdy = 9 * Math.sin(t * TAU);
+  if (m === 'shake') hrot = 6 * Math.sin(t * 3 * TAU) * Math.PI / 180;
   x.save(); x.lineCap = x.lineJoin = 'round';
-  x.beginPath(); pts.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b));
-  x.strokeStyle = INK; x.lineWidth = w + 10 * (w / 16); x.stroke(); x.strokeStyle = col; x.lineWidth = w; x.stroke(); x.restore();
-}
-function heartPath(x, X, Y, k) {
-  x.beginPath(); x.moveTo(X, Y + 7 * k); x.bezierCurveTo(X - 12 * k, Y - 2 * k, X - 5 * k, Y - 10 * k, X, Y - 3 * k);
-  x.bezierCurveTo(X + 5 * k, Y - 10 * k, X + 12 * k, Y - 2 * k, X, Y + 7 * k); x.closePath();
-}
-// 소품: 하트, 땀방울, 반짝임, 졸음, 음표, 느낌표, 물음표, 화남, 꽃, 별, 눈물, 말풍선 글자
-function prop(x, name, X, Y, sz, text) {
-  x.save(); x.lineWidth = Math.max(3, sz * .11); x.lineJoin = x.lineCap = 'round'; x.strokeStyle = INK; x.textAlign = 'center'; x.textBaseline = 'middle';
-  const star = (n, r1, r2, col) => { x.beginPath(); for (let i = 0; i < n * 2; i++) { const a = i * Math.PI / n - Math.PI / 2, r = i % 2 ? r2 : r1; x.lineTo(X + Math.cos(a) * r, Y + Math.sin(a) * r); } x.closePath(); x.fillStyle = col; x.fill(); x.stroke(); };
-  if (name === 'heart') { heartPath(x, X, Y, sz / 6); x.fillStyle = '#e8453c'; x.fill(); x.stroke(); }
-  else if (name === 'sweat' || name === 'tear') {
-    x.beginPath(); x.moveTo(X, Y - sz * .9); x.bezierCurveTo(X + sz * .9, Y - sz * .1, X + sz * .6, Y + sz * .8, X, Y + sz * .8);
-    x.bezierCurveTo(X - sz * .6, Y + sz * .8, X - sz * .9, Y - sz * .1, X, Y - sz * .9); x.fillStyle = '#8fd3ff'; x.fill(); x.stroke();
-  }
-  else if (name === 'sparkle') star(4, sz, sz * .3, '#ffd23f');
-  else if (name === 'star') star(5, sz, sz * .45, '#ffd23f');
-  else if (name === 'zzz') { x.fillStyle = '#9ad0f5'; [[0, 0, 1], [sz * .8, -sz * .9, .75], [sz * 1.5, -sz * 1.7, .55]].forEach(([a, b, f]) => { x.font = `800 ${sz * 1.2 * f}px ${FONT}`; x.strokeText('Z', X + a, Y + b); x.fillText('Z', X + a, Y + b); }); }
-  else if (name === 'note') {
-    x.beginPath(); x.ellipse(X - sz * .3, Y + sz * .6, sz * .42, sz * .3, -.4, 0, 7); x.fillStyle = '#2f6fd6'; x.fill(); x.stroke();
-    x.beginPath(); x.moveTo(X + sz * .08, Y + sz * .5); x.lineTo(X + sz * .08, Y - sz * .9); x.quadraticCurveTo(X + sz * .9, Y - sz * .6, X + sz * .6, Y - sz * .1); x.stroke();
-  }
-  else if (name === 'bang') {
-    x.beginPath(); x.roundRect(X - sz * .22, Y - sz, sz * .44, sz * 1.3, sz * .2); x.fillStyle = '#e8453c'; x.fill(); x.stroke();
-    x.beginPath(); x.arc(X, Y + sz * .72, sz * .24, 0, 7); x.fill(); x.stroke();
-  }
-  else if (name === 'question') { x.font = `800 ${sz * 2}px ${FONT}`; x.fillStyle = '#2f6fd6'; x.lineWidth = sz * .16; x.strokeText('?', X, Y); x.fillText('?', X, Y); }
-  else if (name === 'anger') {
-    x.strokeStyle = '#d93b2f'; x.lineWidth = sz * .24;
-    [[-1, -1, 0, 1.57], [1, -1, 1.57, 3.14], [1, 1, 3.14, 4.71], [-1, 1, 4.71, 6.28]].forEach(([sx, sy, a0, a1]) => { x.beginPath(); x.arc(X + sx * sz * .5, Y + sy * sz * .5, sz * .5, a0, a1); x.stroke(); });
-  }
-  else if (name === 'flower') {
-    for (let i = 0; i < 5; i++) { const a = i * 1.2566; x.beginPath(); x.arc(X + Math.cos(a) * sz * .55, Y + Math.sin(a) * sz * .55, sz * .42, 0, 7); x.fillStyle = '#ff9fbb'; x.fill(); x.stroke(); }
-    x.beginPath(); x.arc(X, Y, sz * .38, 0, 7); x.fillStyle = '#ffd23f'; x.fill(); x.stroke();
-  }
-  else if (name === 'bubble') {
-    x.font = `800 ${sz * .62}px ${FONT}`; const bw = x.measureText(text).width + sz * .9, bh = sz * 1.1;
-    x.beginPath(); x.roundRect(X - bw / 2, Y - bh / 2, bw, bh, bh * .42); x.moveTo(X - bw * .2, Y + bh / 2 - 2); x.lineTo(X - bw * .32, Y + bh / 2 + sz * .38); x.lineTo(X, Y + bh / 2 - 2);
-    x.fillStyle = '#fff'; x.fill(); x.stroke(); x.fillStyle = INK; x.fillText(text, X, Y + sz * .04);
-  }
+  if (o.mirror) { x.translate(360, 0); x.scale(-1, 1); }
+  x.translate(0, dy); x.translate(180, 330); x.rotate((o.tilt != null ? o.tilt : E.tilt || 0) * Math.PI / 180); x.translate(-180, -330);
+  x.lineWidth = 7; x.strokeStyle = ol;
+  [150, 210].forEach(X => { x.beginPath(); x.ellipse(X, 328, 22, 12, 0, 0, 7); x.fillStyle = HC.patch; x.fill(); x.stroke(); });
+  x.beginPath(); x.ellipse(180, 280, 58, 48, 0, 0, 7); x.fillStyle = HC.body; x.fill(); x.stroke();
+  x.beginPath(); x.ellipse(180, 290, 32, 30, 0, 0, 7); x.fillStyle = HC.belly; x.fill();
+  const P = Object.assign({}, POSE[(m === 'wave' && E.arms !== 'wave') ? 'wave' : E.arms]);
+  if (P.wave || (m === 'wave')) { const w = m === 'wave' ? 24 * Math.sin(t * TAU) : 0; P.R = [P.R[0], P.R[1] + w]; }
+  const arm = (side, front) => {
+    const f = P.front === 2 || (P.front === 1 && side === 'R');
+    if (!!f !== front) return;
+    const a = side === 'L' ? [138, 268] : [222, 268], b = P[side];
+    hLimb(x, a, b, 28);
+    if (P.thumb && side === 'R') { x.beginPath(); x.ellipse(b[0] + 2, b[1] - 24, 10, 17, 0, 0, 7); x.fillStyle = HC.body; x.fill(); x.lineWidth = 7; x.strokeStyle = ol; x.stroke(); hLimb(x, a, b, 28); }
+  };
+  arm('L', false); arm('R', false);
+  x.save(); x.translate(0, hdy); x.translate(180, 240); x.rotate(hrot); x.translate(-180, -240);
+  x.lineWidth = 7; x.strokeStyle = ol;
+  [118, 242].forEach(X => { x.beginPath(); x.arc(X, 88, 27, 0, 7); x.fillStyle = HC.body; x.fill(); x.stroke(); x.beginPath(); x.arc(X, 90, 13, 0, 7); x.fillStyle = HC.earIn; x.fill(); });
+  const head = () => mochi(x, 180, 152, 104, 88);
+  head(); x.fillStyle = HC.body; x.fill();
+  x.save(); head(); x.clip(); x.fillStyle = HC.shade; x.fillRect(0, 0, 360, 360); x.translate(-13, -9); head(); x.fillStyle = HC.body; x.fill(); x.restore();
+  head(); x.stroke();
+  x.beginPath(); x.ellipse(180, 104, 30, 15, 0, 0, 7); x.fillStyle = HC.patch; x.fill();
+  hamFace(x, E, 180, 172, 52);
+  x.restore();
+  arm('L', true); arm('R', true);
+  hamFx(x, m === 'heart' ? 'hearts' : m === 'drop' ? 'sweat' : (o.alt ? E.fx2 : E.fx), o);
   x.restore();
 }
-// 사람: 머리(drawFace) + 몸통 + 팔다리. o.lie는 누운 모양이에요. arms는 어깨에서 손까지의 거리(머리 크기 s 단위)예요
-function person(x, o) {
-  const { hx, hy, s } = o, skin = '#fff1ea', pants = '#44576a', shirt = o.shirt || '#9ad0f5';
-  const hand = (X, Y) => { x.beginPath(); x.arc(X, Y, 10 * s, 0, 7); x.fillStyle = skin; x.fill(); x.lineWidth = 5 * s; x.strokeStyle = INK; x.stroke(); };
-  const body = (a, b, w, h) => { x.beginPath(); x.roundRect(a, b, w, h, 16 * s); x.fillStyle = shirt; x.fill(); x.lineWidth = 5 * s; x.strokeStyle = INK; x.stroke(); };
-  x.save();
-  if (o.lie) {
-    const tx = hx + 54 * s, ty = hy + 6 * s, tw = 118 * s, th = 64 * s;
-    (o.legs || []).forEach(([dx, dy]) => limb(x, [[tx + tw - 10 * s, ty + th * .5], [tx + tw + dx * s, ty + th * .5 + dy * s]], 18 * s, pants));
-    body(tx, ty, tw, th);
-    [[tx + 22 * s, ty + 6 * s], [tx + 58 * s, ty + 6 * s]].forEach(([sx, sy], i) => { const [dx, dy] = o.arms[i]; limb(x, [[sx, sy], [sx + dx * s, sy + dy * s]], 16 * s, skin); hand(sx + dx * s, sy + dy * s); });
-  } else {
-    const ty = hy + 56 * s, th = (o.legs ? 66 : 80) * s;
-    (o.legs || []).forEach(([dx, dy], i) => limb(x, [[hx + (i ? 16 : -16) * s, ty + th - 6 * s], [hx + dx * s, ty + th + dy * s]], 20 * s, pants));
-    body(hx - 36 * s, ty, 72 * s, th);
-    [-1, 1].forEach((sd, i) => { const sx = hx + sd * 30 * s, sy = ty + 14 * s, [dx, dy] = o.arms[i]; limb(x, [[sx, sy], [sx + dx * s, sy + dy * s]], 16 * s, skin); hand(sx + dx * s, sy + dy * s); });
-  }
-  x.translate(hx + (o.hdx || 0) - 90 * s, hy + (o.hdy || 0) - 98 * s);
-  drawFace(x, o.n, { scale: s, outline: o.outline, dark: o.dark, darkR: 24, soft: o.soft });
-  x.restore();
+// 스티커처럼 흰 테두리를 둘러요
+function stickerOut(cv, src, r) {
+  const W = cv.width, H = cv.height, w = Object.assign(document.createElement('canvas'), { width: W, height: H }), wx = w.getContext('2d');
+  wx.drawImage(src, 0, 0); wx.globalCompositeOperation = 'source-in'; wx.fillStyle = '#fff'; wx.fillRect(0, 0, W, H);
+  const x = cv.getContext('2d');
+  for (const k of [1, .55]) for (let i = 0; i < 28; i++) { const a = i / 28 * Math.PI * 2; x.drawImage(w, Math.cos(a) * r * k, Math.sin(a) * r * k); }
+  x.drawImage(src, 0, 0);
 }
-const POSES = [[[-26, 66], [26, 66]], [[-26, 66], [58, -18]], [[-60, -14], [60, -14]], [[-26, 66], [30, -4]], [[18, 34], [-18, 34]], [[-34, 50], [54, 18]]];
-const PROPS = ['bubble', 'heart', 'sweat', 'sparkle', 'zzz', 'note', 'bang', 'question', 'anger', 'flower', 'star', 'tear'];
-const BUBBLE = ['안녕', '굿', 'ㅇㅋ', '헉', 'ㅠㅠ', '최고', '좋아', '감사'];
-const SHIRTS = ['#ffd966', '#9ad0f5', '#f5a3b5', '#b5e0a8', '#c9b6f0', '#ffb877'];
-// 한 칸의 그림을 그려요. t가 없으면 마지막 장면이에요 (0~1이면 움직이는 장면)
+// 그림이 실제로 차지하는 범위를 작게 그려서 재 둬요 (기울기·효과 때문에 한쪽으로 쏠리지 않게 칸 안에 맞추려고요)
+const hamBoxCache = new Map();
+function hamBox(sp) {
+  const key = [sp.e, sp.alt ? 1 : 0, sp.mirror ? 1 : 0, sp.tilt, sp.motion].join();
+  if (hamBoxCache.has(key)) return hamBoxCache.get(key);
+  const R = 200, k = R / 400, c = Object.assign(document.createElement('canvas'), { width: R, height: R }), x = c.getContext('2d', { willReadFrequently: true });
+  const b = [1e9, 1e9, -1e9, -1e9];
+  for (const t of sp.motion ? [0, .125, .25, .375, .5, .625, .75, .875, 1] : [.5]) {
+    x.clearRect(0, 0, R, R); x.save(); x.scale(k, k); x.translate(20, 20); hamster(x, { e: sp.e, mirror: sp.mirror, alt: sp.alt, t, m: sp.motion, tilt: sp.tilt }); x.restore();
+    const d = x.getImageData(0, 0, R, R).data;
+    for (let y = 0; y < R; y++) for (let X = 0; X < R; X++) if (d[(y * R + X) * 4 + 3] > 8) { if (X < b[0]) b[0] = X; if (y < b[1]) b[1] = y; if (X > b[2]) b[2] = X; if (y > b[3]) b[3] = y; }
+  }
+  const box = [b[0] / k - 20, b[1] / k - 20, (b[2] + 1) / k - 20, (b[3] + 1) / k - 20];
+  hamBoxCache.set(key, box); return box;
+}
 function renderSample(cv, sp, t) {
-  const { w: W, h: H } = sp, x = cv.getContext('2d', { willReadFrequently: true }), moving = t != null, tt = moving ? t : .5;
-  x.clearRect(0, 0, W, H);
-  if (sp.plate === 'fill') { x.fillStyle = '#ffe8a3'; x.fillRect(0, 0, W, H); }
-  else if (sp.plate === 'white') { const m = Math.min(W, H) * .05; x.beginPath(); x.roundRect(m, m, W - 2 * m, H - 2 * m, Math.min(W, H) * .14); x.fillStyle = '#ffffff'; x.fill(); }
-  const lie = sp.form === 'wide', tall = sp.form === 'tall';
-  let s = lie ? .95 : tall ? 1.2 : 1.15 * W / 360;
-  let hx = lie ? W * .2 : tall ? W / 2 : W * .47, hy = lie ? H * .46 : tall ? H * .27 : W * .46;
-  if (sp.touch) { s *= 1.75; hx = W * .25; hy = H * .5; }
-  const o = { hx, hy, s, n: sp.n, shirt: sp.shirt, outline: sp.outline, dark: sp.dark, soft: sp.soft, lie };
-  o.arms = (lie ? [[-24, -64], [50, -70]] : POSES[sp.pose]).map(a => a.slice());
-  if (lie) o.legs = [[44, -26], [52, 30]]; else if (tall) o.legs = [[-18, 130], [18, 130]];
-  const psz = lie ? 30 : 38 * W / 360 * (tall ? 1.15 : 1), py = hy - 84 * s;
-  let dy = 0, drop = 0, pop = 1, raise = 0, name = lie && !sp.motion ? 'heart' : sp.prop;
-  const m = sp.motion;
-  if (m === 'wave') o.arms[1] = lie ? [50, -70 + 22 * Math.sin(tt * 2 * Math.PI)] : [60, -16 + 26 * Math.sin(tt * 2 * Math.PI)];
-  if (m === 'nod') o.hdy = 10 * s * Math.sin(tt * 2 * Math.PI);
-  if (m === 'shake') o.hdx = 12 * s * Math.sin(tt * 6 * Math.PI);
-  if (m === 'jump') { const u = 4 * tt * (1 - tt); dy = -34 * s * u; o.arms = [[-60, -14], [60, -14]]; if (o.legs && !lie) o.legs = [[-20 - 6 * (1 - u), 130], [20 + 6 * (1 - u), 130]]; }
-  if (m === 'heart') { pop = Math.min(1, .25 + tt * 1.3); raise = -24 * s * tt; name = 'heart'; }
-  if (m === 'drop') { drop = 80 * s * tt; name = 'sweat'; }
-  x.save(); x.translate(0, dy);
-  person(x, o);
-  const px = hx + (sp.side ? -1 : 1) * 96 * s, pyy = py + drop + raise;
-  const X = lie ? W * .86 : name === 'bubble' ? Math.max(psz * 1.6, Math.min(W - psz * 1.6, px)) : Math.max(psz * 1.5, Math.min(W - psz * (name === 'zzz' ? 2.8 : 1.5), px));
-  prop(x, name, X, lie ? H * .22 : name === 'zzz' ? pyy + psz : pyy, psz * pop, BUBBLE[sp.text % 8]);
+  const W = sp.w, H = sp.h, u = Math.min(W, H) / 360, text = sp.text, x0 = cv.getContext("2d"), m = 24 * u;
+  x0.clearRect(0, 0, W, H);
+  const tmp = Object.assign(document.createElement('canvas'), { width: W, height: H }), x = tmp.getContext('2d');
+  let area = [m, m, W - m, H - m], tx, ty, ts;
+  if (text && W > H) { area = [m, m, W * .56, H - m]; tx = W * .78; ty = H * .52; ts = 100 * u; }
+  else if (text && H > W) { area = [m, m, W - m, H * .64]; tx = W / 2; ty = H * .83; ts = 110 * u; }
+  else if (text) { area = [m, m, W - m, 258 * u]; tx = W / 2; ty = 287 * u; ts = 84 * u; }
+  const b = hamBox(sp), bw = b[2] - b[0], bh = b[3] - b[1], aw = area[2] - area[0], ah = area[3] - area[1];
+  const S = Math.min(aw / bw, ah / bh);
+  x.save(); x.translate((area[0] + area[2]) / 2, (area[1] + area[3]) / 2); x.scale(S, S); x.translate(-(b[0] + b[2]) / 2, -(b[1] + b[3]) / 2);
+  hamster(x, { e: sp.e, mirror: sp.mirror, alt: sp.alt, t, m: sp.motion, tilt: sp.tilt });
   x.restore();
+  if (text) { x.save(); x.translate(tx, ty); x.rotate(-.07); x.translate(-tx, -ty); hGlyph(x, text, tx, ty, ts, '#6b4a3a'); x.restore(); }
+  stickerOut(cv, tmp, 12 * u);
 }
-// 종류별 예시 칸 목록. 일부 칸에는 일부러 문제를 넣어 둬요 (칸 수의 4분의 1 이하)
+const faceCanvas = n => { const c = Object.assign(document.createElement('canvas'), { width: 180, height: 180 }); renderSample(c, miniSpecs()[n % 42]); return c; };
+// 종류별 예시 칸 목록. 모든 칸이 규격에 맞는 예시예요
+function miniSpecs() {
+  return Array.from({ length: 42 }, (_, i) => ({ w: 180, h: 180, e: EXPR_NAMES[i % 21], alt: i >= 21, mirror: i >= 21 }));
+}
 function sampleSpecs(key) {
-  const out = [];
-  const base = i => ({ n: (i * 5 + 2) % 42, pose: i % 6, prop: PROPS[i % 12], text: (i * 3) % 8, side: i % 2, shirt: SHIRTS[i % 6], outline: i % 5 === 2, soft: i % 4 === 3 });
+  const out = [], N = EXPR_NAMES;
+  if (key === 'mini') return miniSpecs();
   if (key === 'still') {
+    const ord = [0, 2, 4, 6, 1, 3, 5, 7, 8, 10, 12, 14, 9, 11, 13, 15, 16, 18, 20, 17, 19];
     for (let i = 0; i < 32; i++) {
-      const sp = { w: 360, h: 360, form: 'sq', ...base(i) };
-      if (i === 7) sp.plate = 'white'; if (i === 12) sp.plate = 'fill'; if (i === 20) sp.touch = true; if (i === 25) sp.w = sp.h = 300; if (i === 29) sp.dark = true;
+      const e = N[ord[i % 21]], sp = { w: 360, h: 360, e, alt: i >= 21, mirror: i >= 21 };
+      if (i % 3 === 1) sp.text = EXPR_TEXT[e];
       out.push(sp);
     }
   } else if (key === 'anim') {
     const mot = { 0: 'wave', 2: 'nod', 5: 'heart', 8: 'jump', 11: 'shake', 14: 'drop', 17: 'wave', 20: 'heart', 22: 'jump' };
+    const me = { 0: 'hello', 2: 'joy', 5: 'love', 8: 'excited', 11: 'angry', 14: 'awkward', 17: 'wink', 20: 'pray', 22: 'laugh' };
+    const rest = N.filter(n => !Object.values(me).includes(n)); let k = 0;
     for (let i = 0; i < 24; i++) {
-      const sp = { w: 360, h: 360, form: 'sq', ...base(i + 3) };
-      if (mot[i]) { sp.motion = mot[i]; sp.frames = 8; }
-      if (i === 20) sp.plate = 'white'; if (i === 22) sp.frames = 26; if (i === 9) sp.w = sp.h = 300; if (i === 15) sp.touch = true; if (i === 18) sp.dark = true;
+      if (mot[i]) { out.push({ w: 360, h: 360, e: me[i], motion: mot[i], frames: 8 }); continue; }
+      const j = k++, e = rest[j % rest.length], sp = { w: 360, h: 360, e, alt: j >= rest.length, mirror: j >= rest.length };
+      if (i % 3 === 1) sp.text = EXPR_TEXT[e];
       out.push(sp);
     }
   } else {
-    const forms = ['sq', 'wide', 'tall', 'sq', 'sq', 'wide', 'tall', 'sq', 'sq', 'wide', 'tall', 'sq', 'sq', 'wide', 'tall', 'sq'], mot = { 0: 'wave', 1: 'nod', 2: 'jump', 3: 'heart', 15: 'jump' };
+    const forms = ['sq', 'wide', 'tall', 'sq', 'sq', 'wide', 'tall', 'sq', 'sq', 'wide', 'tall', 'sq', 'sq', 'wide', 'tall', 'sq'];
+    const mot = { 0: 'wave', 1: 'nod', 2: 'jump', 3: 'heart', 15: 'jump' }, me = { 0: 'hello', 1: 'joy', 2: 'excited', 3: 'love', 15: 'laugh' };
+    const rest = N.filter(n => !Object.values(me).includes(n)); let k = 0;
     forms.forEach((form, i) => {
-      const sp = { form, w: form === 'tall' ? 300 : 540, h: form === 'wide' ? 300 : 540, ...base(i + 1) };
-      if (form === 'tall') sp.pose = [1, 2, 3, 5][i % 4];
-      if (mot[i]) { sp.motion = mot[i]; sp.frames = 8; }
-      if (i === 15) sp.frames = 25; if (i === 9) sp.plate = 'white'; if (i === 13) sp.w = 400; if (i === 6) sp.touch = true;
+      const sp = { form, w: form === 'tall' ? 300 : 540, h: form === 'wide' ? 300 : 540 };
+      if (mot[i]) { sp.motion = mot[i]; sp.frames = 8; sp.e = me[i]; }
+      else sp.e = rest[k++ % rest.length];
+      if (form !== 'sq' || (!mot[i] && i % 2 === 0)) sp.text = EXPR_TEXT[sp.e];
       out.push(sp);
     });
   }
@@ -1130,17 +1234,13 @@ async function loadSample() {
   try {
     const k = K();
     if (Array.isArray(k.grid)) {
-      // 미니: 시트 한 장. 일부 칸은 일부러 문제를 넣어 둔 예시예요
+      // 미니: 시트 한 장 (표정 42가지)
       const [w, h] = k.dims[0], toBlob = cv => new Promise(ok => cv.toBlob(ok, 'image/png'));
-      const face = (x, i) => {
-        if (i === 33) { x.beginPath(); x.roundRect(8, 8, 164, 164, 26); x.fillStyle = '#ffffff'; x.fill(); }
-        drawFace(x, i, { fill: i === 15 || i === 28, big: i === 9, dark: i === 5, outline: i % 3 === 1, soft: i % 5 === 2 });
-      };
       const cv = Object.assign(document.createElement('canvas'), { width: w * k.grid[0], height: h * k.grid[1] });
-      const x = cv.getContext('2d');
+      const x = cv.getContext('2d'), specs = miniSpecs();
       for (let i = 0; i < k.need; i++) {
         const c = Object.assign(document.createElement('canvas'), { width: w, height: h });
-        face(c.getContext('2d'), i);
+        renderSample(c, specs[i]);
         x.drawImage(c, (i % k.grid[0]) * w, Math.floor(i / k.grid[0]) * h);
       }
       await ingest([new File([await toBlob(cv)], '예시시트.png', { type: 'image/png' })], true);
@@ -1156,49 +1256,38 @@ function scaleUrl(src, px) {
   return c.toDataURL();
 }
 const sampleUrl = (sp, t, px) => { const cv = Object.assign(document.createElement('canvas'), { width: sp.w, height: sp.h }); renderSample(cv, sp, t); return scaleUrl(cv, px); };
-const faceCanvas = n => { const c = Object.assign(document.createElement('canvas'), { width: 180, height: 180 }); drawFace(c.getContext('2d'), n, {}); return c; };
-// 미니 여러 개를 가로로 이어 붙인 한 장
-function faceStrip(ns, px) {
-  const c = Object.assign(document.createElement('canvas'), { width: px * ns.length, height: px }), x = c.getContext('2d');
-  ns.forEach((n, i) => x.drawImage(faceCanvas(n), i * px, 0, px, px));
-  return c.toDataURL();
-}
-const DEMO_BUILD = {
-  mini() {
-    const sizes = dark => VIEW.mini.map(([s, cap]) => { const px = Math.min(s, 132); return `<div class="dm-cell"><img class="tp" src="${scaleUrl(faceCanvas(13), px)}" width="${px}" height="${px}" alt="">${cap}</div>`; }).join('');
-    return `<div class="dm">
-      <div class="dm-card"><div class="dm-row">${sizes()}</div>
-        <div class="dm-msg me"><span class="dm-bub">사랑해 <img class="tp" src="${faceStrip([13, 20, 7], 26)}" width="78" height="26" alt=""></span></div></div>
-      <div class="dm-card dark"><div class="dm-row">${sizes(true)}</div></div></div>`;
-  },
-  still() {
-    const sp = sampleSpecs('still');
-    const cells = [0, 1, 2, 3, 4, 5, 6, 7].map(i => `<img class="tp" src="${sampleUrl(sp[i], undefined, 44)}" width="44" height="44" alt="">`).join('');
-    return `<div class="dm">
-      <div class="dm-card"><div class="dm-msg you"><span class="dm-bub white">오늘 뭐해?</span></div>
-        <div class="dm-msg me"><img class="tp" src="${sampleUrl(sp[1], undefined, 132)}" width="132" height="132" alt=""><span class="dm-note">원본 축소 132px</span></div></div>
-      <div class="dm-card"><div class="dm-row">
-        <div class="dm-cell"><img class="tp" src="${sampleUrl(sp[1], undefined, 88)}" width="88" height="88" alt="">채팅창 약 88px</div>
-        <div class="dm-cell"><div class="dm-kbd">${cells}</div>키보드 목록 약 44px</div></div></div></div>`;
-  },
-  anim() {
-    const sp = sampleSpecs('anim')[0];   // 손을 흔드는 장면 (움직이는 WebP는 demoAnim()이 만들어요)
-    const scene = [0, 1, 2, 3, 4, 5, 6, 7].map(f => `<img class="tp${f === 7 ? ' last' : ''}" src="${sampleUrl(sp, f / 8, 30)}" width="30" height="30" alt="">`).join('');
-    return `<div class="dm">
-      <div class="dm-card"><div class="dm-msg you"><span class="dm-bub white">같이 가자!</span></div>
-        <div class="dm-msg me"><img class="tp" data-anim src="${sampleUrl(sp, .5, 132)}" width="132" height="132" alt=""><span class="dm-note">원본 축소 132px</span></div>
-        <p class="dm-note" data-anim-note hidden>이 브라우저에서는 움직이는 예시를 만들 수 없어요. 정지 그림으로 보여 드려요.</p></div>
-      <div class="dm-card"><div class="dm-strip">${scene}</div>
-        <div class="dm-row"><span class="chip note">움직이는 WebP 3개 이상</span><span class="dm-note">마지막 장면이 미리보기로 쓰여요</span></div></div></div>`;
-  },
-  large() {
-    const sp = sampleSpecs('large'), k = 92 / 540;
-    const frame = (s, cap) => { const w = Math.round(s.w * k), h = Math.round(s.h * k); return `<div class="dm-cell"><img class="tp" src="${sampleUrl(s, undefined, 92)}" width="${w}" height="${h}" alt="">${cap}</div>`; };
-    return `<div class="dm">
-      <div class="dm-card"><div class="dm-frames">${frame(sp[0], '540×540')}${frame(sp[1], '540×300')}${frame(sp[2], '300×540')}</div></div>
-      <div class="dm-card"><div class="dm-msg me"><img class="tp" src="${sampleUrl(sp[3], undefined, 132)}" width="132" height="132" alt=""><span class="dm-note">원본 축소 132px</span></div></div></div>`;
-  },
-};
+const DEMO_BUILD = (() => {
+  // 모든 종류가 같은 대화방 틀을 써요. 그림은 2배로 그려서 선명하게 보여요
+  const face = (n, px) => `<img src="${scaleUrl(faceCanvas(n), px * 2)}" width="${px}" height="${px}" alt="">`;
+  const pic = (sp, px, t, attr = '') => `<img ${attr} src="${sampleUrl(sp, t, px * 2)}" width="${Math.round(sp.w * px / Math.max(sp.w, sp.h))}" height="${Math.round(sp.h * px / Math.max(sp.w, sp.h))}" alt="">`;
+  const you = text => `<div class="ph-row you"><span class="av">${face(16, 32)}</span><span class="dm-bub white">${text}</span></div>`;
+  const me = html => `<div class="ph-row me"><span class="dm-bub">${html}</span></div>`;
+  const input = '<div class="ph-in"><span>메시지 입력</span><i></i></div>';
+  const scene = (body, foot, cap) => `<div class="ph"><div class="ph-top"><b>수아</b></div><div class="ph-body">${body}</div>${foot}</div><p class="dm-cap" data-cap>${cap}</p>`;
+  return {
+    mini: () => scene(
+      you('오늘 뭐해?') + me(`야식 먹을래 ${face(4, 24)}`) + you('콜 ' + face(20, 24)) +
+      me(`사랑해 ${face(7, 24)}${face(1, 24)}${face(4, 24)}`) +
+      `<div class="ph-row me">${face(20, 40)}${face(7, 40)}${face(1, 40)}</div>`,
+      input, '글자 사이에 붙으면 이만큼 작게 보여요'),
+    still: () => {
+      const sp = sampleSpecs('still');
+      return scene(you('오늘 뭐해?') + `<div class="ph-row me">${pic(sp[0], 150)}</div>`,
+        `<div class="ph-kb">${[0, 1, 2, 3, 4, 5, 6, 7].map(i => `<span${i === 0 ? ' class="on"' : ''}>${pic(sp[i], 44)}</span>`).join('')}</div>`,
+        '보낸 이모티콘과 키보드 목록에서 보이는 모습');
+    },
+    anim: () => {
+      const sp = sampleSpecs('anim')[0];
+      return scene(you('같이 가자!') + `<div class="ph-row me"><span class="dm-tag">움직여요</span>${pic(sp, 160, .5, 'data-anim')}</div>` + you('ㅋㅋ 귀여워'),
+        input, '움직이는 WebP 3개 이상이 필요해요');
+    },
+    large: () => {
+      const sp = sampleSpecs('large');
+      return scene(you('사진 보내줘!') + `<div class="ph-row me">${pic(sp[3], 230)}</div>`,
+        input, '큰 이모티콘은 화면을 크게 차지해요');
+    },
+  };
+})();
 // 움직이는 예시: 8장면을 WebP로 조립해 한 번만 만들어 두고 다시 써요 (실패하면 null)
 let demoAnimP = null;
 function demoAnim() {
@@ -1219,9 +1308,9 @@ function drawDemo() {
   if (!demoCache[kind]) demoCache[kind] = DEMO_BUILD[kind]();
   $('#demo').innerHTML = demoCache[kind];
   if (kind === 'anim') demoAnim().then(url => {
-    const box = $('#demo'), im = box.querySelector('img[data-anim]'), note = box.querySelector('[data-anim-note]');
+    const box = $('#demo'), im = box.querySelector('img[data-anim]'), cap = box.querySelector('[data-cap]');
     if (url && im) im.src = url;
-    if (!url && note) note.hidden = false;
+    if (!url && cap) cap.textContent = '이 브라우저에서는 움직이는 예시를 만들 수 없어 정지 그림으로 보여요';
   });
 }
 
@@ -1232,9 +1321,9 @@ function drawLook() {
   const usable = items.filter(it => it.canvas && !it.problems.blank);
   const mini = kind === 'mini';
   $('#pairDesc').textContent = (mini ? '채팅창 크기(24px)로 줄였을 때' : '작게(24px) 줄였을 때') + ' 서로 가장 비슷한 짝이에요.';
-  const T = mini ? ['20px · 노란 말풍선 옆', '20px · 다크모드', '40px · 이모티콘만 보낼 때'] : ['키보드 목록 크기 · 밝은 배경', '키보드 목록 크기 · 다크모드', '채팅창 크기'];
+  const T = mini ? ['20px · 내 말풍선 옆', '20px · 다크모드', '40px · 이모티콘만 보낼 때'] : ['키보드 목록 크기 · 밝은 배경', '키보드 목록 크기 · 다크모드', '채팅창 크기'];
   ['#t1', '#t2', '#t3'].forEach((id, i) => $(id).textContent = T[i]);
-  $('#s1').style.background = mini ? '#fee500' : '#ffffff';
+  $('#s1').style.background = mini ? skin.mine : skin.other; $('#s3').style.background = skin.bg;
   if (!usable.length) { noFile($('#pairs')); ['#s1', '#s2', '#s3'].forEach(s => $(s).innerHTML = ''); return; }
   const pairs = [];
   for (let a = 0; a < usable.length; a++) for (let b = a + 1; b < usable.length; b++) {
@@ -1252,16 +1341,66 @@ function drawLook() {
 }
 
 /* ===== 테마 갤러리 ===== */
-// 실제 카톡 테마를 비슷하게 흉내 낸 색이에요 (카카오가 공개한 색상 코드는 없어요)
-const SKINS = [
-  { name: '기본',   bg: '#bacee0', mine: '#fee500', mineInk: '#191919', other: '#ffffff', otherInk: '#191919' },
-  { name: '다크',   bg: '#1c1c1e', mine: '#fee500', mineInk: '#191919', other: '#2c2c2e', otherInk: '#f2f2f2' },
-  { name: '화이트', bg: '#ffffff', mine: '#fee500', mineInk: '#191919', other: '#f1f1f1', otherInk: '#191919' },
-  { name: '블랙',   bg: '#000000', mine: '#3a3a3c', mineInk: '#ffffff', other: '#1f1f1f', otherInk: '#ffffff' },
-  { name: '고대비', bg: '#000000', mine: '#ffff00', mineInk: '#000000', other: '#ffffff', otherInk: '#000000' },
-  { name: '핑크',   bg: '#fde4ec', mine: '#ff9fbb', mineInk: '#191919', other: '#ffffff', otherInk: '#191919' },
-  { name: '민트',   bg: '#d6f1ea', mine: '#76d4bd', mineInk: '#191919', other: '#ffffff', otherInk: '#191919' },
+/* ===== 대화방 꾸미기: 색만 고르고, 고른 색은 이 페이지 안 메모리에만 있어요 (저장하지 않아요). 색은 눈으로 본 비슷한 값이에요 ===== */
+const PRESETS = [
+  { name: '하늘',   bg: '#bacee0', mine: '#2f4f7a', mineInk: '#ffffff', other: '#ffffff', otherInk: '#1d2b3a' },
+  { name: '구름',   bg: '#dfe9f3', mine: '#4f86c6', mineInk: '#ffffff', other: '#ffffff', otherInk: '#1d2b3a' },
+  { name: '연회색', bg: '#e9ebee', mine: '#5f7391', mineInk: '#ffffff', other: '#ffffff', otherInk: '#1d2b3a' },
+  { name: '분홍',   bg: '#fde4ec', mine: '#d9567f', mineInk: '#ffffff', other: '#ffffff', otherInk: '#3a2330' },
+  { name: '연두',   bg: '#dff1d8', mine: '#4a9560', mineInk: '#ffffff', other: '#ffffff', otherInk: '#1f3326' },
+  { name: '민트',   bg: '#d6f1ea', mine: '#2a9580', mineInk: '#ffffff', other: '#ffffff', otherInk: '#14332d' },
+  { name: '라벤더', bg: '#e6defa', mine: '#7358c7', mineInk: '#ffffff', other: '#ffffff', otherInk: '#2a2045' },
+  { name: '살구',   bg: '#fde6d3', mine: '#d9733f', mineInk: '#ffffff', other: '#ffffff', otherInk: '#3a2518' },
+  { name: '크림',   bg: '#fbf1dc', mine: '#b9792f', mineInk: '#ffffff', other: '#ffffff', otherInk: '#3a2c18' },
+  { name: '흰색',   bg: '#ffffff', mine: '#3f6fd6', mineInk: '#ffffff', other: '#eef0f3', otherInk: '#1d2b3a' },
+  { name: '남색',   bg: '#24324d', mine: '#8fb6ee', mineInk: '#10213d', other: '#3a4a69', otherInk: '#f2f5fa' },
+  { name: '검정',   bg: '#111418', mine: '#4d7cff', mineInk: '#ffffff', other: '#2c2f36', otherInk: '#f2f2f2' },
 ];
+const SKIN_KEYS = ['bg', 'mine', 'mineInk', 'other', 'otherInk'];
+const SKIN_LABEL = { bg: '배경', mine: '내 말풍선', mineInk: '내 글자', other: '상대 말풍선', otherInk: '상대 글자' };
+let skin = { ...PRESETS[0] };
+const hex3 = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const lumOf = h => { const [r, g, b] = hex3(h).map(v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }); return .2126 * r + .7152 * g + .0722 * b; };
+const contrastOf = (a, b) => { const x = lumOf(a), y = lumOf(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+const mixHex = (a, b, t) => '#' + hex3(a).map((v, i) => Math.round(v * (1 - t) + hex3(b)[i] * t).toString(16).padStart(2, '0')).join('');
+function skinPanelHTML(open) {
+  return `<details class="skinp"${open}><summary>대화방 꾸미기</summary>
+    <p class="muted sk-note">고른 색은 비슷하게 맞춘 값이에요. 이 페이지 안에서만 쓰고 저장하지 않아요.</p>
+    <div class="sw-row" role="group" aria-label="대화방 색 견본">${PRESETS.map((p, i) => `<button type="button" class="sw" data-sw="${i}" title="${p.name}" aria-label="${p.name}" aria-pressed="false" style="background:linear-gradient(135deg,${p.bg} 52%,${p.mine} 52%)"></button>`).join('')}</div>
+    <div class="pick">${SKIN_KEYS.map(k => `<label>${SKIN_LABEL[k]}<input type="color" data-ck="${k}" value="${skin[k]}"></label>`).join('')}</div>
+    <div class="tog"><button type="button" class="btn btn-soft btn-s" data-tone="light" aria-pressed="false">밝게</button><button type="button" class="btn btn-soft btn-s" data-tone="dark" aria-pressed="false">어둡게</button></div>
+    <p class="sk-hint" data-hint hidden>글자와 말풍선 색이 비슷해서 읽기 어려울 수 있어요.</p>
+  </details>`;
+}
+function drawSkinPanels() {
+  const open = innerWidth > 760 ? ' open' : '';
+  ['#skin0', '#skin1', '#skin2'].forEach(id => { $(id).innerHTML = skinPanelHTML(open); });
+}
+function applySkin() {
+  const r = document.documentElement.style, dark = lumOf(skin.bg) < .25;
+  r.setProperty('--c-bg', skin.bg); r.setProperty('--c-mine', skin.mine); r.setProperty('--c-mine-ink', skin.mineInk);
+  r.setProperty('--c-other', skin.other); r.setProperty('--c-other-ink', skin.otherInk);
+  r.setProperty('--c-bar', mixHex(skin.bg, dark ? '#000000' : '#ffffff', dark ? .3 : .55)); r.setProperty('--c-top-ink', dark ? '#eef1f5' : '#1d2b3a');
+  const low = contrastOf(skin.mine, skin.mineInk) < 3 || contrastOf(skin.other, skin.otherInk) < 3;
+  document.querySelectorAll('.skinp').forEach(p => {
+    p.querySelectorAll('[data-ck]').forEach(i => { i.value = skin[i.dataset.ck]; });
+    p.querySelectorAll('[data-sw]').forEach(b => b.setAttribute('aria-pressed', SKIN_KEYS.every(k => PRESETS[+b.dataset.sw][k] === skin[k])));
+    p.querySelectorAll('[data-tone]').forEach(b => b.setAttribute('aria-pressed', (b.dataset.tone === 'dark') === dark));
+    p.querySelector('[data-hint]').hidden = !low;
+  });
+  refreshTab();
+}
+const darkOf = s => ({ ...s, bg: mixHex(s.bg, '#0d1218', .88), other: '#2a313b', otherInk: '#eef1f5' });
+const lightOf = s => ({ ...s, bg: lumOf(s.bg) < .25 ? mixHex(s.bg, '#ffffff', .82) : s.bg, other: '#ffffff', otherInk: '#1d2b3a' });
+document.addEventListener('click', e => {
+  const sw = e.target.closest('[data-sw]'), tone = e.target.closest('[data-tone]'), ph = e.target.closest('.phone[data-sk]');
+  if (sw) skin = { ...PRESETS[+sw.dataset.sw] };
+  else if (tone) skin = tone.dataset.tone === 'dark' ? darkOf(skin) : lightOf(skin);
+  else if (ph) skin = { ...PRESETS[+ph.dataset.sk] };
+  else return;
+  applySkin();
+});
+document.addEventListener('input', e => { const i = e.target.closest('[data-ck]'); if (!i) return; skin[i.dataset.ck] = i.value; applySkin(); });
 const SCENES = {
   '연인': [['other', '오늘 회사 너무 힘들었어'], ['mine', '헐 고생했어'], ['other', '맛있는 거 사줘'], ['mine', ''], ['other', '고마워!!'], ['mine', '잘 자 내일 봐']],
   '친구 단톡': [['other', '이번 주 토요일 다들 시간 돼?'], ['mine', '나 완전 콜'], ['other', '아 나 그날 알바'], ['mine', ''], ['other', '대신 다음엔 내가 쏠게'], ['mine', '오 진짜?']],
@@ -1277,7 +1416,7 @@ function drawThemes() {
   if (!usable.length) { noFile(box); return; }
   const pick = i => usable[(i * 7 + 3) % usable.length];
   const lines = SCENES[scene].map(([who, text], i) => ({ who, text, emos: text ? [pick(i)] : (K().inline ? usable.slice(-4, -1) : [pick(i)]) }));
-  box.innerHTML = SKINS.map(sk => `<div class="phone"><div class="name">${sk.name}</div><div class="room" style="background:${sk.bg}">${lines.map(l => line(l, sk)).join('')}</div></div>`).join('');
+  box.innerHTML = [{ ...skin, name: '내 대화방' }, ...PRESETS].map((sk, i) => `<div class="phone"${i ? ` data-sk="${i - 1}" tabindex="0" title="눌러서 적용"` : ''}><div class="name">${sk.name}</div><div class="room" style="background:${sk.bg}">${lines.map(l => line(l, sk)).join('')}</div></div>`).join('');
 }
 function line({ who, text, emos }, sk) {
   const bg = who === 'mine' ? sk.mine : sk.other, ink = who === 'mine' ? sk.mineInk : sk.otherInk, side = who === 'mine' ? 'me' : 'you';
@@ -1290,6 +1429,7 @@ function line({ who, text, emos }, sk) {
 }
 
 drawKinds();
+drawSkinPanels(); applySkin();
 demoAnim(); // 움직이는 예시를 미리 조립해 둬요 (첫 화면에서 빨리 보이도록)
 // ?demo 로 열면 예시 시트를 바로 보여 줘요 (공유·소개용 링크)
 track();
