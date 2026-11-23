@@ -3,7 +3,7 @@
 <head>
 <!-- 콘텐츠 보안 정책: connect-src는 익명 방문·사용 통계를 위한 https://gateway.umami.is 연결만 허용해요. 올린 파일은 브라우저 안에서만 열려요.
      frame-ancestors는 메타 태그로 지정할 수 없어서, Cloudflare 이전 때 _headers에 넣어요. script-src 해시는 README의 개발 메모에 계산 방법이 있어요. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-c+ABF71bepGXR/TsyPFOsdzdIgQHLX0+9wbJT+5iTmQ='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Kkn4BJcixIpOQe1AYQpVbhOSZMOi5+qU++AE0RYluJ4='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>이모티콘 사진관 · 이모티콘 제안 전 검수</title>
@@ -1139,6 +1139,12 @@ function hamster(x, o) {
   const cream = '#fff1dc', honey = '#edb57b', coral = '#f48c88', leaf = '#82ac82';
   const resting = o.e === 'sleepy' || o.e === 'sulk';
   if (resting) { x.translate(0, 75); x.scale(1, .75); }
+  if (o.miniPose === 'cheer') {
+    path('M110 232 Q72 216 58 174 Q50 152 65 145 Q79 139 89 163 L123 207Z', honey);
+    path('M250 232 Q288 216 302 174 Q310 152 295 145 Q281 139 271 163 L237 207Z', honey);
+  } else if (o.miniPose === 'greet') {
+    path('M240 244 Q285 226 306 177 Q313 157 326 164 Q343 173 332 196 Q312 253 256 267Z', honey);
+  }
   oval(120, 302, 23, 13, honey, -.18, true);
   oval(236, 302, 23, 13, honey, .18, true);
   x.save(); x.translate(0, hdy); x.translate(180, 240); x.rotate(hrot); x.translate(-180, -240);
@@ -1177,12 +1183,22 @@ function hamster(x, o) {
     const pose = POSE[m === 'wave' ? 'wave' : E.arms];
     paws = [pose.L, pose.R].map(([px,py]) => [180+(px-180)*.88,py-22]);
   }
+  if (o.miniPose === 'cheer') {
+    paws = [[67, 151], [293, 151]];
+    hStar(x, 180, 45, 31, HC.gold);
+  } else if (o.miniPose === 'greet') {
+    paws = [[134, 275], [325, 172]];
+    hTicks(x, 324, 116, -.3, 3);
+  } else if (o.miniPose === 'approve') {
+    path('M248 219 Q266 210 284 214 L291 184 Q295 170 306 175 Q315 179 312 193 L309 212 L330 212 Q345 214 343 230 L338 255 Q336 270 320 270 L280 267 Q263 264 251 254Z', '#9fcac4');
+    paws = [[134, 277], [261, 245]];
+  }
   paws.forEach(([px,py],i) => {
     if (m === 'wave' && i === 1) py += 22 * Math.sin(t * TAU);
     oval(px,py,19,14,cream,i ? -.48 : .48,true);
     oval(px,py+1,7,5,'#f4c2ae',i ? -.48 : .48);
   });
-  hamFx(x, m === 'heart' ? 'hearts' : m === 'drop' ? 'sweat' : (o.alt ? E.fx2 : E.fx), o);
+  if (!o.miniPose) hamFx(x, m === 'heart' ? 'hearts' : m === 'drop' ? 'sweat' : (o.alt ? E.fx2 : E.fx), o);
   x.restore();
 }
 // 스티커처럼 흰 테두리를 둘러요
@@ -1196,12 +1212,12 @@ function stickerOut(cv, src, r) {
 // 그림이 실제로 차지하는 범위를 작게 그려서 재 둬요 (기울기·효과 때문에 한쪽으로 쏠리지 않게 칸 안에 맞추려고요)
 const hamBoxCache = new Map();
 function hamBox(sp) {
-  const key = [sp.e, sp.alt ? 1 : 0, sp.mirror ? 1 : 0, sp.tilt, sp.motion].join();
+  const key = [sp.e, sp.alt ? 1 : 0, sp.mirror ? 1 : 0, sp.tilt, sp.motion, sp.miniPose].join();
   if (hamBoxCache.has(key)) return hamBoxCache.get(key);
   const R = 200, k = R / 400, c = Object.assign(document.createElement('canvas'), { width: R, height: R }), x = c.getContext('2d', { willReadFrequently: true });
   const b = [1e9, 1e9, -1e9, -1e9];
   for (const t of sp.motion ? [0, .125, .25, .375, .5, .625, .75, .875, 1] : [.5]) {
-    x.clearRect(0, 0, R, R); x.save(); x.scale(k, k); x.translate(20, 20); hamster(x, { e: sp.e, mirror: sp.mirror, alt: sp.alt, t, m: sp.motion, tilt: sp.tilt }); x.restore();
+    x.clearRect(0, 0, R, R); x.save(); x.scale(k, k); x.translate(20, 20); hamster(x, { ...sp, t, m: sp.motion }); x.restore();
     const d = x.getImageData(0, 0, R, R).data;
     for (let y = 0; y < R; y++) for (let X = 0; X < R; X++) if (d[(y * R + X) * 4 + 3] > 8) { if (X < b[0]) b[0] = X; if (y < b[1]) b[1] = y; if (X > b[2]) b[2] = X; if (y > b[3]) b[3] = y; }
   }
@@ -1219,7 +1235,7 @@ function renderSample(cv, sp, t) {
   const b = hamBox(sp), bw = b[2] - b[0], bh = b[3] - b[1], aw = area[2] - area[0], ah = area[3] - area[1];
   const S = Math.min(aw / bw, ah / bh);
   x.save(); x.translate((area[0] + area[2]) / 2, (area[1] + area[3]) / 2); x.scale(S, S); x.translate(-(b[0] + b[2]) / 2, -(b[1] + b[3]) / 2);
-  hamster(x, { e: sp.e, mirror: sp.mirror, alt: sp.alt, t, m: sp.motion, tilt: sp.tilt });
+  hamster(x, { ...sp, t, m: sp.motion });
   x.restore();
   if (text) { x.save(); x.translate(tx, ty); x.rotate(-.07); x.translate(-tx, -ty); hGlyph(x, text, tx, ty, ts, '#6b4a3a'); x.restore(); }
   stickerOut(cv, tmp, 12 * u);
@@ -1227,7 +1243,11 @@ function renderSample(cv, sp, t) {
 const faceCanvas = n => { const c = Object.assign(document.createElement('canvas'), { width: 180, height: 180 }); renderSample(c, miniSpecs()[n % 42]); return c; };
 // 종류별 예시 칸 목록. 모든 칸이 규격에 맞는 예시예요
 function miniSpecs() {
-  const specs = Array.from({ length: 42 }, (_, i) => ({ w: 180, h: 180, e: EXPR_NAMES[i % 21], alt: i >= 21, mirror: i >= 21 }));
+  const miniPoses = { joy: 'cheer', hello: 'greet', thumb: 'approve' };
+  const specs = Array.from({ length: 42 }, (_, i) => {
+    const e = EXPR_NAMES[i % 21];
+    return { w: 180, h: 180, e, alt: i >= 21, mirror: i >= 21, miniPose: miniPoses[e] };
+  });
   specs[27].tilt = -22;
   specs[28].tilt = 22;
   return specs;
