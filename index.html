@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<!-- 콘텐츠 보안 정책: 이 페이지는 어떤 주소로도 데이터를 보낼 수 없어요(connect-src 'none'). 올린 파일은 브라우저 안에서만 열려요.
+<!-- 콘텐츠 보안 정책: connect-src는 익명 방문·사용 통계를 위한 https://gateway.umami.is 연결만 허용해요. 올린 파일은 브라우저 안에서만 열려요.
      frame-ancestors는 메타 태그로 지정할 수 없어서, Cloudflare 이전 때 _headers에 넣어요. script-src 해시는 README의 개발 메모에 계산 방법이 있어요. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-qMwLILJhEAEviN+Wn3hBfPHLFHlBvTziSDbxQYY8XS8='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-c+ABF71bepGXR/TsyPFOsdzdIgQHLX0+9wbJT+5iTmQ='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>이모티콘 사진관 · 이모티콘 제안 전 검수</title>
@@ -104,6 +104,8 @@ h1,h2,h3{letter-spacing:-.03em;margin:0}
 .tog{display:flex;gap:8px;margin-top:10px}
 .tog .btn[aria-pressed="true"]{background:var(--navy);color:#fff}
 .sk-hint{margin:8px 0 0;font-size:13px;color:var(--retake)}
+.ph-body,#s3,.phone:first-child .room{background-image:var(--wallpaper,none);background-position:center;background-size:cover;background-repeat:no-repeat}
+.skinp [hidden]{display:none}
 .skin-slot{margin:0 0 4px}
 @media (max-width:760px){.pick{grid-template-columns:repeat(3,1fr)}}
 :root{--c-bg:#bacee0;--c-mine:#2f4f7a;--c-mine-ink:#ffffff;--c-other:#ffffff;--c-other-ink:#1d2b3a;--c-bar:#dfe9f3;--c-top-ink:#1d2b3a}
@@ -180,9 +182,9 @@ body.dragging #veil{display:grid}
 .prints{display:grid;grid-template-columns:repeat(var(--cols,6),minmax(0,1fr));gap:12px;background:var(--sky);padding:14px;border-radius:12px}
 .print{position:relative;background:var(--paper);padding:6px 6px 22px;border-radius:6px;border:0;cursor:pointer;box-shadow:0 1px 2px rgba(29,43,58,.12);transition:transform .2s var(--ease),box-shadow .2s}
 .print:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(29,43,58,.14)}
-.print .face{aspect-ratio:1;display:grid;place-items:center;border-radius:3px;overflow:hidden}
+.print .face{position:relative;aspect-ratio:1;border-radius:3px;overflow:hidden}
 .prints.night .print .face{background:#1c1c1e}
-.print img{max-width:100%;max-height:100%}
+.print .face img{position:absolute;inset:0;margin:auto;max-width:100%;max-height:100%}
 /* 투명한 부분이 보이도록 그림 바로 뒤에 옅은 바둑판 무늬를 깔아요. 배경을 칠한 그림은 무늬를 가려서 바로 눈에 띄어요 */
 .print .face img,.sheet-row:not(.dark) .ph{background:conic-gradient(var(--sky) 25%,var(--paper) 0 50%,var(--sky) 0 75%,var(--paper) 0) 0 0/10px 10px}
 .sheet-row:not(.dark) .ph{background-size:8px 8px}
@@ -236,6 +238,9 @@ body.dragging #veil{display:grid}
 .scene{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 20px;margin-bottom:16px}
 .phones{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
 .phone{background:var(--paper);border-radius:22px;padding:8px;box-shadow:var(--shadow)}
+.phone[data-sk]{position:relative}
+.phone-pick{position:absolute;inset:0;border:0;border-radius:inherit;background:transparent;cursor:pointer}
+.phone-pick:focus-visible{border-radius:inherit}
 .phone .name{font-size:13px;font-weight:700;color:var(--ink-2);padding:4px 8px 8px}
 .room{border-radius:16px;padding:12px 10px;display:flex;flex-direction:column;gap:7px;min-height:340px}
 .msg{display:flex;flex-direction:column;gap:3px;max-width:86%}
@@ -267,13 +272,17 @@ footer a{color:var(--navy);text-underline-offset:3px}
   .sheet-row{gap:14px;flex-wrap:wrap}
 }
 @media print{
-  .top,.rail .printout,.reload,.tabs,.kinds,footer,.scene .kinds{display:none !important}
+  .top,.rail .printout,.reload,.tabs,.kinds,footer,#v-themes,.skin-slot,.board-head .toggle{display:none !important}
   body,html{background:#fff}
   .view{display:block !important}
   .desk{grid-template-columns:1fr}
   .rail,.inspector{position:static;max-height:none;overflow:visible}
   .guide,#veil{display:none !important}
   .card{box-shadow:none;border:1px solid var(--line)}
+  .rail,.inspector,.panel,.pair,.print{break-inside:avoid}
+  .receipt .row{padding:6px 0}
+  .prints{--cols:6 !important}
+  .board-head,.panel > h2{break-after:avoid}
 }
 </style>
 </head>
@@ -385,7 +394,7 @@ footer a{color:var(--navy);text-underline-offset:3px}
       <div id="skin1" class="skin-slot"></div>
       <h3 id="t1"></h3><div class="strip" id="s1"></div>
       <h3 id="t2"></h3><div class="strip" id="s2" style="background:#1c1c1e"></div>
-      <h3 id="t3"></h3><div class="strip" id="s3" style="background:#bacee0"></div>
+      <h3 id="t3"></h3><div class="strip" id="s3" style="background-color:#bacee0"></div>
     </div>
   </section>
 
@@ -445,6 +454,12 @@ Object.values(INTRO).forEach(v => v.hint = SOURCE_HINT);
 let switchNote = '';
 // 파일을 불러오는 동안은 true예요. 이때 탭은 반쯤 만들어진 목록을 그리지 않고 「불러오는 중」을 보여 줘요
 let loading = false;
+let requestId = 0;
+function beginRequest() {
+  loading = false;
+  refreshTab();
+  return ++requestId;
+}
 let kind = 'mini';
 const K = () => KINDS[kind];
 let items = [], selected = 0, isSample = false, lastHashes = null;
@@ -529,9 +544,10 @@ document.addEventListener('drop', e => {
   e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging');
   e.dataTransfer.files.length && ingest([...e.dataTransfer.files]);
 });
-$('#printBtn').onclick = () => { track('print'); drawLook(); drawThemes(); print(); };
+$('#printBtn').onclick = () => { track('print'); drawLook(); print(); };
 
 function showIntake() {
+  ++requestId; loading = false;
   items.forEach(it => it.src?.startsWith('blob:') && URL.revokeObjectURL(it.src));
   items = []; isSample = false; switchNote = '';
   $('#intake').hidden = false; $('#desk').hidden = true; showErr('');
@@ -572,25 +588,44 @@ function imageDims(dv) {
   return null;
 }
 // 너무 큰 파일이면 디코딩하지 않아요
-async function tooBig(f) {
+async function tooBig(f, header) {
   if (f.size > MAX_BYTES) return true;
-  const dims = imageDims(new DataView(await f.slice(0, 64).arrayBuffer()));
+  const dims = imageDims(header ?? new DataView(await f.slice(0, 64).arrayBuffer()));
   return !!dims && (dims[0] > MAX_SIDE || dims[1] > MAX_SIDE);
 }
-async function ingest(files, sample = false) {
+function matchesFileType(header, ext) {
+  if (ext === 'png') return header.byteLength >= 8 && header.getUint32(0) === 0x89504e47 && header.getUint32(4) === 0x0d0a1a0a;
+  return ext === 'webp' && header.byteLength >= 12 && header.getUint32(0) === 0x52494646 && header.getUint32(8) === 0x57454250;
+}
+async function ingest(files, sample = false, id = beginRequest(), sampleWarn = '') {
+  if (id !== requestId) return;
   files = [...files].sort((a, b) => a.name.localeCompare(b.name, 'ko', { numeric: true }));
   if (!sample && files.length > MAX_FILES) return showErr(`한 번에 ${MAX_FILES}개까지 맡길 수 있어요. 나눠서 맡겨 주세요.`);
   const single = files.length === 1, ext = typeOf(files[0]);
+  const singleUpload = single && !sample;
+  const first = files[0];
+  const formatError = '지원하지 않는 파일 형식이에요. 종류에 맞는 PNG 또는 WebP를 맡겨 주세요.';
   let bmp = null;
-  if (sample || !(await tooBig(files[0]))) { try { bmp = await createImageBitmap(files[0]); } catch {} }
-  let note = '';
+  let header;
+  if (singleUpload) {
+    if (!first.size) return showErr('빈 파일이에요. 그림이 들어 있는 파일을 맡겨 주세요.');
+    try { header = new DataView(await first.slice(0, 64).arrayBuffer()); }
+    catch { if (id === requestId) showErr('파일을 읽지 못했어요. 다시 맡겨 주세요.'); return; }
+    if (id !== requestId) return;
+    if (!matchesFileType(header, ext)) return showErr(formatError);
+  }
+  const huge = !sample && await tooBig(first, header);
+  if (!huge) { try { bmp = await createImageBitmap(first); } catch {} }
+  if (id !== requestId) { bmp?.close(); return; }
+  if (singleUpload && !bmp) return showErr(huge ? '이미지 크기나 파일 용량이 불러오기 한도를 넘었어요.' : '이미지를 열지 못했어요. 파일을 확인해 주세요.');
+  let note = '', target = kind;
   if (bmp && !sample) {
     const fit = key => fitsKind(key, bmp.width, bmp.height, single && ext === 'png');
     if (!fit(kind)) {
       // 지금 종류에는 안 맞지만 다른 종류와 맞으면 그 종류로 바꿔서 검사해요 (파일 형식까지 맞는 종류 우선)
       const others = Object.keys(KINDS).filter(key => key !== kind && fit(key));
       const pick = others.find(key => KINDS[key].types.includes(ext)) || others[0];
-      if (pick) { kind = pick; note = `파일 크기가 「${KINDS[pick].name}」 규격이라 종류를 바꿔서 검사했어요.`; lastHashes = null; drawKinds(); }
+      if (pick) { target = pick; note = `파일 크기가 「${KINDS[pick].name}」 규격이라 종류를 바꿔서 검사했어요.`; }
       else if (single) {
         const m = `${bmp.width}×${bmp.height}px 이미지는 어느 종류의 규격과도 맞지 않아요.
 ${kindLabel(K())}은 ${specText(K())}이어야 해요.`;
@@ -598,31 +633,52 @@ ${kindLabel(K())}은 ${specText(K())}이어야 해요.`;
       }
     }
   }
-  const prev = items; items = []; isSample = sample; switchNote = note; showErr('');
+  if (singleUpload && !KINDS[target].types.includes(ext)) {
+    bmp.close(); return showErr(formatError);
+  }
+  const pending = [];
+  showErr('');
   loading = true; refreshTab();
   const up = sample ? null : { n: files.length, sheet: false };
-  const k = K(), sh = single && bmp && ext === 'png' ? sheetOf(k, bmp.width, bmp.height) : null;
+  const k = KINDS[target], sh = single && bmp && ext === 'png' ? sheetOf(k, bmp.width, bmp.height) : null;
+  let complete = false;
   try {
-    if (sh) { up && (up.sheet = true); await fromSheet(bmp, k.dims[0][0], k.dims[0][1], sh[0], sh[1]); }
-    else { bmp?.close(); for (const f of files) await fromFile(f); }
+    if (sh) {
+      if (up) up.sheet = true;
+      await fromSheet(pending, id, bmp, k.dims[0][0], k.dims[0][1], sh[0], sh[1]);
+    } else {
+      for (const f of files) {
+        if (id !== requestId) break;
+        await fromFile(pending, f, singleUpload ? bmp : null);
+      }
+    }
+    if (id !== requestId) return;
+    complete = true;
   } catch {
-    // 불러오다 실패하면 미완성 목록을 버리고 오류만 보여 줘요
-    prev.forEach(it => it.src?.startsWith('blob:') && URL.revokeObjectURL(it.src));
-    items.forEach(it => it.src?.startsWith('blob:') && URL.revokeObjectURL(it.src));
-    items = []; loading = false; refreshTab();
-    return showErr('파일을 불러오지 못했어요. 다시 맡겨 주세요.');
+    if (id === requestId) {
+      loading = false; refreshTab();
+      showErr('파일을 불러오지 못했어요. 다시 맡겨 주세요.');
+    }
+    return;
+  } finally {
+    bmp?.close();
+    if (!complete)
+      pending.forEach(it => it.src && URL.revokeObjectURL(it.src));
   }
-  done(prev, up);
+  if (target !== kind) { kind = target; lastHashes = null; drawKinds(); }
+  const prev = items;
+  items = pending; isSample = sample; switchNote = note;
+  done(prev, up, sampleWarn);
 }
 
-async function fromSheet(bmp, cw, ch, cols, rows) {
+async function fromSheet(pending, id, bmp, cw, ch, cols, rows) {
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    if (id !== requestId) return;
     const cv = Object.assign(document.createElement('canvas'), { width: cw, height: ch });
     cv.getContext('2d', { willReadFrequently: true }).drawImage(bmp, c * cw, r * ch, cw, ch, 0, 0, cw, ch);
     const blob = await new Promise(ok => cv.toBlob(ok, 'image/png'));
-    items.push({ label: `${r + 1}행 ${c + 1}열`, w: cw, h: ch, type: 'png', kb: blob.size / 1024, src: URL.createObjectURL(blob), canvas: cv });
+    pending.push({ label: `${r + 1}행 ${c + 1}열`, w: cw, h: ch, type: 'png', kb: blob.size / 1024, src: URL.createObjectURL(blob), canvas: cv });
   }
-  bmp.close();
 }
 // WebP 컨테이너를 따라가 움직임(ANIM 청크 또는 VP8X 플래그)과 프레임 수(ANMF 청크 개수)를 읽어요. WebP가 아니면 null
 function webpInfo(buf) {
@@ -654,13 +710,14 @@ async function lastFrame(f, w, h) {
   } catch { return null; }
   finally { dec?.close(); }
 }
-async function fromFile(f) {
+async function fromFile(pending, f, decoded = null) {
   const type = typeOf(f);
-  if (await tooBig(f)) { items.push({ label: f.name, w: 0, h: 0, type, kb: f.size / 1024, src: '', canvas: null, broken: true, huge: true }); return; }
-  let bmp; try { bmp = await createImageBitmap(f); } catch { items.push({ label: f.name, w: 0, h: 0, type, kb: f.size / 1024, src: '', canvas: null, broken: true }); return; }
+  if (!decoded && await tooBig(f)) { pending.push({ label: f.name, w: 0, h: 0, type, kb: f.size / 1024, src: '', canvas: null, broken: true, huge: true }); return; }
+  let bmp = decoded;
+  if (!bmp) { try { bmp = await createImageBitmap(f); } catch { pending.push({ label: f.name, w: 0, h: 0, type, kb: f.size / 1024, src: '', canvas: null, broken: true }); return; } }
   const cv = Object.assign(document.createElement('canvas'), { width: bmp.width, height: bmp.height });
-  cv.getContext('2d', { willReadFrequently: true }).drawImage(bmp, 0, 0);
-  bmp.close();
+  try { cv.getContext('2d', { willReadFrequently: true }).drawImage(bmp, 0, 0); }
+  finally { if (!decoded) bmp.close(); }
   let info = { animated: false, frames: 1 };
   if (type === 'webp') { try { info = webpInfo(await f.arrayBuffer()) || info; } catch {} }
   let canvas = cv, scene = 'first';
@@ -668,7 +725,7 @@ async function fromFile(f) {
     const last = await lastFrame(f, cv.width, cv.height);
     if (last) { canvas = last; scene = 'last'; }
   }
-  items.push({ label: f.name, w: cv.width, h: cv.height, type, kb: f.size / 1024, src: URL.createObjectURL(f), canvas, animated: info.animated, frames: info.frames, scene });
+  pending.push({ label: f.name, w: cv.width, h: cv.height, type, kb: f.size / 1024, src: URL.createObjectURL(f), canvas, animated: info.animated, frames: info.frames, scene });
 }
 
 /* ===== 검사 ===== */
@@ -796,7 +853,7 @@ function thumbOf(it) {
 }
 const hashOf = it => { const v = thumbOf(it); let h = 0; for (let i = 0; i < v.length; i += 3) h = (h * 31 + (v[i] >> 3)) | 0; return h; };
 
-function done(prev, up) {
+function done(prev, up, sampleWarn) {
   loading = false;
   if (up) track('upload', { kind, files: fileBand(up.n), sheet: up.sheet, switched: !!switchNote });
   items.forEach((it, i) => { it.no = i + 1; it.problems = inspect(it); it.bad = VIOLATION.filter(k => it.problems[k]); it.note = NOTE.filter(k => it.problems[k]); });
@@ -961,15 +1018,8 @@ function hGlyph(x, ch, X, Y, size, col) {
   x.save(); x.font = `900 ${size}px ${FONT}`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineJoin = 'round';
   x.strokeStyle = '#fff'; x.lineWidth = size * .28; x.strokeText(ch, X, Y); x.strokeStyle = HC.ol; x.lineWidth = size * .08; x.strokeText(ch, X, Y); x.fillStyle = col; x.fillText(ch, X, Y); x.restore();
 }
-function mochi(x, cx, cy, w, h) {
-  x.beginPath(); x.moveTo(cx, cy - h);
-  x.bezierCurveTo(cx + w * .72, cy - h, cx + w, cy - h * .55, cx + w, cy - h * .08); x.bezierCurveTo(cx + w, cy + h * .6, cx + w * .76, cy + h, cx, cy + h);
-  x.bezierCurveTo(cx - w * .76, cy + h, cx - w, cy + h * .6, cx - w, cy - h * .08); x.bezierCurveTo(cx - w, cy - h * .55, cx - w * .72, cy - h, cx, cy - h); x.closePath();
-}
-function hLimb(x, a, b, w) {
-  x.save(); x.lineCap = x.lineJoin = 'round'; x.beginPath(); x.moveTo(a[0], a[1]); x.lineTo(b[0], b[1]);
-  x.strokeStyle = HC.ol; x.lineWidth = w + 12; x.stroke(); x.strokeStyle = HC.body; x.lineWidth = w; x.stroke(); x.restore();
-}
+
+
 // 표정 스물한 가지. fx는 곁들이는 효과, fx2는 두 번째 변형에서 쓰는 효과예요
 const EXPR = {
   joy:      { eyes: 'arc',   mouth: 'open',  fx: 'sparkle', fx2: 'ticks',   arms: 'up',     tilt: 4 },
@@ -984,7 +1034,7 @@ const EXPR = {
   shy:      { eyes: 'dot',   mouth: 'smile', fx: 'ticks',   fx2: 'hearts',  arms: 'cheeks', tilt: -3, blush: 1.5 },
   confused: { eyes: 'dot',   mouth: 'wavy',  fx: 'question', fx2: 'sweat',  arms: 'down',   tilt: 6 },
   drool:    { eyes: 'star',  mouth: 'big',   fx: 'drool',   fx2: 'sparkle', arms: 'hug',    tilt: 0 },
-  proud:    { eyes: 'arc',   mouth: 'cat',   fx: 'stars',   fx2: 'flower',  arms: 'hips',   tilt: -4 },
+  proud:    { eyes: 'arc',   mouth: 'cat',   fx: 'stars',   fx2: 'flower',  arms: 'hips',   tilt: -12 },
   awkward:  { eyes: 'dot',   mouth: 'wavy',  fx: 'sweat',   fx2: 'ticks',   arms: 'out',    tilt: 3, small: 1 },
   sorry:    { eyes: 'dot',   mouth: 'frown', fx: 'sweat',   fx2: 'none',    arms: 'heart',  tilt: -4, brow: 'sad' },
   sulk:     { eyes: 'dot',   mouth: 'flat',  fx: 'ticks',   fx2: 'anger',   arms: 'down',   tilt: -5, brow: 'angry', puff: 1 },
@@ -1075,30 +1125,63 @@ function hamster(x, o) {
   if (o.mirror) { x.translate(360, 0); x.scale(-1, 1); }
   x.translate(0, dy); x.translate(180, 330); x.rotate((o.tilt != null ? o.tilt : E.tilt || 0) * Math.PI / 180); x.translate(-180, -330);
   x.lineWidth = 7; x.strokeStyle = ol;
-  [150, 210].forEach(X => { x.beginPath(); x.ellipse(X, 328, 22, 12, 0, 0, 7); x.fillStyle = HC.patch; x.fill(); x.stroke(); });
-  x.beginPath(); x.ellipse(180, 280, 58, 48, 0, 0, 7); x.fillStyle = HC.body; x.fill(); x.stroke();
-  x.beginPath(); x.ellipse(180, 290, 32, 30, 0, 0, 7); x.fillStyle = HC.belly; x.fill();
-  const P = Object.assign({}, POSE[(m === 'wave' && E.arms !== 'wave') ? 'wave' : E.arms]);
-  if (P.wave || (m === 'wave')) { const w = m === 'wave' ? 24 * Math.sin(t * TAU) : 0; P.R = [P.R[0], P.R[1] + w]; }
-  const arm = (side, front) => {
-    const f = P.front === 2 || (P.front === 1 && side === 'R');
-    if (!!f !== front) return;
-    const a = side === 'L' ? [138, 268] : [222, 268], b = P[side];
-    hLimb(x, a, b, 28);
-    if (P.thumb && side === 'R') { x.beginPath(); x.ellipse(b[0] + 2, b[1] - 24, 10, 17, 0, 0, 7); x.fillStyle = HC.body; x.fill(); x.lineWidth = 7; x.strokeStyle = ol; x.stroke(); hLimb(x, a, b, 28); }
+  const oval = (cx, cy, rx, ry, color, angle = 0, outline = false) => {
+    x.beginPath(); x.ellipse(cx, cy, rx, ry, angle, 0, TAU);
+    x.fillStyle = color; x.fill();
+    if (outline) { x.lineWidth = 6; x.strokeStyle = ol; x.stroke(); }
   };
-  arm('L', false); arm('R', false);
+  const path = (d, color, outline = true) => {
+    const shape = new Path2D(d);
+    x.fillStyle = color; x.fill(shape);
+    if (outline) { x.strokeStyle = ol; x.lineWidth = 6; x.stroke(shape); }
+    return shape;
+  };
+  const cream = '#fff1dc', honey = '#edb57b', coral = '#f48c88', leaf = '#82ac82';
+  const resting = o.e === 'sleepy' || o.e === 'sulk';
+  if (resting) { x.translate(0, 75); x.scale(1, .75); }
+  oval(120, 302, 23, 13, honey, -.18, true);
+  oval(236, 302, 23, 13, honey, .18, true);
   x.save(); x.translate(0, hdy); x.translate(180, 240); x.rotate(hrot); x.translate(-180, -240);
-  x.lineWidth = 7; x.strokeStyle = ol;
-  [118, 242].forEach(X => { x.beginPath(); x.arc(X, 88, 27, 0, 7); x.fillStyle = HC.body; x.fill(); x.stroke(); x.beginPath(); x.arc(X, 90, 13, 0, 7); x.fillStyle = HC.earIn; x.fill(); });
-  const head = () => mochi(x, 180, 152, 104, 88);
-  head(); x.fillStyle = HC.body; x.fill();
-  x.save(); head(); x.clip(); x.fillStyle = HC.shade; x.fillRect(0, 0, 360, 360); x.translate(-13, -9); head(); x.fillStyle = HC.body; x.fill(); x.restore();
-  head(); x.stroke();
-  x.beginPath(); x.ellipse(180, 104, 30, 15, 0, 0, 7); x.fillStyle = HC.patch; x.fill();
-  hamFace(x, E, 180, 172, 52);
+  for (const side of [-1, 1]) {
+    oval(180 + side * 81, 104, 27, 31, honey, side * .55, true);
+    oval(180 + side * 83, 106, 16, 19, '#f3a499', side * .55);
+  }
+  const coat = path('M78 171 Q78 113 123 96 Q144 88 161 90 Q151 78 158 77 Q173 76 184 87 Q184 71 193 76 Q202 80 207 91 Q275 98 283 163 C287 181 313 197 308 225 Q305 250 273 259 C274 290 244 306 181 307 Q91 309 85 262 Q52 256 52 227 C51 205 73 189 78 171Z', honey);
+  x.save(); x.clip(coat);
+  path('M33 197 Q65 169 103 177 C137 181 143 201 170 189 Q184 181 197 188 C231 208 237 166 283 177 Q315 180 336 212 L327 334 L28 330Z',cream,false);
+  oval(165, 108, 7, 17, '#d19765', -.28);
+  oval(185, 104, 6, 13, '#d19765', -.1);
+  x.restore(); x.strokeStyle = ol; x.lineWidth = 6; x.stroke(coat);
+  hamFace(x, E, 180, 173, 53);
+  oval(180, 185, 7, 4.5, '#955f57');
+  for (const side of [-1, 1]) {
+    for (const offset of [0, 9]) oval(180 + side * (77 + offset), 204 - offset / 4, 2.4, 2.4, '#ba796a');
+  }
   x.restore();
-  arm('L', true); arm('R', true);
+  let paws = [[143, 261], [215, 262]];
+  if (['yum','drool','excited'].includes(o.e)) {
+    path('M142 249 C144 231 165 229 178 236 C200 220 222 230 221 247 C220 270 192 294 181 295 Q151 284 142 249Z',coral);
+    path('M176 237 Q160 237 156 224 Q171 222 179 231 Q177 213 190 211 Q196 226 187 232 Q202 224 211 231 Q202 244 184 240Z',leaf);
+    for (const [px, py] of [[160,249],[180,255],[201,246],[171,268],[193,267],[182,282]]) oval(px,py,2.4,4,cream,.3);
+  } else if (['love','shy','pray'].includes(o.e)) {
+    hHeart(x,180,257,3.8,coral);
+    oval(164,240,7,4,'#ffd7c8',-.55);
+  } else if (resting || o.e === 'cry') {
+    path('M82 237 Q129 250 166 237 Q215 216 278 241 L274 263 Q265 307 179 309 Q92 309 82 265Z','#9fcac4');
+    for (const [px,py] of [[134,267],[178,286],[222,255],[241,277]]) hStar(x,px,py,7,cream);
+    paws = [[117,241],[236,237]];
+  } else if (['proud','sorry','awkward'].includes(o.e)) {
+    path('M180 219 C217 244 211 277 183 292 C157 285 142 257 180 219Z','#bd936e');
+    tq(x,[180,230],[167,261],[181,285],4);
+  } else {
+    const pose = POSE[m === 'wave' ? 'wave' : E.arms];
+    paws = [pose.L, pose.R].map(([px,py]) => [180+(px-180)*.88,py-22]);
+  }
+  paws.forEach(([px,py],i) => {
+    if (m === 'wave' && i === 1) py += 22 * Math.sin(t * TAU);
+    oval(px,py,19,14,cream,i ? -.48 : .48,true);
+    oval(px,py+1,7,5,'#f4c2ae',i ? -.48 : .48);
+  });
   hamFx(x, m === 'heart' ? 'hearts' : m === 'drop' ? 'sweat' : (o.alt ? E.fx2 : E.fx), o);
   x.restore();
 }
@@ -1144,7 +1227,10 @@ function renderSample(cv, sp, t) {
 const faceCanvas = n => { const c = Object.assign(document.createElement('canvas'), { width: 180, height: 180 }); renderSample(c, miniSpecs()[n % 42]); return c; };
 // 종류별 예시 칸 목록. 모든 칸이 규격에 맞는 예시예요
 function miniSpecs() {
-  return Array.from({ length: 42 }, (_, i) => ({ w: 180, h: 180, e: EXPR_NAMES[i % 21], alt: i >= 21, mirror: i >= 21 }));
+  const specs = Array.from({ length: 42 }, (_, i) => ({ w: 180, h: 180, e: EXPR_NAMES[i % 21], alt: i >= 21, mirror: i >= 21 }));
+  specs[27].tilt = -22;
+  specs[28].tilt = 22;
+  return specs;
 }
 function sampleSpecs(key) {
   const out = [], N = EXPR_NAMES;
@@ -1208,11 +1294,11 @@ function assembleWebp(frames, w, h, ms) {
   let p = 12 + head.length; anmf.forEach(c => { out.set(c, p); p += c.length; });
   return out;
 }
-let sampleWarn = '';
-async function sampleFiles(key) {
+async function sampleFiles(key, id) {
   const specs = sampleSpecs(key), files = [], pad = i => String(i + 1).padStart(2, '0');
   let webpOk = true;
   for (let i = 0; i < specs.length; i++) {
+    if (id !== requestId) return;
     const sp = specs[i], mk = t => { const cv = Object.assign(document.createElement('canvas'), { width: sp.w, height: sp.h }); renderSample(cv, sp, t); return cv; };
     if (sp.motion && webpOk) {
       const F = 8, enc = [];
@@ -1225,12 +1311,11 @@ async function sampleFiles(key) {
     const blob = await new Promise(ok => mk(sp.motion ? .5 : undefined).toBlob(ok, 'image/png'));
     files.push(new File([blob], `예시${pad(i)}.png`, { type: 'image/png' }));
   }
-  sampleWarn = webpOk ? '' : '이 브라우저에서는 움직이는 예시를 만들 수 없어요. 정지 그림으로 보여 드려요.';
-  return files;
+  const warning = webpOk ? '' : '이 브라우저에서는 움직이는 예시를 만들 수 없어요. 정지 그림으로 보여 드려요.';
+  return { files, warning };
 }
-let sampling = false;
 async function loadSample() {
-  if (sampling) return; sampling = true; sampleWarn = '';
+  const id = beginRequest();
   try {
     const k = K();
     if (Array.isArray(k.grid)) {
@@ -1243,9 +1328,14 @@ async function loadSample() {
         renderSample(c, specs[i]);
         x.drawImage(c, (i % k.grid[0]) * w, Math.floor(i / k.grid[0]) * h);
       }
-      await ingest([new File([await toBlob(cv)], '예시시트.png', { type: 'image/png' })], true);
-    } else await ingest(await sampleFiles(kind), true);
-  } finally { sampling = false; }
+      await ingest([new File([await toBlob(cv)], '예시시트.png', { type: 'image/png' })], true, id);
+    } else {
+      const sample = await sampleFiles(kind, id);
+      if (sample) await ingest(sample.files, true, id, sample.warning);
+    }
+  } catch {
+    if (id === requestId) showErr('예시를 만들지 못했어요. 다시 시도해 주세요.');
+  }
 }
 // 접수 화면 오른쪽 미리보기: 종류마다 다른 장면을 그려요. 한 번 만든 HTML은 저장해 두고 다시 써요
 const demoCache = {};
@@ -1323,7 +1413,7 @@ function drawLook() {
   $('#pairDesc').textContent = (mini ? '채팅창 크기(24px)로 줄였을 때' : '작게(24px) 줄였을 때') + ' 서로 가장 비슷한 짝이에요.';
   const T = mini ? ['20px · 내 말풍선 옆', '20px · 다크모드', '40px · 이모티콘만 보낼 때'] : ['키보드 목록 크기 · 밝은 배경', '키보드 목록 크기 · 다크모드', '채팅창 크기'];
   ['#t1', '#t2', '#t3'].forEach((id, i) => $(id).textContent = T[i]);
-  $('#s1').style.background = mini ? skin.mine : skin.other; $('#s3').style.background = skin.bg;
+  $('#s1').style.background = mini ? skin.mine : skin.other; $('#s3').style.backgroundColor = skin.bg;
   if (!usable.length) { noFile($('#pairs')); ['#s1', '#s2', '#s3'].forEach(s => $(s).innerHTML = ''); return; }
   const pairs = [];
   for (let a = 0; a < usable.length; a++) for (let b = a + 1; b < usable.length; b++) {
@@ -1359,14 +1449,39 @@ const PRESETS = [
 const SKIN_KEYS = ['bg', 'mine', 'mineInk', 'other', 'otherInk'];
 const SKIN_LABEL = { bg: '배경', mine: '내 말풍선', mineInk: '내 글자', other: '상대 말풍선', otherInk: '상대 글자' };
 let skin = { ...PRESETS[0] };
+let wallpaper = '', photoRequest = 0;
+function setWallpaper(url, status) {
+  if (wallpaper) URL.revokeObjectURL(wallpaper);
+  wallpaper = url;
+  document.documentElement.style.setProperty('--wallpaper', url ? `url("${url}")` : 'none');
+  document.querySelectorAll('[data-photo-clear]').forEach(b => b.hidden = !url);
+  document.querySelectorAll('[data-photo-status]').forEach(el => el.textContent = status);
+}
+document.addEventListener('change', async e => {
+  if (!e.target.matches('[data-photo]')) return;
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = '';
+  const id = ++photoRequest, url = URL.createObjectURL(file);
+  const image = new Image(); image.src = url;
+  try {
+    await image.decode();
+    if (id === photoRequest) { setWallpaper(url, '배경 사진을 적용했어요.'); return; }
+  } catch {
+    if (id === photoRequest) document.querySelectorAll('[data-photo-status]').forEach(el => el.textContent = '사진을 열 수 없어요. 다른 이미지로 시도해 주세요.');
+  }
+  URL.revokeObjectURL(url);
+});
 const hex3 = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 const lumOf = h => { const [r, g, b] = hex3(h).map(v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }); return .2126 * r + .7152 * g + .0722 * b; };
 const contrastOf = (a, b) => { const x = lumOf(a), y = lumOf(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
 const mixHex = (a, b, t) => '#' + hex3(a).map((v, i) => Math.round(v * (1 - t) + hex3(b)[i] * t).toString(16).padStart(2, '0')).join('');
 function skinPanelHTML(open) {
   return `<details class="skinp"${open}><summary>대화방 꾸미기</summary>
-    <p class="muted sk-note">고른 색은 비슷하게 맞춘 값이에요. 이 페이지 안에서만 쓰고 저장하지 않아요.</p>
+    <p class="muted sk-note">12가지 색 조합은 카카오톡을 참고해 비슷하게 맞춘 견본이에요. 내 배경 사진은 이 페이지에서만 보여요.</p>
     <div class="sw-row" role="group" aria-label="대화방 색 견본">${PRESETS.map((p, i) => `<button type="button" class="sw" data-sw="${i}" title="${p.name}" aria-label="${p.name}" aria-pressed="false" style="background:linear-gradient(135deg,${p.bg} 52%,${p.mine} 52%)"></button>`).join('')}</div>
+    <div class="tog"><button type="button" class="btn btn-soft btn-s" data-photo-pick>배경 사진 선택</button><input type="file" accept="image/*" data-photo hidden><button type="button" class="btn btn-line btn-s" data-photo-clear hidden>사진 지우기</button></div>
+    <span class="muted" data-photo-status role="status"></span>
     <div class="pick">${SKIN_KEYS.map(k => `<label>${SKIN_LABEL[k]}<input type="color" data-ck="${k}" value="${skin[k]}"></label>`).join('')}</div>
     <div class="tog"><button type="button" class="btn btn-soft btn-s" data-tone="light" aria-pressed="false">밝게</button><button type="button" class="btn btn-soft btn-s" data-tone="dark" aria-pressed="false">어둡게</button></div>
     <p class="sk-hint" data-hint hidden>글자와 말풍선 색이 비슷해서 읽기 어려울 수 있어요.</p>
@@ -1394,13 +1509,18 @@ const darkOf = s => ({ ...s, bg: mixHex(s.bg, '#0d1218', .88), other: '#2a313b',
 const lightOf = s => ({ ...s, bg: lumOf(s.bg) < .25 ? mixHex(s.bg, '#ffffff', .82) : s.bg, other: '#ffffff', otherInk: '#1d2b3a' });
 document.addEventListener('click', e => {
   const sw = e.target.closest('[data-sw]'), tone = e.target.closest('[data-tone]'), ph = e.target.closest('.phone[data-sk]');
+  const focused = ph?.contains(document.activeElement);
+  if (e.target.closest('[data-photo-pick]')) { e.target.closest('.skinp').querySelector('[data-photo]').click(); return; }
+  if (e.target.closest('[data-photo-clear]')) { photoRequest++; setWallpaper('', '배경색으로 돌아왔어요.'); return; }
+  if (sw || ph) { photoRequest++; setWallpaper('', ''); }
   if (sw) skin = { ...PRESETS[+sw.dataset.sw] };
   else if (tone) skin = tone.dataset.tone === 'dark' ? darkOf(skin) : lightOf(skin);
   else if (ph) skin = { ...PRESETS[+ph.dataset.sk] };
   else return;
   applySkin();
+  if (focused) $(`.phone[data-sk="${ph.dataset.sk}"] .phone-pick`)?.focus({ preventScroll: true });
 });
-document.addEventListener('input', e => { const i = e.target.closest('[data-ck]'); if (!i) return; skin[i.dataset.ck] = i.value; applySkin(); });
+document.addEventListener('input', e => { const i = e.target.closest('[data-ck]'); if (!i) return; if (i.dataset.ck === 'bg') { photoRequest++; setWallpaper('', ''); } skin[i.dataset.ck] = i.value; applySkin(); });
 const SCENES = {
   '연인': [['other', '오늘 회사 너무 힘들었어'], ['mine', '헐 고생했어'], ['other', '맛있는 거 사줘'], ['mine', ''], ['other', '고마워!!'], ['mine', '잘 자 내일 봐']],
   '친구 단톡': [['other', '이번 주 토요일 다들 시간 돼?'], ['mine', '나 완전 콜'], ['other', '아 나 그날 알바'], ['mine', ''], ['other', '대신 다음엔 내가 쏠게'], ['mine', '오 진짜?']],
@@ -1413,18 +1533,20 @@ function drawThemes() {
   const box = $('#phones');
   if (loading) { box.innerHTML = '<div class="empty-tab">파일을 불러오는 중이에요.</div>'; return; }
   const usable = items.filter(it => it.src && !it.problems.blank);
-  if (!usable.length) { noFile(box); return; }
+
   const pick = i => usable[(i * 7 + 3) % usable.length];
-  const lines = SCENES[scene].map(([who, text], i) => ({ who, text, emos: text ? [pick(i)] : (K().inline ? usable.slice(-4, -1) : [pick(i)]) }));
-  box.innerHTML = [{ ...skin, name: '내 대화방' }, ...PRESETS].map((sk, i) => `<div class="phone"${i ? ` data-sk="${i - 1}" tabindex="0" title="눌러서 적용"` : ''}><div class="name">${sk.name}</div><div class="room" style="background:${sk.bg}">${lines.map(l => line(l, sk)).join('')}</div></div>`).join('');
+  const lines = SCENES[scene].map(([who, text], i) => ({ who, text, emos: !usable.length ? [] : K().inline && !text ? usable.slice(-3) : [pick(i)] }));
+  box.innerHTML = [{ ...skin, name: '내 대화방' }, ...PRESETS].map((sk, i) => `<div class="phone"${i ? ` data-sk="${i - 1}"` : ''}><div class="name">${sk.name}</div><div class="room" style="background-color:${sk.bg}">${lines.map(l => line(l, sk)).join('')}</div>${i ? `<button type="button" class="phone-pick" aria-label="${esc(sk.name)} 테마 적용"></button>` : ''}</div>`).join('');
 }
 function line({ who, text, emos }, sk) {
   const bg = who === 'mine' ? sk.mine : sk.other, ink = who === 'mine' ? sk.mineInk : sk.otherInk, side = who === 'mine' ? 'me' : 'you';
+  if (!emos.length) return text ? `<div class="msg ${side}"><div class="bub" style="background:${bg};color:${ink}">${esc(text)}</div></div>` : '';
   if (K().inline) {
-    if (!text) { const s = emos.length === 1 ? 64 : 34; return `<div class="msg ${side}"><div class="solo">${emos.map(e => `<img src="${e.src}" width="${s}" height="${s}" alt="">`).join('')}</div></div>`; }
-    return `<div class="msg ${side}"><div class="bub" style="background:${bg};color:${ink}">${esc(text)} <span class="seq">${emos.map(e => `<img src="${e.src}" width="18" height="18" alt="">`).join('')}</span></div></div>`;
+    const s = VIEW.mini[text ? 2 : 1][0];
+    if (!text) return `<div class="msg ${side}"><div class="solo">${emos.map(e => `<img src="${e.src}" width="${s}" height="${s}" alt="">`).join('')}</div></div>`;
+    return `<div class="msg ${side}"><div class="bub" style="background:${bg};color:${ink}">${esc(text)} <span class="seq">${emos.map(e => `<img src="${e.src}" width="${s}" height="${s}" alt="">`).join('')}</span></div></div>`;
   }
-  const e = emos[0], base = kind === 'large' ? 140 : 96, s = base / Math.max(e.w, e.h);
+  const e = emos[0], s = Math.min(1, VIEW[kind][1][0] / Math.max(e.w, e.h));
   return `<div class="msg ${side}"><img src="${e.src}" width="${Math.round(e.w * s)}" height="${Math.round(e.h * s)}" alt="">${text ? `<div class="bub" style="background:${bg};color:${ink}">${esc(text)}</div>` : ''}</div>`;
 }
 
