@@ -11,6 +11,8 @@
 - **잘못 올려도 친절하게:** 파일 크기가 다른 종류의 규격과 맞으면 종류를 바꿔서 검사하고 알려 줘요. 단일 파일이 비어 있거나 열리지 않거나, 지원하는 형식이나 크기와 맞지 않으면 이전 결과를 그대로 두고 오류만 보여 줘요. 화면 어디에나 끌어다 놓을 수 있어요.
 - **닮은꼴·실제 크기:** 24px로 줄였을 때 가장 비슷한 짝 8개를 찾고, 실제 채팅 크기로 줄인 모습을 보여 줘요.
 - **테마 갤러리:** 카카오톡을 참고한 색 견본 12종에서 같은 대화를 비교해요. 내 대화방에는 직접 고른 배경 사진과 말풍선 색을 적용할 수 있어요. 사진은 현재 페이지에서만 사용해요.
+- **인쇄·PDF:** 접수증과 칸 목록, 닮은꼴·실제 크기를 한 번에 출력해요. 결과가 나타나는 중에 눌러도 모든 칸이 또렷하게 찍히고, 다크모드 띠와 말풍선 색은 브라우저의 배경 인쇄 설정과 상관없이 남아요.
+- **키보드:** 화면 탭(규격 검수·닮은꼴·실제 크기·테마 갤러리)은 좌우 화살표·Home·End로 옮길 수 있어요.
 
 ## 지원 종류
 | 종류 | 개수 | 크기 | 용량 | 형식 |
@@ -26,6 +28,9 @@
 
 ## 개발 메모
 - **보안:** CSP의 `connect-src`는 익명 통계를 위한 `https://gateway.umami.is` 연결만 허용해요. 올린 파일과 검사 결과는 기기 안에서만 처리해요.
+- **글꼴:** Pretendard Variable v1.3.9의 dynamic-subset CSS를 `index.html`에 그대로 넣었어요(원본 SRI `sha384-GIdEBaqGN9mNkDkMkzMHW8EKUqtpPIe/sLj1X7DIrnc9uPtLROJgmuDlh+3rBw0j`). 글꼴 파일은 필요한 조각만 `cdn.jsdelivr.net`에서 받아요(`font-src`). 버전을 올리면 새 CSS의 SRI를 확인하고, `url(../../../`를 `https://cdn.jsdelivr.net/gh/orioncactus/pretendard@<버전>/`로 바꿔 다시 넣어요.
+- **예시 그림 글자**는 웹폰트가 받아진 뒤 그려요. 폰트가 막혀도 2초 뒤 시스템 글꼴로 그려요.
+- **움직이는 예시 WebP**를 다시 만들 때는 각 예시를 8장면 PNG로 렌더링하고, 공유 128색 팔레트 + 무손실 VP8L로 묶어 `#motionAssets`에 넣어요(로컬 `qa/encode-motion.py` 방식).
 - **인라인 스크립트를 고치면** `index.html`의 CSP `script-src` 해시를 다시 맞춰요. 아래 명령의 결과를 `'sha256-…'` 자리에 넣어요.
   ```bash
   node -e "const s=require('fs').readFileSync('index.html','utf8');const m=s.match(/<script>([\s\S]*?)<\/script>/);console.log('sha256-'+require('crypto').createHash('sha256').update(m[1].replace(/\r\n/g,'\n')).digest('base64'))"
