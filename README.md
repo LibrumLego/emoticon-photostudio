@@ -44,3 +44,4 @@
 - **안 보내는 경우:** 로컬이나 파일로 연 경우, 브라우저의 Do Not Track 또는 Global Privacy Control이 켜진 경우, 주소에 `?notrack`이 있는 경우
 - **운영자 자기 방문 제외:** 주소 끝에 `?notrack`을 붙이면 그 주소로 연 페이지에서는 보내지 않아요.
 - 보내는 주소는 `https://gateway.umami.is/api/send` 하나예요. 외부 추적 스크립트는 넣지 않아요.
+- 요청에는 이 사이트의 Umami 사이트 ID(`website`, `x-umami-website-id` 헤더)와 호스트 헤더가 함께 가고, 쿠키는 보내지 않아요(`credentials: 'omit'`). 종류와 탭 값은 영어 코드(`mini`·`still`·`anim`·`large`, `look`·`themes`)로 보내요.
