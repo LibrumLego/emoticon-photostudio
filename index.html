@@ -3,7 +3,7 @@
 <head>
 <!-- 콘텐츠 보안 정책: connect-src는 익명 방문·사용 통계를 위한 https://gateway.umami.is 연결만 허용해요. 올린 파일은 브라우저 안에서만 열려요.
      frame-ancestors는 메타 태그로 지정할 수 없어서, Cloudflare 이전 때 _headers에 넣어요. script-src 해시는 README의 개발 메모에 계산 방법이 있어요. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-B83GhP84iQi2qWsfDrcXp/gdSmKC3BWTiHUBCGgQTAA='; style-src 'self' 'unsafe-inline'; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-zMPpzvNoUqyGhVPqn3GqtnXO0ZXvZkQmjHNW65OAHMc='; style-src 'self' 'unsafe-inline'; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>이모티콘 사진관 · 이모티콘 제안 전 검수</title>
@@ -1332,7 +1332,7 @@ function renderSample(cv, sp, t) {
   let area = [m, m, W - m, H - m], tx, ty, ts;
   if (text && W > H) { area = [m, m, W * .56, H - m]; tx = W * .78; ty = H * .52; ts = 100 * u; }
   else if (text && H > W) { area = [m, m, W - m, H * .64]; tx = W / 2; ty = H * .83; ts = 110 * u; }
-  else if (text && sp.textAt === 'top') { area = [m, 114 * u, W - m, H - m]; tx = W / 2; ty = 66 * u; ts = 78 * u; } // 글자를 위에 얹는 칸
+  else if (text && sp.textAt === 'top') { area = [m, 122 * u, W - m, H - m]; tx = W / 2; ty = 74 * u; ts = 78 * u; } // 글자를 위에 얹는 칸
   else if (text) { area = [m, m, W - m, 246 * u]; tx = W / 2; ty = 294 * u; ts = 78 * u; }
   const b = hamBox(sp), bw = b[2] - b[0], bh = b[3] - b[1], aw = area[2] - area[0], ah = area[3] - area[1];
   const S = Math.min(aw / bw, ah / bh);
