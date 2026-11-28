@@ -3,7 +3,7 @@
 <head>
 <!-- 콘텐츠 보안 정책: connect-src는 익명 방문·사용 통계를 위한 https://gateway.umami.is 연결만 허용해요. 올린 파일은 브라우저 안에서만 열려요.
      frame-ancestors는 메타 태그로 지정할 수 없어서, Cloudflare 이전 때 _headers에 넣어요. script-src 해시는 README의 개발 메모에 계산 방법이 있어요. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-31qoqbikTHSpUCFsAJbcTtCF2Q7LEmk6sC+P2pqU1yM='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-o/Yowseupk4JE3bEKmEray1XW9w7B9UjgbyK7jNbhPU='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' blob: data:; connect-src https://gateway.umami.is; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>이모티콘 사진관 · 이모티콘 제안 전 검수</title>
@@ -25,6 +25,7 @@
 <meta name="twitter:title" content="이모티콘 사진관 · 이모티콘 제안 전 검수">
 <meta name="twitter:description" content="이모티콘 작가를 위한 무료 검수 도구예요. PNG·WebP를 맡기면 규격, 여백, 다크모드, 실제 크기를 한 번에 확인해요. 파일은 기기 밖으로 나가지 않아요. 카카오와 관련 없는 개인 도구예요.">
 <meta name="twitter:image" content="https://librumlego.github.io/emoticon-photostudio/og.png?v=hamster-1">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" integrity="sha384-GIdEBaqGN9mNkDkMkzMHW8EKUqtpPIe/sLj1X7DIrnc9uPtLROJgmuDlh+3rBw0j" crossorigin="anonymous">
 <style>
 :root{
@@ -316,8 +317,8 @@ footer a{color:var(--navy);text-underline-offset:3px}
     </a>
     <nav class="tabs" role="tablist" aria-label="화면">
       <button role="tab" data-view="check" aria-selected="true">규격 검수</button>
-      <button role="tab" data-view="look" aria-selected="false">닮은꼴·실제 크기</button>
-      <button role="tab" data-view="themes" aria-selected="false">테마 갤러리</button>
+      <button role="tab" data-view="look" aria-selected="false" tabindex="-1">닮은꼴·실제 크기</button>
+      <button role="tab" data-view="themes" aria-selected="false" tabindex="-1">테마 갤러리</button>
     </nav>
     <span class="free"><svg class="i"><use href="#i-lock"/></svg>파일은 기기 밖으로 안 나가요 <b>무료 공개 중</b></span>
   </div>
@@ -498,9 +499,16 @@ function track(name, data) {
 const fileBand = n => n === 1 ? '1' : n <= 10 ? '2-10' : n <= 50 ? '11-50' : '51+';
 
 /* ===== 화면 전환 ===== */
-document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => go(b.dataset.view));
+const tabBtns = [...document.querySelectorAll('.tabs button')];
+tabBtns.forEach(b => b.onclick = () => go(b.dataset.view));
+// 탭 목록 키보드: 좌우 화살표·Home·End로 옮기면서 바로 열어요. Tab 키로는 선택된 탭 하나에만 들어와요
+$('.tabs').onkeydown = e => {
+  const i = tabBtns.indexOf(document.activeElement); if (i < 0) return;
+  const n = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabBtns.length - 1 }[e.key]; if (n === undefined) return;
+  e.preventDefault(); const b = tabBtns[(n + tabBtns.length) % tabBtns.length]; go(b.dataset.view); b.focus();
+};
 function go(v) {
-  document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x.dataset.view === v));
+  tabBtns.forEach(x => { x.setAttribute('aria-selected', x.dataset.view === v); x.tabIndex = x.dataset.view === v ? 0 : -1; });
   document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
   if (v === 'look') drawLook();
   if (v === 'themes') drawThemes();
@@ -1254,18 +1262,21 @@ function hamster(x, o) {
   }
   x.restore();
   let paws = [[143, 261], [215, 262]];
-  if (['yum','drool','excited'].includes(o.e)) {
+  // 손에 든 것: 표정마다 정해진 소품이 있고, o.prop으로 바꿀 수 있어요(미니 두 번째 변형에서 실루엣을 다르게 하려고요)
+  const prop = o.prop || (['yum','drool','excited'].includes(o.e) ? 'berry' : ['love','shy','pray'].includes(o.e) ? 'heart'
+    : resting || o.e === 'cry' ? 'pillow' : ['proud','sorry','awkward'].includes(o.e) ? 'seed' : 'arms');
+  if (prop === 'berry') {
     path('M142 249 C144 231 165 229 178 236 C200 220 222 230 221 247 C220 270 192 294 181 295 Q151 284 142 249Z',coral);
     path('M176 237 Q160 237 156 224 Q171 222 179 231 Q177 213 190 211 Q196 226 187 232 Q202 224 211 231 Q202 244 184 240Z',leaf);
     for (const [px, py] of [[160,249],[180,255],[201,246],[171,268],[193,267],[182,282]]) oval(px,py,2.4,4,cream,.3);
-  } else if (['love','shy','pray'].includes(o.e)) {
+  } else if (prop === 'heart') {
     hHeart(x,180,257,3.8,coral);
     oval(164,240,7,4,'#ffd7c8',-.55);
-  } else if (resting || o.e === 'cry') {
+  } else if (prop === 'pillow') {
     path('M82 237 Q129 250 166 237 Q215 216 278 241 L274 263 Q265 307 179 309 Q92 309 82 265Z','#9fcac4');
     for (const [px,py] of [[134,267],[178,286],[222,255],[241,277]]) hStar(x,px,py,7,cream);
     paws = [[117,241],[236,237]];
-  } else if (['proud','sorry','awkward'].includes(o.e)) {
+  } else if (prop === 'seed') {
     path('M180 219 C217 244 211 277 183 292 C157 285 142 257 180 219Z','#bd936e');
     tq(x,[180,230],[167,261],[181,285],4);
   } else {
@@ -1301,7 +1312,7 @@ function stickerOut(cv, src, r) {
 // 그림이 실제로 차지하는 범위를 작게 그려서 재 둬요 (기울기·효과 때문에 한쪽으로 쏠리지 않게 칸 안에 맞추려고요)
 const hamBoxCache = new Map();
 function hamBox(sp) {
-  const key = [sp.e, sp.alt ? 1 : 0, sp.mirror ? 1 : 0, sp.tilt, sp.motion, sp.miniPose].join();
+  const key = [sp.e, sp.alt ? 1 : 0, sp.mirror ? 1 : 0, sp.tilt, sp.motion, sp.miniPose, sp.prop].join();
   if (hamBoxCache.has(key)) return hamBoxCache.get(key);
   const R = 200, k = R / 400, c = Object.assign(document.createElement('canvas'), { width: R, height: R }), x = c.getContext('2d', { willReadFrequently: true });
   const b = [1e9, 1e9, -1e9, -1e9];
@@ -1333,9 +1344,13 @@ const faceCanvas = n => { const c = Object.assign(document.createElement('canvas
 // 종류별 예시 칸 목록. 모든 칸이 규격에 맞는 예시예요
 function miniSpecs() {
   const miniPoses = { joy: 'cheer', hello: 'greet', thumb: 'approve' };
+  // 24px로 줄이면 몸 실루엣이 같아 보여서, 손에 든 것과 글자로 칸마다 모양을 달리해요(qa/mini-sim.js로 잰 값: 가장 닮은 짝 9.8 → 13.8)
+  const firstProps = { 1: 'seed', 9: 'arms', 10: 'berry', 13: 'arms' }, altProps = ['seed', 'heart', 'arms', 'berry', 'pillow', 'arms'];
   const specs = Array.from({ length: 42 }, (_, i) => {
-    const e = EXPR_NAMES[i % 21];
-    return { w: 180, h: 180, e, alt: i >= 21, mirror: i >= 21, miniPose: miniPoses[e] };
+    const e = EXPR_NAMES[i % 21], sp = { w: 180, h: 180, e, alt: i >= 21, mirror: i >= 21, miniPose: miniPoses[e] };
+    if (i < 21) { if (firstProps[i]) sp.prop = firstProps[i]; }
+    else { if (!sp.miniPose) sp.prop = altProps[i % 6]; if (i % 2) sp.text = EXPR_TEXT[e]; }
+    return sp;
   });
   specs[27].tilt = -22;
   specs[28].tilt = 22;
